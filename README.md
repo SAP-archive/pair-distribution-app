@@ -11,7 +11,12 @@ This is an CF application which can generate pairs based on different strategies
   - considers development tracks. Pairs are generated for tracks but tracks don't play any role yet during pair generation.
    
 ## Configure and deploy
-Create a `deploy/application.properties` from `deploy/application.properties.template`. Replace all place holders `<...>`. Trello credentials for your account can be generated [here](https://developers.trello.com/get-started/start-building#authenticate). Create also an CF application manifest from `deploy/manifest.yml.template` and replace all place holder. After that the application can be deployed by executing the `deploy.sh`. This script will build the application and deploy to your CF account. You must be logged in with the CF CLI.
+Create reguired configs by: 
+```
+cp deploy/application.properties.template deploy/application.properties
+cp deploy/manifest.yml.template deploy/manifest.yml
+```
+Replace all place holders `<...>` inside. Trello credentials for your account can be generated [here](https://developers.trello.com/get-started/start-building#authenticate). After that the application can be deployed by executing the `deploy.sh`. This script will build the application and deploy to your CF account. You must be logged in with the CF CLI.
 
 ## Prepare trello account
 * create a list called `Devs`. This list has a card called `Devs` and members of this cards are all developers available for the day. Rotation app will use this information for pair generation.
