@@ -16,7 +16,9 @@ Create reguired configs by:
 cp deploy/application.properties.template deploy/application.properties
 cp deploy/manifest.yml.template deploy/manifest.yml
 ```
-Replace all place holders `<...>` inside. Trello credentials for your account can be generated [here](https://developers.trello.com/get-started/start-building#authenticate). After that the application can be deployed by executing the `deploy.sh`. This script will build the application and deploy to your CF account. You must be logged in with the CF CLI.
+Replace all place holders `<...>` inside. Trello credentials for your account can be generated [here](https://developers.trello.com/get-started/start-building#authenticate). You will need also the Id of your trello board. Use the sandbox provided by trello available [here](https://developers.trello.com/sandbox) to get it. With your API key you can executed samples in the sandbox. Execute the `Get Boards` sample to find out the Id of your board. 
+
+After that the application can be deployed by executing the `deploy.sh`. This script will build the application and deploy to your CF account. You must be logged in with the CF CLI.
 
 ## Prepare trello account
 * create a list called `Devs`. This list should have a card called `Devs` and members of this cards are all developers available for the day. Rotation app will use this information for pair generation.
