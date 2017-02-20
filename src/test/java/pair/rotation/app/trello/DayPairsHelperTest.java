@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -171,6 +172,10 @@ public class DayPairsHelperTest {
 		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
 	}
 	
+	@Test
+	public void testDateFormatterFormat() {
+		assertThat(DayPairsHelper.DATE_FORMATTER, is(new SimpleDateFormat("dd-MM-yyyy")));
+    }
 	
 	private List<DayPairs> getPairsList() {
 		ArrayList<DayPairs> result = new ArrayList<DayPairs>();
