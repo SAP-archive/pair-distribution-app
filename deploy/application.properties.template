@@ -1,0 +1,11 @@
+server.contextPath=/
+endpoints.health.sensitive=false
+
+#trello auth
+trello.access.key=<trello-access-key>
+trello.application.key=<trello-application-key>
+trello.pairing.board=<trello-pairing-board>
+
+#basic auth
+spring.devtools.remote.secret=<basic-auth-password>
+security.user.name=<basic-auth-user>

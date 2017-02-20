@@ -1,0 +1,10 @@
+---
+applications:
+- name: <pair-app-name>
+  memory: 512M
+  instances: 1
+  host: <pair-app-host>
+  path: target/ROOT.war
+  services:
+    - pairsdb
+  
