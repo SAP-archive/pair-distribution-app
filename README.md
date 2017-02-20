@@ -19,8 +19,8 @@ cp deploy/manifest.yml.template deploy/manifest.yml
 Replace all place holders `<...>` inside. Trello credentials for your account can be generated [here](https://developers.trello.com/get-started/start-building#authenticate). After that the application can be deployed by executing the `deploy.sh`. This script will build the application and deploy to your CF account. You must be logged in with the CF CLI.
 
 ## Prepare trello account
-* create a list called `Devs`. This list has a card called `Devs` and members of this cards are all developers available for the day. Rotation app will use this information for pair generation.
-* create a list called `Tracks`. This list has all tracks as cards prioritized from the top to the bottom. This is also used for pair generation.
+* create a list called `Devs`. This list should have a card called `Devs` and members of this cards are all developers available for the day. Rotation app will use this information for pair generation.
+* create a list called `Tracks`. This list should have all tracks as cards prioritized from the top to the bottom. This is also used for pair generation.
 
 ## REST APIs
 - radom poairs: `/pairs/random`
