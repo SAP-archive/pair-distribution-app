@@ -11,13 +11,18 @@ This is an CF application which can generate pairs based on different strategies
   - considers development tracks. Pairs are generated for tracks but tracks don't play any role yet during pair generation.
    
 ## Configure and deploy
-Create reguired configs by: 
+#### Configure 
 ```
 cp deploy/application.properties.template deploy/application.properties
 cp deploy/manifest.yml.template deploy/manifest.yml
 ```
 Replace all place holders `<...>` inside. Trello credentials for your account can be generated [here](https://developers.trello.com/get-started/start-building#authenticate). You will need also the Id of your trello board. Use the sandbox provided by trello available [here](https://developers.trello.com/sandbox) to get it. With your API key you can executed samples in the sandbox. Execute the `Get Boards` sample to find out the Id of your board. 
-
+#### Prepare persistence
+Create the MongoDB service instance required for the application. E.g. with follwoing command:
+```
+cf cs mongodb v3.0-container pairsdb
+```
+#### Deploy
 After that the application can be deployed by executing the `deploy.sh`. This script will build the application and deploy to your CF account. You must be logged in with the CF CLI.
 
 ## Prepare trello account
