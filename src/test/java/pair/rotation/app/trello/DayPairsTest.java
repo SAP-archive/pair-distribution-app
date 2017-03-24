@@ -27,7 +27,7 @@ public class DayPairsTest {
 	@Test
 	public void testAddPairAndGetTracks(){
 		HashMap<String, Pair> expectedPairs = new HashMap<String, Pair>();
-		expectedPairs.put("testTrack", new Pair(Arrays.asList("dev1", "dev2")));
+		expectedPairs.put("testTrack", new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2"))));
 		DayPairs pairs = new DayPairs();
 		pairs.addPair("testTrack", expectedPairs.get("testTrack"));
 		
@@ -67,8 +67,8 @@ public class DayPairsTest {
 	
 	@Test
 	public void testGetPairByTrack() throws Exception {
-		Pair pair1 = new Pair(Arrays.asList("dev1", "dev2"));
-		Pair pair2 = new Pair(Arrays.asList("dev3", "dev4"));
+		Pair pair1 = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
+		Pair pair2 = new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")));
 		DayPairs pairs = new DayPairs();
 		pairs.addPair("track1", pair1);
 		pairs.addPair("track2", pair2);
@@ -83,8 +83,8 @@ public class DayPairsTest {
 		DayPairs differentPairsOfToday = new DayPairs();
 		DayPairs yesterdayPairs = new DayPairs();
 		yesterdayPairs.setDate(getYesterdayDate());
-		Pair pair1 = new Pair(Arrays.asList("dev1", "dev2"));
-		Pair pair2 = new Pair(Arrays.asList("dev3", "dev4"));
+		Pair pair1 = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
+		Pair pair2 = new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")));
 		pairsOfToday.addPair("track1", pair1);
 		differentPairsOfToday.addPair("track2", pair2);
 		yesterdayPairs.addPair("track1", pair1);
@@ -99,8 +99,8 @@ public class DayPairsTest {
 		DayPairs differentPairsOfToday = new DayPairs();
 		DayPairs yesterdayPairs = new DayPairs();
 		yesterdayPairs.setDate(getYesterdayDate());
-		Pair pair1 = new Pair(Arrays.asList("dev1", "dev2"));
-		Pair pair2 = new Pair(Arrays.asList("dev3", "dev4"));
+		Pair pair1 = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
+		Pair pair2 = new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")));
 		pairsOfToday.addPair("track1", pair1);
 		differentPairsOfToday.addPair("track2", pair2);
 		yesterdayPairs.addPair("track1", pair1);
@@ -112,7 +112,7 @@ public class DayPairsTest {
 	@Test
 	public void testToString() throws Exception {
 		DayPairs pairs = new DayPairs();
-		Pair pair = new Pair(Arrays.asList("dev1", "dev2"));
+		Pair pair = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		pairs.addPair("track", pair);
 		
 		assertThat(pairs.toString(), is(equalTo("Pairs [pairs=" + pairs.getPairs() + ", date=" + DayPairsHelper.DATE_FORMATTER.format(pairs.getDate()) + "]")));
@@ -121,7 +121,7 @@ public class DayPairsTest {
 	@Test
 	public void testHasPair() throws Exception {
 		DayPairs pairs = new DayPairs();
-		Pair pair = new Pair(Arrays.asList("dev1", "dev2"));
+		Pair pair = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		Pair differentPair = new Pair();
 		pairs.addPair("track", pair);
 		
@@ -132,7 +132,7 @@ public class DayPairsTest {
 	@Test
 	public void testReplacePairWith() throws Exception {
 		DayPairs pairs = new DayPairs();
-		Pair pair = new Pair(Arrays.asList("dev1", "dev2"));
+		Pair pair = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		Pair differentPair = new Pair();
 		pairs.addPair("track", pair);
 		
@@ -148,7 +148,7 @@ public class DayPairsTest {
 	@Test
 	public void testGetTrackByPair() throws Exception {
 		DayPairs pairs = new DayPairs();
-		Pair pair = new Pair(Arrays.asList("dev1", "dev2"));
+		Pair pair = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		Pair differentPair = new Pair();
 		pairs.addPair("track", pair);
 		

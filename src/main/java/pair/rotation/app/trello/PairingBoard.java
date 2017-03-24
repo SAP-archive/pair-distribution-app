@@ -20,7 +20,7 @@ public class PairingBoard {
     private static final String GET_LIST_CARDS = "/lists/{listId}/cards?";
 	private RestTemplateHttpClient httpClient;
 	private TrelloImpl trelloImpl;
-	private ArrayList<String> devs;
+	private ArrayList<Developer> devs;
 	private ArrayList<String> tracks;
 	private ArrayList<DayPairs> pastPairs;
 	private String accessKey;
@@ -35,7 +35,7 @@ public class PairingBoard {
     	trelloImpl = new TrelloImpl(applicationKey, accessKey, httpClient);
 	}
     
-	public ArrayList<String> getDevs() {
+	public ArrayList<Developer> getDevs() {
 		return devs;
 	}
 	
@@ -49,7 +49,7 @@ public class PairingBoard {
 
 	
 	public void syncTrelloBoardState() {
-		devs = new ArrayList<String>();
+		devs = new ArrayList<Developer>();
 		tracks = new ArrayList<String>();
 		pastPairs = new ArrayList<DayPairs>();
 		for (TList tList : getLits()) {
@@ -59,7 +59,7 @@ public class PairingBoard {
 			System.out.println("Cards count is: " + cards.size());
 			if ("devs".equals(listName.toLowerCase())){
 				for (Card card : cards) {
-				devs.addAll(card.getIdMembers());
+				devs.addAll(getDevelopersFromCard(card));
 				}
 			}
 			
@@ -78,7 +78,7 @@ public class PairingBoard {
 				}
 				for (Card card : cards) {
 					Pair pair = new Pair();
-					pair.setDevs(card.getIdMembers());
+					pair.setDevs( getDevelopersFromCard(card));
 					pairs.addPair(card.getName(), pair);
 					System.out.println(card.getName());
 					System.out.println(card.getDesc());
@@ -87,7 +87,7 @@ public class PairingBoard {
 			}
 		}
 	}
-    
+
 	public List<TList> getLits(){
 		return trelloImpl.getBoardLists(pairingBoardId);
 	}
@@ -110,15 +110,32 @@ public class PairingBoard {
         addPairsToList(pairs, newPairingList);
 	}
 
+	private List<Developer> getDevelopersFromCard(Card card) {
+		List<Developer> developers = new ArrayList<>();
+		for (String developerId : card.getIdMembers()) {
+			developers.add(new Developer(developerId));
+		}
+		return developers;
+	}
+
 	private void addPairsToList(DayPairs pairs, TList newPairingList) {
 		for (int i = tracks.size() - 1; i >= 0; i--) {
 			if(pairs.getTracks().contains(tracks.get(i))){
 				Card card = new Card();
 				card.setName(tracks.get(i));
-				card.setIdMembers(pairs.getPairByTrack(tracks.get(i)).getDevs());
+				card.setIdMembers(getIdsFromDevelopers(pairs, i));
 				newPairingList.createCard(card);	
 			}
 		}
+	}
+
+	private List<String> getIdsFromDevelopers(DayPairs pairs, int i) {
+		List<String> developerIds = new ArrayList<>();
+		List<Developer> developers = pairs.getPairByTrack(tracks.get(i)).getDevs();
+		for (Developer developer : developers) {
+			developerIds.add(developer.getId());
+		}
+		return developerIds;
 	}
 
 	private TList createNewPairingList(DayPairs pairs, int daysIntoFuture) {

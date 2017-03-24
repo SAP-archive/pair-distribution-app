@@ -7,40 +7,40 @@ import java.util.List;
 
 public class Pair {
 
-	private List<String> devs;
+	private List<Developer> devs;
 
     public Pair() {
-    	devs = new ArrayList<String>(2);
+    	devs = new ArrayList<Developer>(2);
     }
 
-    public Pair(List<String> devs) {
+    public Pair(List<Developer> devs) {
     	this();
 		this.setDevs(devs);
     }
 
-	public List<String> getDevs() {
-		return Arrays.asList(devs.toArray(new String[0]));
+	public List<Developer> getDevs() {
+		return Arrays.asList(devs.toArray(new Developer[0]));
 	}
 
-	public void setDevs(List<String> devs) {
+	public void setDevs(List<Developer> devs) {
 		this.devs.addAll(devs);
 		Collections.sort(this.devs);
 	}
 
-	public void addDev(String dev) {
+	public void addDev(Developer dev) {
 		if (dev != null){
 			devs.add(dev);
 			Collections.sort(devs);	
 		}
 	}
 
-	public boolean hasDev(String dev) {
+	public boolean hasDev(Developer dev) {
 		return devs.contains(dev);
 	}
 	
-	public String getOtherDev(String dev) {
+	public Developer getOtherDev(Developer dev) {
 		if(devs.contains(dev)){
-			for (String pairDev : devs) {
+			for (Developer pairDev : devs) {
 				if(!pairDev.equals(dev)){
 					return pairDev;
 				}

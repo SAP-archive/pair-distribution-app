@@ -37,10 +37,6 @@ public class DayPairsHelper {
 		return getListCardNames(getListByTitle("tracks"));
 	}
 
-	public List<String> getDevs() {
-		return getListCardNames(getListByTitle("devs"));
-	}
-
 	public List<DayPairs> getPairs() {
 		List<DayPairs> result = new ArrayList<>();
 		for (TList tList : getPairingLists()) {
@@ -75,7 +71,7 @@ public class DayPairsHelper {
 		}
 	}
 	
-	public Map<Pair, Integer> buildPairsWeight(List<DayPairs> pastPairs, List<String> availableDevs) {
+	public Map<Pair, Integer> buildPairsWeight(List<DayPairs> pastPairs, List<Developer> availableDevs) {
 		Map<Pair, Integer> result = new HashMap<>(); 
 		List<Pair> possiblePairs = getPossiblePairs(availableDevs);
 		for (Pair pair : possiblePairs) {
@@ -92,7 +88,7 @@ public class DayPairsHelper {
 		return result;
 	}
 	
-	private List<Pair> getPossiblePairs(List<String> availableDevs) {
+	private List<Pair> getPossiblePairs(List<Developer> availableDevs) {
 		List<Pair> result = new ArrayList<>();
 		if(availableDevs.isEmpty() || availableDevs.size() == 1){
 			return result;
@@ -104,12 +100,12 @@ public class DayPairsHelper {
 		return result;
 	}
 
-	public DayPairs generateNewDayPairs(List<String> tracks, List<String> devs, List<DayPairs> pastPairs,
+	public DayPairs generateNewDayPairs(List<String> tracks, List<Developer> devs, List<DayPairs> pastPairs,
 			Map<Pair, Integer> pairsWeight) {
 		DayPairs result = new DayPairs();
 		sortByDescendDate(pastPairs);
 		List<String> possibleTracks = getPossibleTracks(tracks, devs);
-		List<String> availableDevs = new ArrayList<String>(devs);
+		List<Developer> availableDevs = new ArrayList<Developer>(devs);
 		for (String track : possibleTracks) {
 			Pair pair = tryToFindPair(track, pastPairs, availableDevs);
 			availableDevs.removeAll(pair.getDevs());
@@ -137,8 +133,8 @@ public class DayPairsHelper {
 			if (firstDayPair!= null && secondDayPair != null && firstDayPair.hasPair(soloPair) && secondDayPair.hasPair(soloPair)){
 				Pair pairWithHighestWeight = getPairWithHighestPairWeight(todayPairs.getPairs().values(), pairsWeight);
 				String track = todayPairs.getTrackByPair(pairWithHighestWeight);
-				String longestDevOnStory = getLongestDevOnStory(firstDayPair.getPairByTrack(track), secondDayPair.getPairByTrack(track));
-				String newSoloPair = pairWithHighestWeight.getOtherDev(longestDevOnStory);
+				Developer longestDevOnStory = getLongestDevOnStory(firstDayPair.getPairByTrack(track), secondDayPair.getPairByTrack(track));
+				Developer newSoloPair = pairWithHighestWeight.getOtherDev(longestDevOnStory);
 				Pair newPair = new Pair(Arrays.asList(soloPair.getDevs().get(0), longestDevOnStory));
 				todayPairs.replacePairWith(pairWithHighestWeight, newPair);
 				todayPairs.replacePairWith(soloPair, new Pair(Arrays.asList(newSoloPair)));
@@ -175,7 +171,7 @@ public class DayPairsHelper {
 		return result;
 	}
 	
-	private List<String> getPossibleTracks(List<String> todaysTracks, List<String> todaysDevs){
+	private List<String> getPossibleTracks(List<String> todaysTracks, List<Developer> todaysDevs){
 		int possibleTracksCount = (int) Math.ceil(todaysDevs.size() / 2.0);
 		List<String> possibleTracks;
 		if (possibleTracksCount < todaysTracks.size()){
@@ -186,7 +182,7 @@ public class DayPairsHelper {
 		return possibleTracks;
 	}
 	
-	private Pair tryToFindPair(String track, List<DayPairs> pastPairs, final List<String> availableDevs) {
+	private Pair tryToFindPair(String track, List<DayPairs> pastPairs, final List<Developer> availableDevs) {
 		Pair trackPairToday = new Pair();
 		Pair trackPairOneDayBack = getPastPairByTrack(pastPairs, track, 0);
 		Pair trackPairTwoDaysBack = getPastPairByTrack(pastPairs, track, 1);
@@ -205,7 +201,7 @@ public class DayPairsHelper {
 //				trackPairToday.setDevs(trackPairOneDayBack.getDevs());
 			}else if(hasHistoryForLongestDev(trackPairThreeDaysBack)){
 				logger.info("There is history to find longest dev");
-				String longestDevOnStory = getLongestDevOnStory(trackPairOneDayBack, trackPairThreeDaysBack);
+				Developer longestDevOnStory = getLongestDevOnStory(trackPairOneDayBack, trackPairThreeDaysBack);
 				if (longestDevOnStory != null && availableDevs.contains(longestDevOnStory)) {
 					logger.info("Longest dev is" + longestDevOnStory);
 					trackPairToday.addDev(longestDevOnStory);
@@ -237,7 +233,7 @@ public class DayPairsHelper {
 		return null;
 	}
 	
-	private Pair getPairByWeight(Pair pairCandidate, List<String> availableDevs, Map<Pair, Integer> pairsWeight) {
+	private Pair getPairByWeight(Pair pairCandidate, List<Developer> availableDevs, Map<Pair, Integer> pairsWeight) {
 		Pair result = null;
 		if(pairCandidate.getDevs().isEmpty()){
 			result = getPairWithSmallestWeight(availableDevs, pairsWeight);
@@ -247,7 +243,7 @@ public class DayPairsHelper {
 		return result;
 	}
 	
-	private Pair getPairWithSmallestWeight(List<String> availableDevs, Map<Pair, Integer> pairsWeight) {
+	private Pair getPairWithSmallestWeight(List<Developer> availableDevs, Map<Pair, Integer> pairsWeight) {
 		int smallestWeight = 0;
 		Pair result = null;
 		for (Pair pair : pairsWeight.keySet()) {
@@ -262,11 +258,11 @@ public class DayPairsHelper {
 		return result;
 	}
 	
-	private Pair findPairForDevByPairingWeight(String dev, List<String> availableDevs, Map<Pair,Integer> pairsWeight) {
+	private Pair findPairForDevByPairingWeight(Developer dev, List<Developer> availableDevs, Map<Pair,Integer> pairsWeight) {
 		int smallestWeight = 0;
-		String otherDev = null;
+		Developer otherDev = null;
 		for (Pair pair : pairsWeight.keySet()) {
-			String ohterPair = pair.getOtherDev(dev);
+			Developer ohterPair = pair.getOtherDev(dev);
 			if(pair.hasDev(dev) && availableDevs.contains(ohterPair)){
 				Integer weight = pairsWeight.get(pair);
 				if(weight < smallestWeight || otherDev == null){
@@ -278,22 +274,22 @@ public class DayPairsHelper {
 		return new Pair(Arrays.asList(dev, otherDev));
 	}
 	
-	private String getLongestDevOnStory(Pair firstDayPair, Pair thirdDayPair) {
-		ArrayList<String> devsOnTrack = new ArrayList<String>();
+	private Developer getLongestDevOnStory(Pair firstDayPair, Pair thirdDayPair) {
+		ArrayList<Developer> devsOnTrack = new ArrayList<Developer>();
 		devsOnTrack.addAll(firstDayPair.getDevs());
 		devsOnTrack.removeAll(thirdDayPair.getDevs());
 		return devsOnTrack.isEmpty() || devsOnTrack.size() == 2 ? getRandomDev(firstDayPair.getDevs()) : devsOnTrack.get(0);
 	}
 
-	private List<String> getAvailableDevs(final List<String> availableDevs, List<String> pairDevs) {
-		ArrayList<String> possibleDevs = new ArrayList<String>(pairDevs);
+	private List<Developer> getAvailableDevs(final List<Developer> availableDevs, List<Developer> pairDevs) {
+		ArrayList<Developer> possibleDevs = new ArrayList<Developer>(pairDevs);
 		possibleDevs.retainAll(availableDevs);
 		return possibleDevs;
 	}
 	
-	private String getRandomDev(List<String> devs) {
+	private Developer getRandomDev(List<Developer> devs) {
 		Collections.shuffle(devs);
-		String dev = devs.isEmpty() ? null : devs.get(0);
+		Developer dev = devs.isEmpty() ? null : devs.get(0);
 		return dev;
 	}
 	
@@ -326,12 +322,20 @@ public class DayPairsHelper {
 		pairs.setDate(getDateFromCradName(tList.getName()));
 		for (Card card : tList.getCards()) {
 			Pair pair = new Pair();
-			pair.setDevs(card.getIdMembers());
+			pair.setDevs(getDevelopersFromCard(card));
 			pairs.addPair(card.getName(), pair);
 			System.out.println(card.getName());
 			System.out.println(card.getDesc());
 		}
 		return pairs;
    }
+   
+	private List<Developer> getDevelopersFromCard(Card card) {
+		List<Developer> developers = new ArrayList<>();
+		for (String developerId : card.getIdMembers()) {
+			developers.add(new Developer(developerId));
+		}
+		return developers;
+	}
 }
 
