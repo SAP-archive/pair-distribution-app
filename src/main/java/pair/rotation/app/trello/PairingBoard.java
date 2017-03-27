@@ -20,9 +20,9 @@ public class PairingBoard {
     private static final String GET_LIST_CARDS = "/lists/{listId}/cards?";
 	private RestTemplateHttpClient httpClient;
 	private TrelloImpl trelloImpl;
-	private ArrayList<Developer> devs;
-	private ArrayList<String> tracks;
-	private ArrayList<DayPairs> pastPairs;
+	private List<Developer> devs;
+	private List<String> tracks;
+	private List<DayPairs> pastPairs;
 	private String accessKey;
 	private String applicationKey;
 	private String pairingBoardId;
@@ -35,15 +35,15 @@ public class PairingBoard {
     	trelloImpl = new TrelloImpl(applicationKey, accessKey, httpClient);
 	}
     
-	public ArrayList<Developer> getDevs() {
+	public List<Developer> getDevs() {
 		return devs;
 	}
 	
-	public ArrayList<String> getTracks() {
+	public List<String> getTracks() {
 		return tracks;
 	}
 	
-   public ArrayList<DayPairs> getPastPairs() {
+   public List<DayPairs> getPastPairs() {
 	   return pastPairs;
    }
 
@@ -58,9 +58,7 @@ public class PairingBoard {
 			List<Card> cards = getListCards(tList.getId());
 			System.out.println("Cards count is: " + cards.size());
 			if ("devs".equals(listName.toLowerCase())){
-				for (Card card : cards) {
-				devs.addAll(getDevelopersFromCard(card));
-				}
+				syncDevs(cards);
 			}
 			
 			if ("tracks".equals(listName.toLowerCase())){
@@ -88,6 +86,58 @@ public class PairingBoard {
 		}
 	}
 
+	private void syncDevs(List<Card> cards) {
+		for (Card card : cards) {
+			String cardName = card.getName().toLowerCase();
+			switch (cardName) {
+			case "devs":
+				devs.addAll(getDevelopersFromCard(card));
+				break;
+			case "dod":
+				makeAllDevsDoD(devs, card);
+				break;
+			default:
+				setDevsCompany(cardName, devs, card);
+			}
+		}
+	}
+
+	private List<Developer> getDevelopersFromCard(Card card) {
+		List<Developer> developers = new ArrayList<>();
+		for (String developerId : card.getIdMembers()) {
+			developers.add(new Developer(developerId));
+		}
+		return developers;
+	}
+	
+	private void setDevsCompany(String company, List<Developer> developers, Card card) {
+		for (String developerId : card.getIdMembers()) {
+			Developer developer = getDeveloperById(devs, new Developer(developerId));
+			if(developer != null){
+				developer.setCompany(company);	
+			}
+		}
+	}
+
+	private void makeAllDevsDoD(List<Developer> developers, Card card) {
+		for (String developerId : card.getIdMembers()) {
+			Developer developer = getDeveloperById(devs, new Developer(developerId));
+			if(developer != null){
+				developer.setDoD(true);
+			}
+		}
+		
+	}
+	
+	private Developer getDeveloperById(List<Developer> devs, Developer developerToCompare){
+		for (Developer developer : devs) {
+			if(developer.equals(developerToCompare)){
+				return developer;
+			}
+		}
+		return null;
+	}
+
 	public List<TList> getLits(){
 		return trelloImpl.getBoardLists(pairingBoardId);
 	}
@@ -108,14 +158,6 @@ public class PairingBoard {
 		TList newPairingList = createNewPairingList(pairs, daysIntoFuture);
 		newPairingList.setInternalTrello(trelloImpl);		
         addPairsToList(pairs, newPairingList);
-	}
-
-	private List<Developer> getDevelopersFromCard(Card card) {
-		List<Developer> developers = new ArrayList<>();
-		for (String developerId : card.getIdMembers()) {
-			developers.add(new Developer(developerId));
-		}
-		return developers;
 	}
 
 	private void addPairsToList(DayPairs pairs, TList newPairingList) {
