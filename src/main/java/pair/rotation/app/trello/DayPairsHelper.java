@@ -71,12 +71,9 @@ public class DayPairsHelper {
 		}
 	}
 	
-	public Map<Pair, Integer> buildPairsWeight(List<DayPairs> pastPairs, List<Developer> availableDevs) {
+	public Map<Pair, Integer> buildPairsWeightFromPastPairing(List<DayPairs> pastPairs, List<Developer> availableDevs) {
 		Map<Pair, Integer> result = new HashMap<>(); 
-		List<Pair> possiblePairs = getPossiblePairs(availableDevs);
-		for (Pair pair : possiblePairs) {
-			result.put(pair, 0);
-		}
+		initPairsInitialWeight(availableDevs, result);
 		for (DayPairs dayPairs : pastPairs) {
 			for (Pair pair : dayPairs.getPairs().values()) {
 				if(pair.isComplete()){
@@ -87,8 +84,50 @@ public class DayPairsHelper {
 		}
 		return result;
 	}
+
+	public void adaptPairsWeightForDoD(Map<Pair, Integer> pairsWeight, List<Developer> availableDevs) {
+		List<Developer> developersOnDoD = getTodayDoDs(availableDevs);
+		for (Pair pair : pairsWeight.keySet()) {
+			if(isPairDoDConform(pair, developersOnDoD)){
+				int weight = pairsWeight.get(pair) - 100;
+				pairsWeight.put(pair, weight);
+			}
+		}
+	}
+
+	private boolean isPairDoDConform(Pair pair, List<Developer> developersOnDoD){
+		List<Developer> devs = pair.getDevs();
+		if(devs.isEmpty()){
+			return true;
+		}
+		if(devs.size() == 1) {
+			return !developersOnDoD.contains(devs.get(0));
+		}else{
+			Developer pairDeveloper = devs.get(0);
+			Developer pairOtherDeveloper = pair.getOtherDev(pairDeveloper);
+			boolean isPairOnDoD = developersOnDoD.contains(pairDeveloper) || developersOnDoD.contains(pairOtherDeveloper);
+			return isPairOnDoD && (pairDeveloper.getCompany().equals(pairOtherDeveloper.getCompany()));	
+		}
+	}
 	
-	private List<Pair> getPossiblePairs(List<Developer> availableDevs) {
+	private List<Developer> getTodayDoDs(List<Developer> availableDevs) {
+		List<Developer> developersOnDoD = new ArrayList<>();
+		for (Developer developer : availableDevs) {
+			if(developer.getDoD()){
+				developersOnDoD.add(developer);
+			}
+		}
+		return developersOnDoD;
+	}
+	
+	private void initPairsInitialWeight(List<Developer> availableDevs, Map<Pair, Integer> result) {
+		List<Pair> allPairCombinations = getAllPairCombinations(availableDevs);
+		for (Pair pair : allPairCombinations) {
+			result.put(pair, 0);
+		}
+	}
+	
+	private List<Pair> getAllPairCombinations(List<Developer> availableDevs) {
 		List<Pair> result = new ArrayList<>();
 		if(availableDevs.isEmpty() || availableDevs.size() == 1){
 			return result;
@@ -96,7 +135,7 @@ public class DayPairsHelper {
 		for(int i = 1; i < availableDevs.size(); i++){
 			result.add(new Pair(Arrays.asList(availableDevs.get(0), availableDevs.get(i))));
 		}
-		result.addAll(getPossiblePairs(availableDevs.subList(1, availableDevs.size())));
+		result.addAll(getAllPairCombinations(availableDevs.subList(1, availableDevs.size())));
 		return result;
 	}
 
@@ -193,7 +232,7 @@ public class DayPairsHelper {
 		logger.info("Pair two days back: " + trackPairTwoDaysBack);
 		logger.info("Pair three days back: " + trackPairThreeDaysBack);
 		
-		if(isRotationTime(trackPairOneDayBack, trackPairTwoDaysBack)) {
+		if(isRotationTime(trackPairOneDayBack, trackPairTwoDaysBack, getTodayDoDs(availableDevs))) {
 			logger.info("time to rotate");
 			if(trackPairOneDayBack.isSolo()){
 				logger.info("Solo don't do anything");
@@ -222,8 +261,12 @@ public class DayPairsHelper {
 		return trackPairThreeDaysBack != null;
 	}
 
-	private boolean isRotationTime(Pair trackPairOneDayBack, Pair trackPairTwoDaysBack) {
-		return trackPairOneDayBack != null && trackPairOneDayBack.equals(trackPairTwoDaysBack);
+	private boolean isRotationTime(Pair trackPairOneDayBack, Pair trackPairTwoDaysBack, List<Developer> developersOnDoD) {
+		return trackPairOneDayBack != null && (isPairForTwoDays(trackPairOneDayBack, trackPairTwoDaysBack) || !isPairDoDConform(trackPairOneDayBack, developersOnDoD));
+	}
+
+	private boolean isPairForTwoDays(Pair trackPairOneDayBack, Pair trackPairTwoDaysBack) {
+		return trackPairOneDayBack.equals(trackPairTwoDaysBack);
 	}
 	
 	private Pair getPastPairByTrack(List<DayPairs> pastPairs, String track, int numberOfDaysBack){
@@ -259,15 +302,15 @@ public class DayPairsHelper {
 	}
 	
 	private Pair findPairForDevByPairingWeight(Developer dev, List<Developer> availableDevs, Map<Pair,Integer> pairsWeight) {
-		int smallestWeight = 0;
+		int initialWeight = 0;
 		Developer otherDev = null;
 		for (Pair pair : pairsWeight.keySet()) {
 			Developer ohterPair = pair.getOtherDev(dev);
 			if(pair.hasDev(dev) && availableDevs.contains(ohterPair)){
 				Integer weight = pairsWeight.get(pair);
-				if(weight < smallestWeight || otherDev == null){
+				if(weight < initialWeight || otherDev == null){
 					otherDev = ohterPair; 
-					smallestWeight = weight;
+					initialWeight = weight;
 				}	
 			}
 		}

@@ -59,6 +59,7 @@ public class PairingBoard {
 			System.out.println("Cards count is: " + cards.size());
 			if ("devs".equals(listName.toLowerCase())){
 				syncDevs(cards);
+				syncDevsMetadata(cards);
 			}
 			
 			if ("tracks".equals(listName.toLowerCase())){
@@ -89,10 +90,16 @@ public class PairingBoard {
 	private void syncDevs(List<Card> cards) {
 		for (Card card : cards) {
 			String cardName = card.getName().toLowerCase();
-			switch (cardName) {
-			case "devs":
+			if ("devs".equals(cardName)) {
 				devs.addAll(getDevelopersFromCard(card));
-				break;
+		  }
+		}
+	}
+	
+	private void syncDevsMetadata(List<Card> cards) {
+		for (Card card : cards) {
+			String cardName = card.getName().toLowerCase();
+			switch (cardName) {
 			case "dod":
 				makeAllDevsDoD(devs, card);
 				break;

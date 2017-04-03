@@ -56,8 +56,10 @@ public class TrelloPairsController {
 		pairsHelper.updateDataBaseWithTrelloContent(pairingBoardTrello.getPastPairs());
 		List<DayPairs> pastPairs = repository.findAll();
 		logger.info("Database state is: " + pastPairs.toString());
-		Map<Pair, Integer> pairsWeight = pairsHelper.buildPairsWeight(pastPairs, pairingBoardTrello.getDevs());
+		Map<Pair, Integer> pairsWeight = pairsHelper.buildPairsWeightFromPastPairing(pastPairs, pairingBoardTrello.getDevs());
 		logger.info("Pairs weight is:" + pairsWeight);
+		pairsHelper.adaptPairsWeightForDoD(pairsWeight, pairingBoardTrello.getDevs());
+		logger.info("Pairs weight after DoD adaptation:" + pairsWeight);
 		DayPairs todayPairs = pairsHelper.generateNewDayPairs(pairingBoardTrello.getTracks(), pairingBoardTrello.getDevs(), pastPairs, pairsWeight);
 		logger.info("Today pairs are: " + todayPairs);
 		pairsHelper.rotateSoloPairIfAny(todayPairs, pastPairs, pairsWeight);
