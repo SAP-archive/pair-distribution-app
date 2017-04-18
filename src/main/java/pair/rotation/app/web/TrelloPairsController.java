@@ -49,10 +49,10 @@ public class TrelloPairsController {
 
 	private DayPairs generatePairs(int daysIntoFuture) {
 		PairingBoard pairingBoardTrello = new PairingBoard(accessKey, applicationKey, pairingBoardId);
-		DayPairsHelper pairsHelper = new DayPairsHelper(repository, pairingBoardTrello);
     	logger.info("Pairing board found. Syncing state now");
 		pairingBoardTrello.syncTrelloBoardState();
 		logger.info("Syncing state finished. Updating database state");
+		DayPairsHelper pairsHelper = new DayPairsHelper(repository);
 		pairsHelper.updateDataBaseWithTrelloContent(pairingBoardTrello.getPastPairs());
 		List<DayPairs> pastPairs = repository.findAll();
 		logger.info("Database state is: " + pastPairs.toString());

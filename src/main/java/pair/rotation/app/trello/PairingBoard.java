@@ -20,7 +20,8 @@ public class PairingBoard {
     private static final String GET_LIST_CARDS = "/lists/{listId}/cards?";
 	private RestTemplateHttpClient httpClient;
 	private TrelloImpl trelloImpl;
-	private List<Developer> devs;
+	private List<Developer> availableDevelopers;
+	private List<Developer> allDevelopers;
 	private List<String> tracks;
 	private List<DayPairs> pastPairs;
 	private String accessKey;
@@ -31,12 +32,20 @@ public class PairingBoard {
     	this.accessKey = accessKey;
 		this.applicationKey = applicationKey;
 		this.pairingBoardId = pairingBoardId;
+		availableDevelopers = new ArrayList<Developer>();
+		allDevelopers = new ArrayList<>();
 		httpClient = new RestTemplateHttpClient();
     	trelloImpl = new TrelloImpl(applicationKey, accessKey, httpClient);
 	}
     
 	public List<Developer> getDevs() {
-		return devs;
+		List<Developer> result = new ArrayList<>();
+		for (Developer developer : allDevelopers) {
+			if(availableDevelopers.contains(developer)){
+				result.add(developer);
+			}
+		}
+		return result;
 	}
 	
 	public List<String> getTracks() {
@@ -49,7 +58,6 @@ public class PairingBoard {
 
 	
 	public void syncTrelloBoardState() {
-		devs = new ArrayList<Developer>();
 		tracks = new ArrayList<String>();
 		pastPairs = new ArrayList<DayPairs>();
 		for (TList tList : getLits()) {
@@ -91,7 +99,7 @@ public class PairingBoard {
 		for (Card card : cards) {
 			String cardName = card.getName().toLowerCase();
 			if ("devs".equals(cardName)) {
-				devs.addAll(getDevelopersFromCard(card));
+				availableDevelopers.addAll(getDevelopersFromCard(card));
 		  }
 		}
 	}
@@ -99,12 +107,10 @@ public class PairingBoard {
 	private void syncDevsMetadata(List<Card> cards) {
 		for (Card card : cards) {
 			String cardName = card.getName().toLowerCase();
-			switch (cardName) {
-			case "dod":
-				makeAllDevsDoD(devs, card);
-				break;
-			default:
-				setDevsCompany(cardName, devs, card);
+			if ("dod".equals(cardName)) {
+				makeAllDevsDoD(card);
+			}else {
+				setDevsCompany(cardName, card);
 			}
 		}
 	}
@@ -112,37 +118,39 @@ public class PairingBoard {
 	private List<Developer> getDevelopersFromCard(Card card) {
 		List<Developer> developers = new ArrayList<>();
 		for (String developerId : card.getIdMembers()) {
-			developers.add(new Developer(developerId));
+			developers.add(getDeveloperById(developerId));
 		}
 		return developers;
 	}
 	
-	private void setDevsCompany(String company, List<Developer> developers, Card card) {
+	private void setDevsCompany(String company, Card card) {
 		for (String developerId : card.getIdMembers()) {
-			Developer developer = getDeveloperById(devs, new Developer(developerId));
-			if(developer != null){
-				developer.setCompany(company);	
-			}
+			Developer developer = getDeveloperById(developerId);
+			developer.setCompany(company);	
 		}
 	}
 
-	private void makeAllDevsDoD(List<Developer> developers, Card card) {
+	private void makeAllDevsDoD(Card card) {
 		for (String developerId : card.getIdMembers()) {
-			Developer developer = getDeveloperById(devs, new Developer(developerId));
-			if(developer != null){
-				developer.setDoD(true);
-			}
+			Developer developer = getDeveloperById(developerId);
+			developer.setDoD(true);
 		}
-		
 	}
 	
-	private Developer getDeveloperById(List<Developer> devs, Developer developerToCompare){
-		for (Developer developer : devs) {
+	private Developer getDeveloperById(String developerId){
+		Developer result = null;
+		Developer developerToCompare = new Developer(developerId);
+		for (Developer developer : allDevelopers) {
 			if(developer.equals(developerToCompare)){
-				return developer;
+				result = developer;
+				break;
 			}
 		}
-		return null;
+		if (result == null){
+			allDevelopers.add(developerToCompare);
+			result = developerToCompare;
+		}
+		return result;
 	}
 
 	public List<TList> getLits(){

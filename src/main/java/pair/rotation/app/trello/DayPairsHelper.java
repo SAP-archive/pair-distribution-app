@@ -1,21 +1,16 @@
 package pair.rotation.app.trello;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.julienvey.trello.domain.Card;
-import com.julienvey.trello.domain.TList;
 
 import pair.rotation.app.persistence.mongodb.TrelloPairsRepository;
 
@@ -24,30 +19,10 @@ public class DayPairsHelper {
 	public static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd-MM-yyyy");
     private static final Logger logger = LoggerFactory.getLogger(DayPairsHelper.class);
 	
-	private PairingBoard pairingBoardTrello;
-
 	private TrelloPairsRepository repository;
 
-	public DayPairsHelper(TrelloPairsRepository repository, PairingBoard paringBoardTrello) {
+	public DayPairsHelper(TrelloPairsRepository repository) {
 		this.repository = repository;
-		this.pairingBoardTrello = paringBoardTrello;
-	}
-
-	public List<String> getTracks() {
-		return getListCardNames(getListByTitle("tracks"));
-	}
-
-	public List<DayPairs> getPairs() {
-		List<DayPairs> result = new ArrayList<>();
-		for (TList tList : getPairingLists()) {
-			try {
-				result.add(getPairsFromList(tList));
-			} catch (ParseException e) {
-				//TODO
-				e.printStackTrace();
-			}
-		}
-		return result;
 	}
 	
 	public void updateDataBaseWithTrelloContent(List<DayPairs> pairs) {
@@ -88,8 +63,8 @@ public class DayPairsHelper {
 	public void adaptPairsWeightForDoD(Map<Pair, Integer> pairsWeight, List<Developer> availableDevs) {
 		List<Developer> developersOnDoD = getTodayDoDs(availableDevs);
 		for (Pair pair : pairsWeight.keySet()) {
-			if(isPairDoDConform(pair, developersOnDoD)){
-				int weight = pairsWeight.get(pair) - 100;
+			if(!isPairDoDConform(pair, developersOnDoD)){
+				int weight = pairsWeight.get(pair) + 100;
 				pairsWeight.put(pair, weight);
 			}
 		}
@@ -98,15 +73,24 @@ public class DayPairsHelper {
 	private boolean isPairDoDConform(Pair pair, List<Developer> developersOnDoD){
 		List<Developer> devs = pair.getDevs();
 		if(devs.isEmpty()){
+			logger.info("devs is empty. It's conform");
 			return true;
 		}
 		if(devs.size() == 1) {
-			return !developersOnDoD.contains(devs.get(0));
+			boolean conform = !developersOnDoD.contains(devs.get(0));
+			logger.info("There is one dev. Its conform status is : " + conform);
+			return conform;
 		}else{
 			Developer pairDeveloper = devs.get(0);
 			Developer pairOtherDeveloper = pair.getOtherDev(pairDeveloper);
 			boolean isPairOnDoD = developersOnDoD.contains(pairDeveloper) || developersOnDoD.contains(pairOtherDeveloper);
-			return isPairOnDoD && (pairDeveloper.getCompany().equals(pairOtherDeveloper.getCompany()));	
+			if(isPairOnDoD){
+				boolean conform = pairDeveloper.getCompany().equals(pairOtherDeveloper.getCompany());
+				logger.info("There are two devs. Theirs conform status is : " + conform);
+				return conform;
+			}
+			logger.info("There are two devs. They are not on DoD. Theirs conform status is : " + true);
+			return true;
 		}
 	}
 	
@@ -201,15 +185,7 @@ public class DayPairsHelper {
 		Collections.sort(pastPairs);
 		Collections.reverse(pastPairs);
 	}
-	
-	private ArrayList<String> getListCardNames(TList tracksList) {
-		ArrayList<String> result = new ArrayList<String>();
-		for (Card card : tracksList.getCards()) {
-			result.add(card.getName());
-		}
-		return result;
-	}
-	
+		
 	private List<String> getPossibleTracks(List<String> todaysTracks, List<Developer> todaysDevs){
 		int possibleTracksCount = (int) Math.ceil(todaysDevs.size() / 2.0);
 		List<String> possibleTracks;
@@ -242,8 +218,9 @@ public class DayPairsHelper {
 				logger.info("There is history to find longest dev");
 				Developer longestDevOnStory = getLongestDevOnStory(trackPairOneDayBack, trackPairThreeDaysBack);
 				if (longestDevOnStory != null && availableDevs.contains(longestDevOnStory)) {
-					logger.info("Longest dev is" + longestDevOnStory);
-					trackPairToday.addDev(longestDevOnStory);
+					Developer longestDev = getDeveloperById(availableDevs, longestDevOnStory);
+					logger.info("Longest dev is" + longestDev);
+					trackPairToday.addDev(longestDev);
 				}
 			}else{
 				//there is no older history. Remove random one
@@ -262,7 +239,14 @@ public class DayPairsHelper {
 	}
 
 	private boolean isRotationTime(Pair trackPairOneDayBack, Pair trackPairTwoDaysBack, List<Developer> developersOnDoD) {
-		return trackPairOneDayBack != null && (isPairForTwoDays(trackPairOneDayBack, trackPairTwoDaysBack) || !isPairDoDConform(trackPairOneDayBack, developersOnDoD));
+		if(trackPairOneDayBack != null){
+			boolean pairForTwoDays = isPairForTwoDays(trackPairOneDayBack, trackPairTwoDaysBack);
+			boolean pairDoDConform = !isPairDoDConform(trackPairOneDayBack, developersOnDoD);
+			logger.info("Rotation time for longest dev is : " + pairForTwoDays);
+			logger.info("Rotation time for DoDConform is : " + pairDoDConform);
+			return trackPairOneDayBack != null && (pairForTwoDays || pairDoDConform);			
+		}
+		return false;
 	}
 
 	private boolean isPairForTwoDays(Pair trackPairOneDayBack, Pair trackPairTwoDaysBack) {
@@ -336,49 +320,13 @@ public class DayPairsHelper {
 		return dev;
 	}
 	
-    private TList getListByTitle(String title){
-    	for (TList list : pairingBoardTrello.getLits()) {
-    		if (title.equals(list.getName().toLowerCase())){
-    			return list;
-    		}
+	private Developer getDeveloperById(List<Developer> devs, Developer developerToCompare){
+		for (Developer developer : devs) {
+			if(developer.equals(developerToCompare)){
+				return developer;
+			}
 		}
-    	return null;
-    }
-    
-    private List<TList> getPairingLists(){
-    	List<TList> result = new ArrayList<TList>();
-    	for (TList list : pairingBoardTrello.getLits()) {
-    		if (list.getName().toLowerCase().startsWith("pairing")){
-    			result.add(list);
-    		}
-		}
-    	return result;
-    }
-    
-	private Date getDateFromCradName(String name) throws ParseException{
-		String date = name.substring(name.indexOf("(") + 1, name.lastIndexOf(")"));
-		return DATE_FORMATTER.parse(date);
-	}
-	
-   private DayPairs getPairsFromList(TList tList) throws ParseException{
-		DayPairs pairs = new DayPairs();
-		pairs.setDate(getDateFromCradName(tList.getName()));
-		for (Card card : tList.getCards()) {
-			Pair pair = new Pair();
-			pair.setDevs(getDevelopersFromCard(card));
-			pairs.addPair(card.getName(), pair);
-			System.out.println(card.getName());
-			System.out.println(card.getDesc());
-		}
-		return pairs;
-   }
-   
-	private List<Developer> getDevelopersFromCard(Card card) {
-		List<Developer> developers = new ArrayList<>();
-		for (String developerId : card.getIdMembers()) {
-			developers.add(new Developer(developerId));
-		}
-		return developers;
+		return null;
 	}
 }
 

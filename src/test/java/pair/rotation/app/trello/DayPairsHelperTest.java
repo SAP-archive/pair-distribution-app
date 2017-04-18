@@ -1,7 +1,13 @@
 package pair.rotation.app.trello;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.contains;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -9,50 +15,27 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.contains;
-
-import com.julienvey.trello.domain.Card;
-import com.julienvey.trello.domain.TList;
 
 import pair.rotation.app.persistence.mongodb.TrelloPairsRepository;
-import pair.rotation.app.trello.DayPairs;
-import pair.rotation.app.trello.DayPairsHelper;
-import pair.rotation.app.trello.Pair;
-import pair.rotation.app.trello.PairingBoard;
 
 public class DayPairsHelperTest {
 
-	private PairingBoard pairingBoardTrell;
 	private DayPairsHelper subject;
 	private TrelloPairsRepository trelloPairsRepository;
 
 
 	@Before
 	public void setUp() throws ParseException{
-		pairingBoardTrell = mock(PairingBoard.class);
 		trelloPairsRepository = mock(TrelloPairsRepository.class);
-		subject = new DayPairsHelper(trelloPairsRepository, pairingBoardTrell);
-		when(pairingBoardTrell.getLits()).thenReturn(getTestDataForBoard());
+		subject = new DayPairsHelper(trelloPairsRepository);
 	}
 	
 	
-	@Test
-	public void testGetTracks() {
-		assertThat(subject.getTracks(), is(equalTo(Arrays.asList("track1", "track2"))));
-	}
-	
-	@Test
-	public void testGetPairs() throws ParseException {
-		assertThat(subject.getPairs(), is(equalTo(getPairsList())));
-	}
-
 	@Test(expected=RuntimeException.class)
 	public void testUpdateDataBaseWithTrelloContentWithException() throws Exception {
 		List<DayPairs> pairsList = getPairsList();
@@ -110,11 +93,11 @@ public class DayPairsHelperTest {
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
 		subject.adaptPairsWeightForDoD(pairsWeight, devs);
 		
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")))), is(-97));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")))), is(3));
 		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev3")))), is(0));
 		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(0));
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev3")))), is(-100));
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev4")))), is(0));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev3")))), is(0));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev4")))), is(+100));
 		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")))), is(3));
 	}
 	
@@ -270,17 +253,6 @@ public class DayPairsHelperTest {
 		return result;
 	}
 	
-	private List<TList> getTestDataForBoard() throws ParseException{
-		ArrayList<TList> result = new ArrayList<TList>();
-		result.add(getListWithCards("tracks", "track1", "track2", null));
-		result.add(getListWithCards("devs", "dev1", "dev2", null));
-		result.add(getListWithCards("pairing(" + DayPairsHelper.DATE_FORMATTER.format(getPastDate(1)) + ")", "track1", "track2", getPairs()));
-		result.add(getListWithCards("pairing(" + DayPairsHelper.DATE_FORMATTER.format(getPastDate(2)) + ")", "track1", "track2", getPairs()));
-		result.add(getListWithCards("pairing(" + DayPairsHelper.DATE_FORMATTER.format(getPastDate(3)) + ")", "track1", "track2", getPairs()));
-		
-		return result;
-	}
-	
 	@Test
 	public void testRotateSoloPair() throws Exception {
 		Pair soloPair = new Pair(Arrays.asList(new Developer("dev3")));
@@ -306,38 +278,6 @@ public class DayPairsHelperTest {
 		subject.rotateSoloPairIfAny(new DayPairs(), pairs, pairsWeight);
 	}
 	
-	private Map<String, List<Developer>> getPairs(){
-		HashMap<String, List<Developer>> result = new HashMap<String, List<Developer>>();
-		result.put("track1", Arrays.asList(new Developer("dev1"), new Developer("dev2")));
-		result.put("track2", Arrays.asList(new Developer("dev3"), new Developer("dev4")));
-		
-		return result;
-	}
-
-	private TList getListWithCards(String listName, String firstCardName, String secondCardName, Map<String, List<Developer>> members) {
-		TList tList = new TList();
-		tList.setName(listName);
-		Card firstCard = new Card();
-		firstCard.setName(firstCardName);
-		Card secondCard = new Card();
-		secondCard.setName(secondCardName);
-		if(members != null){
-			firstCard.setIdMembers(getDeveloperIdsFromDevelopers(members.get(firstCardName)));
-			secondCard.setIdMembers(getDeveloperIdsFromDevelopers(members.get(secondCardName)));
-		}
-		tList.setCards(Arrays.asList(firstCard, secondCard));
-
-		return tList;
-	}
-	
-	private List<String> getDeveloperIdsFromDevelopers(List<Developer> developers) {
-		List<String> result = new ArrayList<>();
-		for (Developer developer : developers) {
-			result.add(developer.getId());
-		}
-		return result;
-	}
-
 	private Date getPastDate(int daysCountToPast) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
