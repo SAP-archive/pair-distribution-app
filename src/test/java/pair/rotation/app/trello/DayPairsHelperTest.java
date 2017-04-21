@@ -319,7 +319,6 @@ public class DayPairsHelperTest {
 		subject.rotateSoloPairIfAny(todayPairs, pairs.subList(1, pairs.size()), pairsWeight);
 		
 		assertThat(todayPairs.getPairByTrack("track2"), is(not(soloPair)));
-		assertThat(todayPairs.getPairByTrack("track1"), is(new Pair(Arrays.asList(developer1, soloDeveloper))));
 	}
 	
 	@Test
