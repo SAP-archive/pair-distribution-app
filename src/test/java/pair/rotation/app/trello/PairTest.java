@@ -1,13 +1,14 @@
 package pair.rotation.app.trello;
 
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 
 import org.junit.Test;
-
-import pair.rotation.app.trello.Pair;
 
 public class PairTest {
 
@@ -115,5 +116,59 @@ public class PairTest {
 		Pair subject2 = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		
 		assertThat(subject.equals(subject2), is(false));
+	}
+		
+	
+	@Test
+	public void testGetDevFromCompany() throws Exception {
+		Developer developer = new Developer("dev1");
+		developer.setCompany("company");
+		Developer developer2 = new Developer("dev2");
+		developer2.setCompany("someOtherCompany");
+		Pair subject = new Pair(Arrays.asList(developer, developer2));
+		
+		assertThat(subject.getDevFromCompany("company"), is(developer));
+	}
+	
+	@Test
+	public void testGetDevFromCompanyNoDev() throws Exception {
+		Developer developer = new Developer("dev1");
+		developer.setCompany("someOtherCompany");
+		Developer developer2 = new Developer("dev2");
+		developer2.setCompany("someOtherCompany");
+		Pair subject = new Pair(Arrays.asList(developer, developer2));
+		
+		assertThat(subject.getDevFromCompany("company"), is(nullValue()));
+	}
+	
+	@Test
+	public void testIsPairFromSameCompanyFalse() throws Exception {
+		Developer developer = new Developer("dev1");
+		developer.setCompany("someCompany");
+		Developer developer2 = new Developer("dev2");
+		developer2.setCompany("someOtherCompany");
+		Pair subject = new Pair(Arrays.asList(developer, developer2));
+		
+		assertThat(subject.isPairFromSameCompany(), is(false));
+	}
+	
+	@Test
+	public void testIsPairFromSameCompanyTrue() throws Exception {
+		Developer developer = new Developer("dev1");
+		developer.setCompany("someCompany");
+		Developer developer2 = new Developer("dev2");
+		developer2.setCompany("someCompany");
+		Pair subject = new Pair(Arrays.asList(developer, developer2));
+		
+		assertThat(subject.isPairFromSameCompany(), is(true));
+	}
+	
+	@Test
+	public void testIsPairFromSameCompanyForSolo() throws Exception {
+		Developer developer = new Developer("dev1");
+		developer.setCompany("someCompany");
+		Pair subject = new Pair(Arrays.asList(developer));
+		
+		assertThat(subject.isPairFromSameCompany(), is(true));
 	}
 }

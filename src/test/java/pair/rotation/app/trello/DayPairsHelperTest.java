@@ -271,6 +271,84 @@ public class DayPairsHelperTest {
 	}
 	
 	@Test
+	public void testRotateSoloPairOnDoD() throws Exception {
+		Developer soloDeveloper = new Developer("dev3");
+		soloDeveloper.setDoD(true);
+		soloDeveloper.setCompany("company");
+		Developer developer1 = new Developer("dev1");
+		developer1.setCompany("company");
+		Developer developer2 = new Developer("dev2");
+		developer2.setCompany("someOtherCompany");
+		List<Developer> availableDevs = Arrays.asList(developer1, developer2, soloDeveloper);
+		List<DayPairs> pairs = new ArrayList<>();
+		DayPairs todayPairs = new DayPairs();
+		todayPairs.addPair("track1", new Pair(Arrays.asList(developer1, developer2)));
+		Pair soloPair = new Pair(Arrays.asList(soloDeveloper));
+		todayPairs.addPair("track2", soloPair);
+		pairs.add(todayPairs);	
+		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, availableDevs);
+		subject.adaptPairsWeightForDoD(pairsWeight, availableDevs);
+	
+		
+		subject.rotateSoloPairIfAny(todayPairs, pairs.subList(1, pairs.size()), pairsWeight);
+		
+		assertThat(todayPairs.getPairByTrack("track2"), is(not(soloPair)));
+		assertThat(todayPairs.getPairByTrack("track1"), is(new Pair(Arrays.asList(developer1, soloDeveloper))));
+	}
+	
+	@Test
+	public void testRotateSoloPairOnDoDAllDevFromSameCompany() throws Exception {
+		Developer soloDeveloper = new Developer("dev3");
+		soloDeveloper.setDoD(true);
+		soloDeveloper.setCompany("company");
+		Developer developer1 = new Developer("dev1");
+		developer1.setCompany("company");
+		Developer developer2 = new Developer("dev2");
+		developer2.setCompany("company");
+		List<Developer> availableDevs = Arrays.asList(developer1, developer2, soloDeveloper);
+		List<DayPairs> pairs = new ArrayList<>();
+		DayPairs todayPairs = new DayPairs();
+		todayPairs.addPair("track1", new Pair(Arrays.asList(developer1, developer2)));
+		Pair soloPair = new Pair(Arrays.asList(soloDeveloper));
+		todayPairs.addPair("track2", soloPair);
+		pairs.add(todayPairs);	
+		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, availableDevs);
+		subject.adaptPairsWeightForDoD(pairsWeight, availableDevs);
+	
+		
+		subject.rotateSoloPairIfAny(todayPairs, pairs.subList(1, pairs.size()), pairsWeight);
+		
+		assertThat(todayPairs.getPairByTrack("track2"), is(not(soloPair)));
+		assertThat(todayPairs.getPairByTrack("track1"), is(new Pair(Arrays.asList(developer1, soloDeveloper))));
+	}
+	
+	@Test
+	public void testRotateSoloPairOnDoDNoPairFromSameCompany() throws Exception {
+		Developer soloDeveloper = new Developer("dev3");
+		soloDeveloper.setDoD(true);
+		soloDeveloper.setCompany("company");
+		Developer developer1 = new Developer("dev1");
+		developer1.setCompany("someOtherCompany");
+		Developer developer2 = new Developer("dev2");
+		developer2.setCompany("someOtherCompany");
+		List<Developer> availableDevs = Arrays.asList(developer1, developer2, soloDeveloper);
+		List<DayPairs> pairs = new ArrayList<>();
+		DayPairs todayPairs = new DayPairs();
+		todayPairs.addPair("track1", new Pair(Arrays.asList(developer1, developer2)));
+		Pair soloPair = new Pair(Arrays.asList(soloDeveloper));
+		todayPairs.addPair("track2", soloPair);
+		pairs.add(todayPairs);	
+		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, availableDevs);
+		subject.adaptPairsWeightForDoD(pairsWeight, availableDevs);
+	
+		
+		subject.rotateSoloPairIfAny(todayPairs, pairs.subList(1, pairs.size()), pairsWeight);
+		
+		assertThat(todayPairs.getPairByTrack("track2"), is(soloPair));
+		assertThat(todayPairs.getPairByTrack("track1"), is(not(new Pair(Arrays.asList(developer1, soloDeveloper)))));
+	}
+	
+	@Test
 	public void testRotateSoloPairWithoutState() throws Exception {
 		List<DayPairs> pairs = new ArrayList<>();
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3")));

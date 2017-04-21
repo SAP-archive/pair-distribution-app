@@ -64,6 +64,7 @@ public class DayPairsHelper {
 		List<Developer> developersOnDoD = getTodayDoDs(availableDevs);
 		for (Pair pair : pairsWeight.keySet()) {
 			if(!isPairDoDConform(pair, developersOnDoD)){
+				logger.info("pair needs DoD adaptation. Pair is: " + pair);
 				int weight = pairsWeight.get(pair) + 100;
 				pairsWeight.put(pair, weight);
 			}
@@ -71,25 +72,18 @@ public class DayPairsHelper {
 	}
 
 	private boolean isPairDoDConform(Pair pair, List<Developer> developersOnDoD){
-		List<Developer> devs = pair.getDevs();
-		if(devs.isEmpty()){
-			logger.info("devs is empty. It's conform");
+		switch (pair.getDevs().size()) {
+		case 0:
 			return true;
-		}
-		if(devs.size() == 1) {
-			boolean conform = !developersOnDoD.contains(devs.get(0));
-			logger.info("There is one dev. Its conform status is : " + conform);
-			return conform;
-		}else{
-			Developer pairDeveloper = devs.get(0);
-			Developer pairOtherDeveloper = pair.getOtherDev(pairDeveloper);
+		case 1:
+			return !developersOnDoD.contains(pair.getFirstDev());
+		default:
+			Developer pairDeveloper = pair.getFirstDev();
+			Developer pairOtherDeveloper = pair.getSecondDev();
 			boolean isPairOnDoD = developersOnDoD.contains(pairDeveloper) || developersOnDoD.contains(pairOtherDeveloper);
 			if(isPairOnDoD){
-				boolean conform = pairDeveloper.getCompany().equals(pairOtherDeveloper.getCompany());
-				logger.info("There are two devs. Theirs conform status is : " + conform);
-				return conform;
+				return pairDeveloper.getCompany().equals(pairOtherDeveloper.getCompany());
 			}
-			logger.info("There are two devs. They are not on DoD. Theirs conform status is : " + true);
 			return true;
 		}
 	}
@@ -150,20 +144,34 @@ public class DayPairsHelper {
 
 	public void rotateSoloPairIfAny(DayPairs todayPairs, List<DayPairs> pastPairs, Map<Pair, Integer> pairsWeight) {
 		Pair soloPair = todayPairs.getSoloPair();		
-		if(soloPair != null){
-			DayPairs firstDayPair = pastPairs.size() > 0 ? pastPairs.get(0) : null;
-			DayPairs secondDayPair = pastPairs.size() > 1 ? pastPairs.get(1) : null;
-			if (firstDayPair!= null && secondDayPair != null && firstDayPair.hasPair(soloPair) && secondDayPair.hasPair(soloPair)){
-				Pair pairWithHighestWeight = getPairWithHighestPairWeight(todayPairs.getPairs().values(), pairsWeight);
-				String track = todayPairs.getTrackByPair(pairWithHighestWeight);
-				Developer longestDevOnStory = getLongestDevOnStory(firstDayPair.getPairByTrack(track), secondDayPair.getPairByTrack(track));
-				Developer newSoloPair = pairWithHighestWeight.getOtherDev(longestDevOnStory);
-				Pair newPair = new Pair(Arrays.asList(soloPair.getDevs().get(0), longestDevOnStory));
-				todayPairs.replacePairWith(pairWithHighestWeight, newPair);
-				todayPairs.replacePairWith(soloPair, new Pair(Arrays.asList(newSoloPair)));
-			}
-				
+		if(soloPair != null && (isSoloPairForTwoDays(pastPairs, soloPair) || soloPair.getFirstDev().getDoD())){
+			Pair pairWithHighestWeight = null; 
+			Developer newPairForSoloDeveloper = null;
+		    if (soloPair.getFirstDev().getDoD()){
+		    	pairWithHighestWeight = getPairWithHighestPairWeightFromCompany(todayPairs.getPairs().values(), pairsWeight, soloPair.getFirstDev().getCompany());
+		    	if (pairWithHighestWeight == null){
+		    		//No rotation for DoD possible
+		    		return;
+		    	}
+		    	if (pairWithHighestWeight.isPairFromSameCompany()){
+					newPairForSoloDeveloper = getRandomDev(pairWithHighestWeight.getDevs());
+				}else{
+					newPairForSoloDeveloper = pairWithHighestWeight.getDevFromCompany(soloPair.getFirstDev().getCompany());
+				}
+		    }else{
+		    	pairWithHighestWeight = getPairWithHighestPairWeight(todayPairs.getPairs().values(), pairsWeight);
+		    	newPairForSoloDeveloper = pairWithHighestWeight.getDevFromCompany(soloPair.getFirstDev().getCompany());
+		    }
+			Pair newPair = new Pair(Arrays.asList(soloPair.getDevs().get(0), newPairForSoloDeveloper));
+			todayPairs.replacePairWith(pairWithHighestWeight, newPair);
+			todayPairs.replacePairWith(soloPair, new Pair(Arrays.asList(pairWithHighestWeight.getOtherDev(newPairForSoloDeveloper))));
 		}
+	}
+
+	private boolean isSoloPairForTwoDays(List<DayPairs> pastPairs, Pair soloPair) {
+		DayPairs firstDayPair = pastPairs.size() > 0 ? pastPairs.get(0) : null;
+		DayPairs secondDayPair = pastPairs.size() > 1 ? pastPairs.get(1) : null;
+		return firstDayPair!= null && secondDayPair != null && firstDayPair.hasPair(soloPair) && secondDayPair.hasPair(soloPair);
 	}
 	
 	private Pair getPairWithHighestPairWeight(Collection<Pair> values, Map<Pair, Integer> pairsWeight) {
@@ -173,6 +181,21 @@ public class DayPairsHelper {
 			if(pairsWeight.containsKey(pair)){
 				Integer weight = pairsWeight.get(pair);
 				if(highesttWeight < weight || result == null){
+					result = pair;
+					highesttWeight = weight;
+				}				
+			}
+		}
+		return result;
+	}
+	
+	private Pair getPairWithHighestPairWeightFromCompany(Collection<Pair> values, Map<Pair, Integer> pairsWeight, String company) {
+		int highesttWeight = 0;
+		Pair result = null;
+		for (Pair pair : values) {
+			if(pairsWeight.containsKey(pair)){
+				Integer weight = pairsWeight.get(pair);
+				if((highesttWeight < weight || result == null) && (pair.getDevFromCompany(company) != null )){
 					result = pair;
 					highesttWeight = weight;
 				}				
@@ -241,10 +264,10 @@ public class DayPairsHelper {
 	private boolean isRotationTime(Pair trackPairOneDayBack, Pair trackPairTwoDaysBack, List<Developer> developersOnDoD) {
 		if(trackPairOneDayBack != null){
 			boolean pairForTwoDays = isPairForTwoDays(trackPairOneDayBack, trackPairTwoDaysBack);
-			boolean pairDoDConform = !isPairDoDConform(trackPairOneDayBack, developersOnDoD);
+			boolean pairDoDConform = isPairDoDConform(trackPairOneDayBack, developersOnDoD);
 			logger.info("Rotation time for longest dev is : " + pairForTwoDays);
-			logger.info("Rotation time for DoDConform is : " + pairDoDConform);
-			return trackPairOneDayBack != null && (pairForTwoDays || pairDoDConform);			
+			logger.info("Rotation time for DoDConform is : " + !pairDoDConform);
+			return trackPairOneDayBack != null && (pairForTwoDays || !pairDoDConform);			
 		}
 		return false;
 	}

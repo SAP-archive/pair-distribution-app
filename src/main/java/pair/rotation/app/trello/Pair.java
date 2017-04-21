@@ -22,6 +22,17 @@ public class Pair {
 		return Arrays.asList(devs.toArray(new Developer[0]));
 	}
 
+	public Developer getFirstDev() {
+		return devs.get(0);
+	}
+	
+	public Developer getSecondDev() {
+		if ( devs.size() == 2){
+			return devs.get(1);
+		}
+		return null;
+	}
+	
 	public void setDevs(List<Developer> devs) {
 		this.devs.addAll(devs);
 		Collections.sort(this.devs);
@@ -85,5 +96,21 @@ public class Pair {
 
 	public boolean isSolo() {
 		return devs.size() == 1;
+	}
+
+	public Developer getDevFromCompany(String company) {
+		for (Developer developer : devs) {
+			if(developer.getCompany().equals(company)){
+				return developer;
+			}
+		}
+		return null;
+	}
+
+	public boolean isPairFromSameCompany() {
+		if(isComplete()){
+			return devs.get(0).getCompany().equals(devs.get(1).getCompany());
+		}
+		return true;
 	}
 }
