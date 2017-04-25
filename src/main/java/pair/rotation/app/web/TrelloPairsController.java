@@ -23,6 +23,7 @@ import pair.rotation.app.trello.PairingBoard;
 public class TrelloPairsController {
    
     private static final Logger logger = LoggerFactory.getLogger(TracksController.class);
+    private boolean rotate_everyday = false;
     
     private TrelloPairsRepository repository;
 	@Value("${trello.access.key}")
@@ -46,6 +47,11 @@ public class TrelloPairsController {
     public DayPairs pairs(@RequestParam("days") int daysIntoFuture ) {
     	return generatePairs(daysIntoFuture);
     }
+    
+    @RequestMapping(value = "/pairs/rotate", method = RequestMethod.PUT)
+    public void pairs(@RequestParam("everyday") boolean everyday ) {
+    	rotate_everyday = everyday;
+    }
 
 	private DayPairs generatePairs(int daysIntoFuture) {
 		PairingBoard pairingBoardTrello = new PairingBoard(accessKey, applicationKey, pairingBoardId);
@@ -60,7 +66,7 @@ public class TrelloPairsController {
 		logger.info("Pairs weight is:" + pairsWeight);
 		pairsHelper.adaptPairsWeightForDoD(pairsWeight, pairingBoardTrello.getDevs());
 		logger.info("Pairs weight after DoD adaptation:" + pairsWeight);
-		DayPairs todayPairs = pairsHelper.generateNewDayPairs(pairingBoardTrello.getTracks(), pairingBoardTrello.getDevs(), pastPairs, pairsWeight);
+		DayPairs todayPairs = pairsHelper.generateNewDayPairs(pairingBoardTrello.getTracks(), pairingBoardTrello.getDevs(), pastPairs, pairsWeight, rotate_everyday);
 		logger.info("Today pairs are: " + todayPairs);
 		pairsHelper.rotateSoloPairIfAny(todayPairs, pastPairs, pairsWeight);
 		logger.info("After single pair rotation they are: " + todayPairs);

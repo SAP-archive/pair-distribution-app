@@ -118,13 +118,13 @@ public class DayPairsHelper {
 	}
 
 	public DayPairs generateNewDayPairs(List<String> tracks, List<Developer> devs, List<DayPairs> pastPairs,
-			Map<Pair, Integer> pairsWeight) {
+			Map<Pair, Integer> pairsWeight, boolean rotate_everyday) {
 		DayPairs result = new DayPairs();
 		sortByDescendDate(pastPairs);
 		List<String> possibleTracks = getPossibleTracks(tracks, devs);
 		List<Developer> availableDevs = new ArrayList<Developer>(devs);
 		for (String track : possibleTracks) {
-			Pair pair = tryToFindPair(track, pastPairs, availableDevs);
+			Pair pair = tryToFindPair(track, pastPairs, availableDevs, rotate_everyday);
 			availableDevs.removeAll(pair.getDevs());
 			if(!pair.isComplete() && availableDevs.size() > 0){
 				pair = getPairByWeight(pair, availableDevs, pairsWeight);
@@ -220,7 +220,7 @@ public class DayPairsHelper {
 		return possibleTracks;
 	}
 	
-	private Pair tryToFindPair(String track, List<DayPairs> pastPairs, final List<Developer> availableDevs) {
+	private Pair tryToFindPair(String track, List<DayPairs> pastPairs, final List<Developer> availableDevs, boolean rotate_everyday) {
 		Pair trackPairToday = new Pair();
 		Pair trackPairOneDayBack = getPastPairByTrack(pastPairs, track, 0);
 		Pair trackPairTwoDaysBack = getPastPairByTrack(pastPairs, track, 1);
@@ -231,7 +231,7 @@ public class DayPairsHelper {
 		logger.info("Pair two days back: " + trackPairTwoDaysBack);
 		logger.info("Pair three days back: " + trackPairThreeDaysBack);
 		
-		if(isRotationTime(trackPairOneDayBack, trackPairTwoDaysBack, getTodayDoDs(availableDevs))) {
+		if(rotate_everyday || isRotationTime(trackPairOneDayBack, trackPairTwoDaysBack, getTodayDoDs(availableDevs))) {
 			logger.info("time to rotate");
 			if(trackPairOneDayBack.isSolo()){
 				logger.info("Solo don't do anything");
