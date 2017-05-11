@@ -64,12 +64,18 @@ public class TrelloPairsController {
 		logger.info("Database state is: " + pastPairs.toString());
 		Map<Pair, Integer> pairsWeight = pairsHelper.buildPairsWeightFromPastPairing(pastPairs, pairingBoardTrello.getDevs());
 		logger.info("Pairs weight is:" + pairsWeight);
+		logger.info("Building build pairs weight");
+		Map<Pair, Integer> buildPairsWeight = pairsHelper.buildBuildPairsWeightFromPastPairing(pastPairs, pairingBoardTrello.getDevs());
+		logger.info("BuildPairs weight is:" + buildPairsWeight);
 		pairsHelper.adaptPairsWeightForDoD(pairsWeight, pairingBoardTrello.getDevs());
 		logger.info("Pairs weight after DoD adaptation:" + pairsWeight);
 		DayPairs todayPairs = pairsHelper.generateNewDayPairs(pairingBoardTrello.getTracks(), pairingBoardTrello.getDevs(), pastPairs, pairsWeight, rotate_everyday);
 		logger.info("Today pairs are: " + todayPairs);
 		pairsHelper.rotateSoloPairIfAny(todayPairs, pastPairs, pairsWeight);
 		logger.info("After single pair rotation they are: " + todayPairs);
+		logger.info("Setting BuildPair");
+		pairsHelper.setBuildPair(todayPairs.getPairs().values(), buildPairsWeight);
+		logger.info("After setting build pair pairs are: " + todayPairs);
 		pairingBoardTrello.addTodayPairsToBoard(todayPairs, daysIntoFuture);
 		logger.info("Trello board has been updated");
 		return todayPairs;

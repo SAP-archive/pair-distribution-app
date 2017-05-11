@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.julienvey.trello.domain.Card;
+import com.julienvey.trello.domain.Label;
 import com.julienvey.trello.domain.TList;
 import com.julienvey.trello.impl.TrelloImpl;
 import com.julienvey.trello.impl.TrelloUrl;
@@ -16,6 +17,7 @@ import com.julienvey.trello.impl.http.RestTemplateHttpClient;
 
 public class PairingBoard {
 
+	private static final String BUILD_PAIR_LABEL_COLOR = "orange";
 	private static final String CREATE_LISTS = "/lists?";
     private static final String GET_LIST_CARDS = "/lists/{listId}/cards?";
 	private RestTemplateHttpClient httpClient;
@@ -85,6 +87,7 @@ public class PairingBoard {
 				}
 				for (Card card : cards) {
 					Pair pair = new Pair();
+					pair.setBuildPair(isBuildPair(card));
 					pair.setDevs( getDevelopersFromCard(card));
 					pairs.addPair(card.getName(), pair);
 					System.out.println(card.getName());
@@ -115,6 +118,17 @@ public class PairingBoard {
 		}
 	}
 
+	private boolean isBuildPair(Card card) {
+		boolean result = false;
+		List<Label> labels = card.getLabels();
+		for (Label label : labels) {
+			if(BUILD_PAIR_LABEL_COLOR.equals(label.getColor())){
+				result = true;
+			}
+		}
+		return result;
+	}
+	
 	private List<Developer> getDevelopersFromCard(Card card) {
 		List<Developer> developers = new ArrayList<>();
 		for (String developerId : card.getIdMembers()) {
@@ -178,23 +192,28 @@ public class PairingBoard {
 	private void addPairsToList(DayPairs pairs, TList newPairingList) {
 		for (int i = tracks.size() - 1; i >= 0; i--) {
 			if(pairs.getTracks().contains(tracks.get(i))){
+				String trackName = tracks.get(i);
+				Pair pairByTrack = pairs.getPairByTrack(trackName);
 				Card card = new Card();
-				card.setName(tracks.get(i));
-				card.setIdMembers(getIdsFromDevelopers(pairs, i));
-				newPairingList.createCard(card);	
+				card.setName(trackName);
+				card.setIdMembers(getIdsFromDevelopers(pairByTrack));
+				Card pairingCard = newPairingList.createCard(card);
+				if(pairByTrack.isBuildPair()){
+					pairingCard.addLabels(BUILD_PAIR_LABEL_COLOR);
+				}
 			}
 		}
 	}
 
-	private List<String> getIdsFromDevelopers(DayPairs pairs, int i) {
+	private List<String> getIdsFromDevelopers(Pair pair) {
 		List<String> developerIds = new ArrayList<>();
-		List<Developer> developers = pairs.getPairByTrack(tracks.get(i)).getDevs();
+		List<Developer> developers = pair.getDevs();
 		for (Developer developer : developers) {
 			developerIds.add(developer.getId());
 		}
 		return developerIds;
 	}
-
+	
 	private TList createNewPairingList(DayPairs pairs, int daysIntoFuture) {
 		TrelloUrl createListURL = TrelloUrl.createUrl(CREATE_LISTS);
 		String name = "pairing(" + DayPairsHelper.DATE_FORMATTER.format(getFutureDate(pairs.getDate(), daysIntoFuture)) + ")";

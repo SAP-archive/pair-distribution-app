@@ -21,6 +21,14 @@ public class PairTest {
 	}
 	
 	@Test
+	public void testGetAndSetDevsWithNullValues() throws Exception {
+		Pair subject = new Pair();
+		subject.setDevs(Arrays.asList(null, new Developer("dev2")));
+		
+		assertThat(subject.getDevs(), is(equalTo(Arrays.asList(new Developer("dev2")))));
+	}
+	
+	@Test
 	public void testAddDev() throws Exception {
 		Pair subject = new Pair(Arrays.asList(new Developer("dev1")));
 		
@@ -170,5 +178,23 @@ public class PairTest {
 		Pair subject = new Pair(Arrays.asList(developer));
 		
 		assertThat(subject.isPairFromSameCompany(), is(true));
+	}
+	
+	@Test
+	public void testIsBuildPairFalse() throws Exception {
+		Pair subject = new Pair();
+		
+		subject.setBuildPair(false);
+		
+		assertThat(subject.isBuildPair(), is(false));
+	}
+	
+	@Test
+	public void testIsBuildPairTrue() throws Exception {
+		Pair subject = new Pair();
+		
+		subject.setBuildPair(true);
+		
+		assertThat(subject.isBuildPair(), is(true));
 	}
 }

@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Pair {
 
 	private List<Developer> devs;
+	private boolean buildPair;
 
     public Pair() {
     	devs = new ArrayList<Developer>(2);
+    	buildPair = false;
     }
 
     public Pair(List<Developer> devs) {
@@ -35,6 +38,7 @@ public class Pair {
 	
 	public void setDevs(List<Developer> devs) {
 		this.devs.addAll(devs);
+		this.devs.removeIf(Objects::isNull);
 		Collections.sort(this.devs);
 	}
 
@@ -112,5 +116,13 @@ public class Pair {
 			return devs.get(0).getCompany().equals(devs.get(1).getCompany());
 		}
 		return true;
+	}
+
+	public boolean isBuildPair() {
+		return buildPair;
+	}
+
+	public void setBuildPair(boolean buildPair) {
+		this.buildPair = buildPair;
 	}
 }

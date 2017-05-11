@@ -48,12 +48,24 @@ public class DayPairsHelper {
 	
 	public Map<Pair, Integer> buildPairsWeightFromPastPairing(List<DayPairs> pastPairs, List<Developer> availableDevs) {
 		Map<Pair, Integer> result = new HashMap<>(); 
-		initPairsInitialWeight(availableDevs, result);
+		initPairsInitialWeight(availableDevs, result, false);
 		for (DayPairs dayPairs : pastPairs) {
 			for (Pair pair : dayPairs.getPairs().values()) {
 				if(pair.isComplete()){
-					int weight = result.get(pair) == null ? 1 : result.get(pair) + 1; 
-					result.put(pair, weight);
+					result.put(pair, result.getOrDefault(pair, 0) + 1);
+				}
+			}
+		}
+		return result;
+	}
+	
+	public Map<Pair, Integer> buildBuildPairsWeightFromPastPairing(List<DayPairs> pastPairs, List<Developer> availableDevs) {
+		Map<Pair, Integer> result = new HashMap<>(); 
+		initPairsInitialWeight(availableDevs, result, true);
+		for (DayPairs dayPairs : pastPairs) {
+			for (Pair pair : dayPairs.getPairs().values()) {
+				if(pair.isBuildPair()){
+					result.put(pair, result.getOrDefault(pair, 0) + 1);
 				}
 			}
 		}
@@ -98,22 +110,26 @@ public class DayPairsHelper {
 		return developersOnDoD;
 	}
 	
-	private void initPairsInitialWeight(List<Developer> availableDevs, Map<Pair, Integer> result) {
-		List<Pair> allPairCombinations = getAllPairCombinations(availableDevs);
+	private void initPairsInitialWeight(List<Developer> availableDevs, Map<Pair, Integer> result, boolean addSoloPairs) {
+		List<Pair> allPairCombinations = getAllPairCombinations(availableDevs, addSoloPairs);
 		for (Pair pair : allPairCombinations) {
 			result.put(pair, 0);
 		}
 	}
 	
-	private List<Pair> getAllPairCombinations(List<Developer> availableDevs) {
+	private List<Pair> getAllPairCombinations(List<Developer> availableDevs, boolean addSoloPairs) {
 		List<Pair> result = new ArrayList<>();
-		if(availableDevs.isEmpty() || availableDevs.size() == 1){
+		if(availableDevs.isEmpty() || (availableDevs.size() == 1 && !addSoloPairs)){
+			return result;
+		} else if (availableDevs.size() == 1 && addSoloPairs) {
+			result.add(new Pair(Arrays.asList(availableDevs.get(0))));
 			return result;
 		}
+		
 		for(int i = 1; i < availableDevs.size(); i++){
 			result.add(new Pair(Arrays.asList(availableDevs.get(0), availableDevs.get(i))));
 		}
-		result.addAll(getAllPairCombinations(availableDevs.subList(1, availableDevs.size())));
+		result.addAll(getAllPairCombinations(availableDevs.subList(1, availableDevs.size()), addSoloPairs));
 		return result;
 	}
 
@@ -350,6 +366,23 @@ public class DayPairsHelper {
 			}
 		}
 		return null;
+	}
+
+	public void setBuildPair(Collection<Pair> pairs, Map<Pair, Integer> buildPairsWeight) {
+		Pair buildPairCandidate = null;
+		int smallestWeight = 0;
+		for (Pair pair : pairs) {
+			Integer weight = buildPairsWeight.get(pair);
+			if(weight == null){
+				continue;
+			}
+			
+			if(weight < smallestWeight || buildPairCandidate == null){
+				buildPairCandidate = pair;
+				smallestWeight = weight;
+			}
+		}
+		buildPairCandidate.setBuildPair(true);
 	}
 }
 
