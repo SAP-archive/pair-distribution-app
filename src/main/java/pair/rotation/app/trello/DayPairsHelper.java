@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,42 +74,45 @@ public class DayPairsHelper {
 		return result;
 	}
 
-	public void adaptPairsWeightForDoD(Map<Pair, Integer> pairsWeight, List<Developer> availableDevs) {
-		List<Developer> developersOnDoD = getTodayDoDs(availableDevs);
+	public void adaptPairsWeight(Map<Pair, Integer> pairsWeight, List<Developer> availableDevs) {
+		List<Developer> developersOnDoD = getFilteredDevs(availableDevs, developer -> developer.getDoD());
+		List<Developer> newDevelopers = getFilteredDevs(availableDevs, developer -> developer.getNew());
 		for (Pair pair : pairsWeight.keySet()) {
-			if(!isPairDoDConform(pair, developersOnDoD)){
+			if(!isPairConform(pair, developersOnDoD, isPairFromSameCompany())){
 				logger.info("pair needs DoD adaptation. Pair is: " + pair);
-				int weight = pairsWeight.get(pair) + 100;
-				pairsWeight.put(pair, weight);
+				addUnconformWeight(pairsWeight, pair);
+			}
+			if(!isPairConform(pair, newDevelopers, isPairWithMixedExpirience())){
+				logger.info("pair with new Developers and needs adaptation. Pair is: " + pair);
+				addUnconformWeight(pairsWeight, pair);
 			}
 		}
 	}
 
-	private boolean isPairDoDConform(Pair pair, List<Developer> developersOnDoD){
+	private void addUnconformWeight(Map<Pair, Integer> pairsWeight, Pair pair) {
+		int weight = pairsWeight.get(pair) + 100;
+		pairsWeight.put(pair, weight);
+	}
+	
+	private boolean isPairConform(Pair pair, List<Developer> releventDevelopers, Predicate<? super Pair> predicate){
 		switch (pair.getDevs().size()) {
 		case 0:
 			return true;
 		case 1:
-			return !developersOnDoD.contains(pair.getFirstDev());
+			return !releventDevelopers.contains(pair.getFirstDev());
 		default:
 			Developer pairDeveloper = pair.getFirstDev();
 			Developer pairOtherDeveloper = pair.getSecondDev();
-			boolean isPairOnDoD = developersOnDoD.contains(pairDeveloper) || developersOnDoD.contains(pairOtherDeveloper);
+			boolean isPairOnDoD = releventDevelopers.contains(pairDeveloper) || releventDevelopers.contains(pairOtherDeveloper);
 			if(isPairOnDoD){
-				return pairDeveloper.getCompany().equals(pairOtherDeveloper.getCompany());
+				return predicate.test(pair);
 			}
 			return true;
 		}
 	}
 	
-	private List<Developer> getTodayDoDs(List<Developer> availableDevs) {
-		List<Developer> developersOnDoD = new ArrayList<>();
-		for (Developer developer : availableDevs) {
-			if(developer.getDoD()){
-				developersOnDoD.add(developer);
-			}
-		}
-		return developersOnDoD;
+	private List<Developer> getFilteredDevs(List<Developer> availableDevs, Predicate<? super Developer> predicate) {
+		return availableDevs.stream().filter(predicate).collect(Collectors.toList());
 	}
 	
 	private void initPairsInitialWeight(List<Developer> availableDevs, Map<Pair, Integer> result, boolean addSoloPairs) {
@@ -160,58 +165,67 @@ public class DayPairsHelper {
 
 	public void rotateSoloPairIfAny(DayPairs todayPairs, List<DayPairs> pastPairs, Map<Pair, Integer> pairsWeight) {
 		Pair soloPair = todayPairs.getSoloPair();		
-		if(soloPair != null && (isSoloPairForTwoDays(pastPairs, soloPair) || soloPair.getFirstDev().getDoD())){
+		if(soloPair != null && (isSoloPairForTwoDays(pastPairs, soloPair) || soloPair.getFirstDev().getDoD() || soloPair.getFirstDev().getNew())){
+			Developer soloDeveloper = soloPair.getFirstDev();
 			Pair pairWithHighestWeight = null; 
 			Developer newPairForSoloDeveloper = null;
-		    if (soloPair.getFirstDev().getDoD()){
-		    	pairWithHighestWeight = getPairWithHighestPairWeightFromCompany(todayPairs.getPairs().values(), pairsWeight, soloPair.getFirstDev().getCompany());
-		    	if (pairWithHighestWeight == null){
-		    		//No rotation for DoD possible
-		    		return;
+		    Collection<Pair> allPairsOfTheDay = todayPairs.getPairs().values();
+			String soloPairCompany = soloDeveloper.getCompany();
+			if (soloDeveloper.getDoD()){
+		    	pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight, hasPairDevFromCompany(soloPairCompany));
+		    	if (pairWithHighestWeight != null){
+		    		newPairForSoloDeveloper = pairWithHighestWeight.isPairFromSameCompany() ? getRandomDev(pairWithHighestWeight.getDevs()) : pairWithHighestWeight.getDevFromCompany(soloPairCompany);
 		    	}
-		    	if (pairWithHighestWeight.isPairFromSameCompany()){
-					newPairForSoloDeveloper = getRandomDev(pairWithHighestWeight.getDevs());
-				}else{
-					newPairForSoloDeveloper = pairWithHighestWeight.getDevFromCompany(soloPair.getFirstDev().getCompany());
-				}
-		    }else{
-		    	pairWithHighestWeight = getPairWithHighestPairWeight(todayPairs.getPairs().values(), pairsWeight);
-		    	newPairForSoloDeveloper = pairWithHighestWeight.getDevFromCompany(soloPair.getFirstDev().getCompany());
+		    } else if (soloDeveloper.getNew()) { 
+		    	pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight, isPairWithNoNewDevelopers());
+		    	newPairForSoloDeveloper = pairWithHighestWeight == null ? null : getRandomDev(pairWithHighestWeight.getDevs());
+		    } else{
+		    	pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight, alwaysTrue());
+		    	newPairForSoloDeveloper = getRandomDev(pairWithHighestWeight.getDevs());
 		    }
+			if (newPairForSoloDeveloper == null){
+				//No rotation for Solo developer possible
+	    		return;
+			}
 			Pair newPair = new Pair(Arrays.asList(soloPair.getDevs().get(0), newPairForSoloDeveloper));
 			todayPairs.replacePairWith(pairWithHighestWeight, newPair);
 			todayPairs.replacePairWith(soloPair, new Pair(Arrays.asList(pairWithHighestWeight.getOtherDev(newPairForSoloDeveloper))));
 		}
 	}
 
+	private Predicate<? super Pair> isPairFromSameCompany() {
+		return p -> p.getFirstDev().getCompany().equals(p.getOtherDev(p.getFirstDev()).getCompany());
+	}
+	
+	private Predicate<? super Pair> isPairWithMixedExpirience() {
+		return p -> !(p.getFirstDev().getNew() && p.getOtherDev(p.getFirstDev()).getNew());
+	}
+	
+	private Predicate<? super Pair> isPairWithNoNewDevelopers() {
+		return p -> !(p.getFirstDev().getNew() || p.getOtherDev(p.getFirstDev()).getNew());
+	}
+	
 	private boolean isSoloPairForTwoDays(List<DayPairs> pastPairs, Pair soloPair) {
 		DayPairs firstDayPair = pastPairs.size() > 0 ? pastPairs.get(0) : null;
 		DayPairs secondDayPair = pastPairs.size() > 1 ? pastPairs.get(1) : null;
 		return firstDayPair!= null && secondDayPair != null && firstDayPair.hasPair(soloPair) && secondDayPair.hasPair(soloPair);
 	}
 	
-	private Pair getPairWithHighestPairWeight(Collection<Pair> values, Map<Pair, Integer> pairsWeight) {
-		int highesttWeight = 0;
-		Pair result = null;
-		for (Pair pair : values) {
-			if(pairsWeight.containsKey(pair)){
-				Integer weight = pairsWeight.get(pair);
-				if(highesttWeight < weight || result == null){
-					result = pair;
-					highesttWeight = weight;
-				}				
-			}
-		}
-		return result;
+	private Predicate<? super Pair> hasPairDevFromCompany(String company) {
+		return p -> p.getDevFromCompany(company) != null;
 	}
 	
-	private Pair getPairWithHighestPairWeightFromCompany(Collection<Pair> values, Map<Pair, Integer> pairsWeight, String company) {
+	private Predicate<? super Pair> alwaysTrue() {
+		return p -> true;
+	}
+	
+	private Pair getPairWithHighestWeightForPredicat(Collection<Pair> values, Map<Pair, Integer> pairsWeight, Predicate<? super Pair> predicate) {
 		int highesttWeight = 0;
 		Pair result = null;
 		for (Pair pair : values) {
 			if(pairsWeight.containsKey(pair)){
 				Integer weight = pairsWeight.get(pair);
-				if((highesttWeight < weight || result == null) && (pair.getDevFromCompany(company) != null )){
+				if((highesttWeight < weight || result == null) && (predicate.test(pair))){
 					result = pair;
 					highesttWeight = weight;
 				}				
@@ -247,7 +261,7 @@ public class DayPairsHelper {
 		logger.info("Pair two days back: " + trackPairTwoDaysBack);
 		logger.info("Pair three days back: " + trackPairThreeDaysBack);
 		
-		if(rotate_everyday || isRotationTime(trackPairOneDayBack, trackPairTwoDaysBack, getTodayDoDs(availableDevs))) {
+		if(rotate_everyday || isRotationTime(trackPairOneDayBack, trackPairTwoDaysBack, availableDevs)) {
 			logger.info("time to rotate");
 			if(trackPairOneDayBack.isSolo()){
 				logger.info("Solo don't do anything");
@@ -277,13 +291,14 @@ public class DayPairsHelper {
 		return trackPairThreeDaysBack != null;
 	}
 
-	private boolean isRotationTime(Pair trackPairOneDayBack, Pair trackPairTwoDaysBack, List<Developer> developersOnDoD) {
+	private boolean isRotationTime(Pair trackPairOneDayBack, Pair trackPairTwoDaysBack, List<Developer> availableDevs) {
 		if(trackPairOneDayBack != null){
 			boolean pairForTwoDays = isPairForTwoDays(trackPairOneDayBack, trackPairTwoDaysBack);
-			boolean pairDoDConform = isPairDoDConform(trackPairOneDayBack, developersOnDoD);
+			boolean pairDoDConform = isPairConform(trackPairOneDayBack, getFilteredDevs(availableDevs, developer -> developer.getDoD()), isPairFromSameCompany());
+			boolean pairNewDevConform = isPairConform(trackPairOneDayBack, getFilteredDevs(availableDevs, developer -> developer.getNew()), isPairWithMixedExpirience());
 			logger.info("Rotation time for longest dev is : " + pairForTwoDays);
 			logger.info("Rotation time for DoDConform is : " + !pairDoDConform);
-			return trackPairOneDayBack != null && (pairForTwoDays || !pairDoDConform);			
+			return trackPairOneDayBack != null && (pairForTwoDays || !pairDoDConform || !pairNewDevConform);			
 		}
 		return false;
 	}

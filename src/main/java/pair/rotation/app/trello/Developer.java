@@ -5,11 +5,13 @@ public class Developer implements Comparable<Developer>{
 	private String id;
 	private String company;
 	private boolean developerOnDuty;
+	private boolean newDeveloper;
 
 	public Developer(String id) {
 		this.id = id;
 		this.company = "";
 		this.developerOnDuty = false;
+		this.newDeveloper = false;
 	}
 
 	public String getId() {
@@ -32,6 +34,14 @@ public class Developer implements Comparable<Developer>{
 		this.developerOnDuty = developerOnDuty;
 	}
 
+	public boolean getNew() {
+		return this.newDeveloper;
+	}
+
+	public void setNew(boolean newDeveloper) {
+		this.newDeveloper = newDeveloper;
+	}
+	
 	@Override
 	public int compareTo(Developer anotherDeveloper) {
 		return this.getId().compareTo(anotherDeveloper.getId());

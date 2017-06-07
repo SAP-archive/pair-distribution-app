@@ -46,6 +46,17 @@ public class DeveloperTest {
 	}
 	
 	@Test
+	public void testNew() {
+		Developer developer = new Developer("developerId");
+		
+		assertThat(developer.getNew(), is(false));
+		
+		developer.setNew(true);
+		
+		assertThat(developer.getNew(), is(true));
+	}
+	
+	@Test
 	public void testCompareTo() {
 		Developer developer = new Developer("developerId");
 		Developer developer2 = new Developer("developerId2");

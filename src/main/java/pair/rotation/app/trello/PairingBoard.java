@@ -109,11 +109,15 @@ public class PairingBoard {
 	
 	private void syncDevsMetadata(List<Card> cards) {
 		for (Card card : cards) {
-			String cardName = card.getName().toLowerCase();
-			if ("dod".equals(cardName)) {
-				makeAllDevsDoD(card);
-			}else {
-				setDevsCompany(cardName, card);
+			switch (card.getName().toLowerCase()) {
+			case "dod":
+				card.getIdMembers().forEach(developerId -> getDeveloperById(developerId).setDoD(true));
+				break;
+			case "new":
+				card.getIdMembers().forEach(developerId -> getDeveloperById(developerId).setNew(true));
+				break;
+			default:
+				setDevsCompany(card.getName().toLowerCase(), card);
 			}
 		}
 	}
@@ -144,13 +148,6 @@ public class PairingBoard {
 		}
 	}
 
-	private void makeAllDevsDoD(Card card) {
-		for (String developerId : card.getIdMembers()) {
-			Developer developer = getDeveloperById(developerId);
-			developer.setDoD(true);
-		}
-	}
-	
 	private Developer getDeveloperById(String developerId){
 		Developer result = null;
 		Developer developerToCompare = new Developer(developerId);
