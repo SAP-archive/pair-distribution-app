@@ -54,14 +54,7 @@ public class Pair {
 	}
 	
 	public Developer getOtherDev(Developer dev) {
-		if(devs.contains(dev)){
-			for (Developer pairDev : devs) {
-				if(!pairDev.equals(dev)){
-					return pairDev;
-				}
-			}
-		}
-		return null;
+		return devs.contains(dev) ? devs.stream().filter(developer -> !developer.equals(dev)).findFirst().orElse(null): null;
 	}
 	
 	public boolean isComplete(){
@@ -103,12 +96,7 @@ public class Pair {
 	}
 
 	public Developer getDevFromCompany(String company) {
-		for (Developer developer : devs) {
-			if(developer.getCompany().equals(company)){
-				return developer;
-			}
-		}
-		return null;
+		return devs.stream().filter(developer -> developer.getCompany().equals(company)).findFirst().orElse(null);
 	}
 
 	public boolean isPairFromSameCompany() {

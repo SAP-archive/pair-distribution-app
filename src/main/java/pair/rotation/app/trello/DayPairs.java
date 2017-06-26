@@ -46,6 +46,30 @@ public class DayPairs implements Comparable<DayPairs>{
 	public Pair getPairByTrack(String track) {
 		return pairs.get(track);
 	} 
+
+	@Override
+	public String toString() {
+		return "Pairs [pairs=" + pairs + ", date=" + DayPairsHelper.DATE_FORMATTER.format(date) + "]";
+	}
+
+	public boolean hasPair(Pair pair) {
+		return pairs.containsValue(pair);
+	}
+
+	public void replacePairWith(Pair oldPair, Pair newPair) {
+		pairs.keySet().stream().filter(key -> pairs.get(key).equals(oldPair) ).findFirst().ifPresent(track -> pairs.put(track, newPair));
+	}
+
+	public String getTrackByPair(Pair pair) {
+		return pairs.keySet().stream().filter(key -> pairs.get(key).equals(pair) ).findFirst().orElse(null);
+	}
+	
+	public Pair getSoloPair() {
+		return pairs.keySet().stream().filter(track -> getPairByTrack(track).isSolo() )
+				                      .findFirst()
+				                      .map(soloTrack -> getPairByTrack(soloTrack))
+				                      .orElse(null);
+	}
 	
 	@Override
 	public int hashCode() {
@@ -72,54 +96,11 @@ public class DayPairs implements Comparable<DayPairs>{
 		return true;
 	}
 	
-	@Override
-	public String toString() {
-		return "Pairs [pairs=" + pairs + ", date=" + DayPairsHelper.DATE_FORMATTER.format(date) + "]";
-	}
-
-	public boolean hasPair(Pair pair) {
-		return pairs.containsValue(pair);
-	}
-
-	public void replacePairWith(Pair oldPair, Pair newPair) {
-		String track = null;
-		for (String key : pairs.keySet()) {
-			Pair pair = pairs.get(key);
-			if(pair.equals(oldPair)){
-				track = key;
-			}
-		}
-		pairs.put(track, newPair);
-	}
-
-	public String getTrackByPair(Pair pair) {
-		for (String key : pairs.keySet()) {
-			if (pairs.get(key).equals(pair)){
-				return key;
-			}
-		}
-		return null;
-	}
-	
-	public Pair getSoloPair() {
-		Pair soloPair = null;
-		for (String track : getPairs().keySet()) {
-			Pair pairByTrack = getPairByTrack(track);
-			if(pairByTrack.isSolo()){
-				soloPair = pairByTrack;
-			}
-		}
-		return soloPair;
-	}
-	
 	private Date getDateWithoutTime(Date dateToFormat){
 		try {
 			return DayPairsHelper.DATE_FORMATTER.parse(DayPairsHelper.DATE_FORMATTER.format(dateToFormat));
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		//TODO this should happen
-		return null;
+			throw new IllegalArgumentException(e);
+		}			
 	}
 }

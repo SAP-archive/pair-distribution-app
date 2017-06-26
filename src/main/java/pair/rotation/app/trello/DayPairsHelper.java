@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,65 +50,46 @@ public class DayPairsHelper {
 	}
 	
 	public Map<Pair, Integer> buildPairsWeightFromPastPairing(List<DayPairs> pastPairs, List<Developer> availableDevs) {
-		Map<Pair, Integer> result = new HashMap<>(); 
-		initPairsInitialWeight(availableDevs, result, false);
-		for (DayPairs dayPairs : pastPairs) {
-			for (Pair pair : dayPairs.getPairs().values()) {
-				if(pair.isComplete()){
-					result.put(pair, result.getOrDefault(pair, 0) + 1);
-				}
-			}
-		}
-		return result;
+		return buildPairsWeghtFromPredicate(pastPairs, availableDevs, pair -> pair.isComplete());
 	}
-	
+
 	public Map<Pair, Integer> buildBuildPairsWeightFromPastPairing(List<DayPairs> pastPairs, List<Developer> availableDevs) {
-		Map<Pair, Integer> result = new HashMap<>(); 
-		initPairsInitialWeight(availableDevs, result, true);
-		for (DayPairs dayPairs : pastPairs) {
-			for (Pair pair : dayPairs.getPairs().values()) {
-				if(pair.isBuildPair()){
-					result.put(pair, result.getOrDefault(pair, 0) + 1);
-				}
-			}
-		}
+		return buildPairsWeghtFromPredicate(pastPairs, availableDevs, pair -> pair.isBuildPair());
+	}
+
+	
+	private Map<Pair, Integer> buildPairsWeghtFromPredicate(List<DayPairs> pastPairs, List<Developer> availableDevs, Predicate<? super Pair> filter) {
+		final Map<Pair, Integer> result = new HashMap<>(); 
+		initPairsInitialWeight(availableDevs, result, false);
+		pastPairs.stream().forEach(dayPairs -> dayPairs.getPairs().values().stream()
+				                                                           .filter(pair -> filter.test(pair))
+		                                                                   .forEach(pair -> result.put(pair, result.getOrDefault(pair, 0) + 1)));
 		return result;
 	}
 
+	
 	public void adaptPairsWeight(Map<Pair, Integer> pairsWeight, List<Developer> availableDevs) {
 		List<Developer> developersOnDoD = getFilteredDevs(availableDevs, developer -> developer.getDoD());
+		pairsWeight.keySet().stream().filter(pair -> !isPairConform(pair, developersOnDoD, isPairFromSameCompany()))
+		                             .forEach(pair -> { logger.info("pair needs DoD adaptation. Pair is: " + pair); addUnconformWeight(pairsWeight, pair); });
+		
 		List<Developer> newDevelopers = getFilteredDevs(availableDevs, developer -> developer.getNew());
-		for (Pair pair : pairsWeight.keySet()) {
-			if(!isPairConform(pair, developersOnDoD, isPairFromSameCompany())){
-				logger.info("pair needs DoD adaptation. Pair is: " + pair);
-				addUnconformWeight(pairsWeight, pair);
-			}
-			if(!isPairConform(pair, newDevelopers, isPairWithMixedExpirience())){
-				logger.info("pair with new Developers and needs adaptation. Pair is: " + pair);
-				addUnconformWeight(pairsWeight, pair);
-			}
-		}
+		pairsWeight.keySet().stream().filter(pair -> !isPairConform(pair, newDevelopers, isPairWithMixedExpirience()))		
+                                     .forEach(pair -> { logger.info("pair with new Developers and needs adaptation. Pair is: " + pair); addUnconformWeight(pairsWeight, pair);; });
 	}
 
 	private void addUnconformWeight(Map<Pair, Integer> pairsWeight, Pair pair) {
-		int weight = pairsWeight.get(pair) + 100;
-		pairsWeight.put(pair, weight);
+		pairsWeight.put(pair, pairsWeight.get(pair) + 100);
 	}
 	
-	private boolean isPairConform(Pair pair, List<Developer> releventDevelopers, Predicate<? super Pair> predicate){
+	private boolean isPairConform(Pair pair, List<Developer> predicateDevelopers, Predicate<? super Pair> predicate){
 		switch (pair.getDevs().size()) {
 		case 0:
 			return true;
 		case 1:
-			return !releventDevelopers.contains(pair.getFirstDev());
+			return !predicateDevelopers.contains(pair.getFirstDev());
 		default:
-			Developer pairDeveloper = pair.getFirstDev();
-			Developer pairOtherDeveloper = pair.getSecondDev();
-			boolean isPairOnDoD = releventDevelopers.contains(pairDeveloper) || releventDevelopers.contains(pairOtherDeveloper);
-			if(isPairOnDoD){
-				return predicate.test(pair);
-			}
-			return true;
+			return predicateDevelopers.contains(pair.getFirstDev()) || predicateDevelopers.contains(pair.getSecondDev()) ? predicate.test(pair) : true; 
 		}
 	}
 	
@@ -116,10 +98,7 @@ public class DayPairsHelper {
 	}
 	
 	private void initPairsInitialWeight(List<Developer> availableDevs, Map<Pair, Integer> result, boolean addSoloPairs) {
-		List<Pair> allPairCombinations = getAllPairCombinations(availableDevs, addSoloPairs);
-		for (Pair pair : allPairCombinations) {
-			result.put(pair, 0);
-		}
+		getAllPairCombinations(availableDevs, addSoloPairs).stream().forEach(pair -> result.put(pair, 0));
 	}
 	
 	private List<Pair> getAllPairCombinations(List<Developer> availableDevs, boolean addSoloPairs) {
@@ -220,18 +199,9 @@ public class DayPairsHelper {
 	}
 	
 	private Pair getPairWithHighestWeightForPredicat(Collection<Pair> values, Map<Pair, Integer> pairsWeight, Predicate<? super Pair> predicate) {
-		int highesttWeight = 0;
-		Pair result = null;
-		for (Pair pair : values) {
-			if(pairsWeight.containsKey(pair)){
-				Integer weight = pairsWeight.get(pair);
-				if((highesttWeight < weight || result == null) && (predicate.test(pair))){
-					result = pair;
-					highesttWeight = weight;
-				}				
-			}
-		}
-		return result;
+		return values.stream().filter(pair -> pairsWeight.containsKey(pair))
+				              .filter(pair -> predicate.test(pair))
+				              .max(Comparator.comparing(pair -> pairsWeight.get(pair))).orElse(null);
 	}
 	
 	private void sortByDescendDate(List<DayPairs> pastPairs) {
@@ -241,13 +211,7 @@ public class DayPairsHelper {
 		
 	private List<String> getPossibleTracks(List<String> todaysTracks, List<Developer> todaysDevs){
 		int possibleTracksCount = (int) Math.ceil(todaysDevs.size() / 2.0);
-		List<String> possibleTracks;
-		if (possibleTracksCount < todaysTracks.size()){
-			possibleTracks = todaysTracks.subList(0, possibleTracksCount);
-		} else {
-			possibleTracks = todaysTracks;
-		}
-		return possibleTracks;
+		return todaysTracks.size() > possibleTracksCount ? todaysTracks.subList(0, possibleTracksCount) : todaysTracks;
 	}
 	
 	private Pair tryToFindPair(String track, List<DayPairs> pastPairs, final List<Developer> availableDevs, boolean rotate_everyday) {
@@ -308,10 +272,7 @@ public class DayPairsHelper {
 	}
 	
 	private Pair getPastPairByTrack(List<DayPairs> pastPairs, String track, int numberOfDaysBack){
-		if (numberOfDaysBack < pastPairs.size()) {
-			return pastPairs.get(numberOfDaysBack).getPairByTrack(track);
-		}
-		return null;
+		return numberOfDaysBack < pastPairs.size() ? pastPairs.get(numberOfDaysBack).getPairByTrack(track) : null;
 	}
 	
 	private Pair getPairByWeight(Pair pairCandidate, List<Developer> availableDevs, Map<Pair, Integer> pairsWeight) {
@@ -325,33 +286,16 @@ public class DayPairsHelper {
 	}
 	
 	private Pair getPairWithSmallestWeight(List<Developer> availableDevs, Map<Pair, Integer> pairsWeight) {
-		int smallestWeight = 0;
-		Pair result = null;
-		for (Pair pair : pairsWeight.keySet()) {
-			if(availableDevs.containsAll(pair.getDevs())){
-				Integer weight = pairsWeight.get(pair);
-				if(weight < smallestWeight || result == null){
-					result = pair;
-					smallestWeight = weight;
-				}				
-			}
-		}
-		return result;
+		return pairsWeight.keySet().stream().filter(pair -> availableDevs.containsAll(pair.getDevs()))
+				                            .min(Comparator.comparing(pair -> pairsWeight.get(pair))).orElse(null);
 	}
 	
 	private Pair findPairForDevByPairingWeight(Developer dev, List<Developer> availableDevs, Map<Pair,Integer> pairsWeight) {
-		int initialWeight = 0;
-		Developer otherDev = null;
-		for (Pair pair : pairsWeight.keySet()) {
-			Developer ohterPair = pair.getOtherDev(dev);
-			if(pair.hasDev(dev) && availableDevs.contains(ohterPair)){
-				Integer weight = pairsWeight.get(pair);
-				if(weight < initialWeight || otherDev == null){
-					otherDev = ohterPair; 
-					initialWeight = weight;
-				}	
-			}
-		}
+		Developer otherDev = pairsWeight.keySet().stream().filter(pair -> pair.hasDev(dev))
+				                                          .filter(pair -> availableDevs.contains(pair.getOtherDev(dev)))
+		                                                  .min(Comparator.comparing(pair -> pairsWeight.get(pair)))
+		                                                  .map(pair -> pair.getOtherDev(dev))
+		                                                  .orElse(null);
 		return new Pair(Arrays.asList(dev, otherDev));
 	}
 	
@@ -370,34 +314,17 @@ public class DayPairsHelper {
 	
 	private Developer getRandomDev(List<Developer> devs) {
 		Collections.shuffle(devs);
-		Developer dev = devs.isEmpty() ? null : devs.get(0);
-		return dev;
+		return devs.isEmpty() ? null : devs.get(0);
 	}
 	
 	private Developer getDeveloperById(List<Developer> devs, Developer developerToCompare){
-		for (Developer developer : devs) {
-			if(developer.equals(developerToCompare)){
-				return developer;
-			}
-		}
-		return null;
+		return devs.stream().filter(developer -> developer.equals(developerToCompare)).findFirst().orElse(null);
 	}
 
 	public void setBuildPair(Collection<Pair> pairs, Map<Pair, Integer> buildPairsWeight) {
-		Pair buildPairCandidate = null;
-		int smallestWeight = 0;
-		for (Pair pair : pairs) {
-			Integer weight = buildPairsWeight.get(pair);
-			if(weight == null){
-				continue;
-			}
-			
-			if(weight < smallestWeight || buildPairCandidate == null){
-				buildPairCandidate = pair;
-				smallestWeight = weight;
-			}
-		}
-		buildPairCandidate.setBuildPair(true);
+		pairs.stream().filter(pair -> buildPairsWeight.get(pair) != null)
+		              .min(Comparator.comparing(pair -> buildPairsWeight.get(pair)))
+		              .ifPresent(pair -> pair.setBuildPair(true));
 	}
 }
 

@@ -6,9 +6,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.julienvey.trello.domain.Card;
-import com.julienvey.trello.domain.Label;
 import com.julienvey.trello.domain.TList;
 import com.julienvey.trello.impl.TrelloImpl;
 import com.julienvey.trello.impl.TrelloUrl;
@@ -41,13 +41,7 @@ public class PairingBoard {
 	}
     
 	public List<Developer> getDevs() {
-		List<Developer> result = new ArrayList<>();
-		for (Developer developer : allDevelopers) {
-			if(availableDevelopers.contains(developer)){
-				result.add(developer);
-			}
-		}
-		return result;
+		return allDevelopers.stream().filter(developer -> availableDevelopers.contains(developer)).collect(Collectors.toList());
 	}
 	
 	public List<String> getTracks() {
@@ -99,12 +93,8 @@ public class PairingBoard {
 	}
 
 	private void syncDevs(List<Card> cards) {
-		for (Card card : cards) {
-			String cardName = card.getName().toLowerCase();
-			if ("devs".equals(cardName)) {
-				availableDevelopers.addAll(getDevelopersFromCard(card));
-		  }
-		}
+		cards.stream().filter(card -> "devs".equals(card.getName().toLowerCase()))
+		              .forEach(card -> availableDevelopers.addAll(getDevelopersFromCard(card)));
 	}
 	
 	private void syncDevsMetadata(List<Card> cards) {
@@ -123,44 +113,25 @@ public class PairingBoard {
 	}
 
 	private boolean isBuildPair(Card card) {
-		boolean result = false;
-		List<Label> labels = card.getLabels();
-		for (Label label : labels) {
-			if(BUILD_PAIR_LABEL_COLOR.equals(label.getColor())){
-				result = true;
-			}
-		}
-		return result;
+		return card.getLabels().stream().filter(label -> BUILD_PAIR_LABEL_COLOR.equals(label.getColor()))
+				                        .findAny()
+				                        .isPresent();
 	}
 	
 	private List<Developer> getDevelopersFromCard(Card card) {
-		List<Developer> developers = new ArrayList<>();
-		for (String developerId : card.getIdMembers()) {
-			developers.add(getDeveloperById(developerId));
-		}
-		return developers;
+		return card.getIdMembers().stream().map(developerId -> getDeveloperById(developerId)).collect(Collectors.toList());
 	}
 	
 	private void setDevsCompany(String company, Card card) {
-		for (String developerId : card.getIdMembers()) {
-			Developer developer = getDeveloperById(developerId);
-			developer.setCompany(company);	
-		}
+		card.getIdMembers().stream().map(developerId -> getDeveloperById(developerId)).forEach(developer -> developer.setCompany(company));
 	}
 
 	private Developer getDeveloperById(String developerId){
-		Developer result = null;
-		Developer developerToCompare = new Developer(developerId);
-		for (Developer developer : allDevelopers) {
-			if(developer.equals(developerToCompare)){
-				result = developer;
-				break;
-			}
+		Developer result = allDevelopers.stream().filter(developer -> developer.equals(new Developer(developerId))).findFirst().orElse(new Developer(developerId));
+		if(!allDevelopers.contains(result)){
+			allDevelopers.add(result);
 		}
-		if (result == null){
-			allDevelopers.add(developerToCompare);
-			result = developerToCompare;
-		}
+		
 		return result;
 	}
 
@@ -203,12 +174,7 @@ public class PairingBoard {
 	}
 
 	private List<String> getIdsFromDevelopers(Pair pair) {
-		List<String> developerIds = new ArrayList<>();
-		List<Developer> developers = pair.getDevs();
-		for (Developer developer : developers) {
-			developerIds.add(developer.getId());
-		}
-		return developerIds;
+		return pair.getDevs().stream().map(developer -> developer.getId()).collect(Collectors.toList());
 	}
 	
 	private TList createNewPairingList(DayPairs pairs, int daysIntoFuture) {
