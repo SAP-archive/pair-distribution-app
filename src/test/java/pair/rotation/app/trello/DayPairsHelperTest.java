@@ -68,12 +68,12 @@ public class DayPairsHelperTest {
 		
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
 		
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")))), is(3));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")))), is(2));
 		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev3")))), is(0));
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(0));
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev3")))), is(0));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(1));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev3")))), is(1));
 		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev4")))), is(0));
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")))), is(3));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")))), is(2));
 	}
 
 	@Test
@@ -95,12 +95,12 @@ public class DayPairsHelperTest {
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
 		subject.adaptPairsWeight(pairsWeight, devs);
 		
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")))), is(3));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")))), is(2));
 		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev3")))), is(0));
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(0));
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev3")))), is(0));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(1));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev3")))), is(1));
 		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev4")))), is(+100));
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")))), is(3));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")))), is(2));
 	}
 	
 	@Test
@@ -119,12 +119,12 @@ public class DayPairsHelperTest {
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
 		subject.adaptPairsWeight(pairsWeight, devs);
 		
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")))), is(103));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")))), is(102));
 		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev3")))), is(0));
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(0));
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev3")))), is(0));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(1));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev3")))), is(1));
 		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev4")))), is(0));
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")))), is(3));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")))), is(2));
 	}
 	
 	@Test
@@ -144,20 +144,19 @@ public class DayPairsHelperTest {
 	
 	@Test
 	public void testGenerateNewDayPairsWithSmallestWeight() throws Exception {
-		List<DayPairs> pairs = getPairsList();
-		List<Developer> devs = Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"), new Developer("dev4"));
+		List<DayPairs> pairs = getLongPairsList();
+		List<Developer> devs = Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"), new Developer("dev4"), new Developer("dev5"), new Developer("dev6"));
 		List<String> tracks = Arrays.asList("track1", "track2", "track3");
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
-		pairsWeight.put(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev3"))), 1);
-		pairsWeight.put(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev4"))), 1);
 		
 		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, false);
 		
-		assertThat(dayPairs.getTracks().size(), is(2));
-		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
+		assertThat(dayPairs.getTracks().size(), is(3));
+		assertThat(dayPairs.getTracks(), contains("track1", "track2", "track3"));
 		System.out.println(dayPairs.getPairs());
-		assertThat(dayPairs.hasPair(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(true));
-		assertThat(dayPairs.hasPair(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev3")))), is(true));
+		assertThat(dayPairs.hasPair(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev6")))), is(true));
+		assertThat(dayPairs.hasPair(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev2")))), is(true));
+		assertThat(dayPairs.hasPair(new Pair(Arrays.asList(new Developer("dev5"), new Developer("dev4")))), is(true));
 	}
 	
 	@Test
@@ -166,7 +165,6 @@ public class DayPairsHelperTest {
 		List<Developer> devs = Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"));
 		List<String> tracks = Arrays.asList("track1", "track2", "track3");
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
-		pairsWeight.put(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev3"))), 1);
 		
 		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, false);
 		
@@ -240,6 +238,7 @@ public class DayPairsHelperTest {
 		subject.adaptPairsWeight(pairsWeight, devs);
 		
 		DayPairs todayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, false);
+		subject.rotateSoloPairIfAny(todayPairs, pairs, pairsWeight);
 		
 		assertThat(todayPairs.getPairByTrack("track1"), is(not(new Pair(Arrays.asList(new Developer("dev1"))))));
 		assertThat(todayPairs.getPairByTrack("track1"), is(not(new Pair(Arrays.asList(developer2, developer3)))));
@@ -247,27 +246,22 @@ public class DayPairsHelperTest {
 	
 	@Test
 	public void testGenerateNewDayPairsNewDevsAvailable() throws Exception {
-		Developer developer1 = new Developer("dev1");
-		developer1.setNew(true);
+		
+		List<DayPairs> pairs = getPairsList();
 		Developer developer2 = new Developer("dev2");
 		developer2.setNew(true);
 		Developer developer3 = new Developer("dev3");
-		Developer developer4 = new Developer("dev4");
-		DayPairs dayPairs = new DayPairs();
-		dayPairs.addPair("track1", new Pair(Arrays.asList(developer1, developer2)));
-		dayPairs.addPair("track2", new Pair(Arrays.asList(developer3, developer4)));
-		dayPairs.setDate(getPastDate(1));
-		List<DayPairs> pairs = Arrays.asList(dayPairs);
-		List<Developer> devs = Arrays.asList(developer1, developer2, developer3, developer4);
-		List<String> tracks = Arrays.asList("track1", "track2");
-		
+		developer3.setNew(true);
+		List<Developer> devs = Arrays.asList(new Developer("dev1"), developer2, developer3, new Developer("dev4"));
+		List<String> tracks = Arrays.asList("track1", "track2", "track3");
 		
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
 		subject.adaptPairsWeight(pairsWeight, devs);
 		
 		DayPairs todayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, false);
 		
-		assertThat(todayPairs.getPairByTrack("track1"), is(not(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2"))))));
+		assertThat(todayPairs.getPairByTrack("track1"), is(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")))));
+		assertThat(todayPairs.getPairByTrack("track2"), is(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")))));
 	}
 	
 	@Test
@@ -289,6 +283,7 @@ public class DayPairsHelperTest {
 		subject.adaptPairsWeight(pairsWeight, devs);
 		
 		DayPairs todayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, false);
+		subject.rotateSoloPairIfAny(todayPairs, pairs, pairsWeight);
 		
 		assertThat(todayPairs.getPairByTrack("track1"), is(not(new Pair(Arrays.asList(new Developer("dev1"))))));
 		assertThat(todayPairs.getPairByTrack("track1"), is(not(new Pair(Arrays.asList(developer2, developer3)))));
@@ -316,13 +311,46 @@ public class DayPairsHelperTest {
 		return getPairsListFromDevs(Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"), new Developer("dev4")));
 	}
 	
+	private List<DayPairs> getLongPairsList() {
+		List<Developer> devs = Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"), new Developer("dev4"), new Developer("dev5"), new Developer("dev6"));
+		return getPairsListWithLongestDevFromDevs(devs);
+	}
+	
 	private List<DayPairs> getPairsListFromDevs(List<Developer> devs) {
 		ArrayList<DayPairs> result = new ArrayList<DayPairs>();
-		for(int i = 1; i < 4 ; i++){
+		for(int i = 1; i < 3 ; i++){
 			DayPairs pairs = new DayPairs();
 			pairs.setDate(getPastDate(i));
 			pairs.addPair("track1", new Pair(Arrays.asList(devs.get(0), devs.get(1))));
 			pairs.addPair("track2", new Pair(Arrays.asList(devs.get(2), devs.get(3))));
+			result.add(pairs);
+		}
+		DayPairs pairs = new DayPairs();
+		pairs.setDate(getPastDate(3));
+		pairs.addPair("track1", new Pair(Arrays.asList(devs.get(0), devs.get(3))));
+		pairs.addPair("track2", new Pair(Arrays.asList(devs.get(2), devs.get(1))));
+		result.add(pairs);
+		
+		return result;
+	}
+	
+	private List<DayPairs> getPairsListWithLongestDevFromDevs(List<Developer> devs) {
+		ArrayList<DayPairs> result = new ArrayList<DayPairs>();
+		for(int i = 1; i < 3 ; i++){
+			DayPairs pairs = new DayPairs();
+			pairs.setDate(getPastDate(i));
+			pairs.addPair("track1", new Pair(Arrays.asList(devs.get(0), devs.get(3))));
+			pairs.addPair("track2", new Pair(Arrays.asList(devs.get(2), devs.get(5))));
+			pairs.addPair("track3", new Pair(Arrays.asList(devs.get(4), devs.get(1))));
+			result.add(pairs);
+		}
+		
+		for(int i = 3; i < 5 ; i++){
+			DayPairs pairs = new DayPairs();
+			pairs.setDate(getPastDate(i));
+			pairs.addPair("track1", new Pair(Arrays.asList(devs.get(0), devs.get(1))));
+			pairs.addPair("track2", new Pair(Arrays.asList(devs.get(2), devs.get(3))));
+			pairs.addPair("track3", new Pair(Arrays.asList(devs.get(4), devs.get(5))));
 			result.add(pairs);
 		}
 		return result;
@@ -440,9 +468,9 @@ public class DayPairsHelperTest {
 		
 		Map<Pair, Integer> pairsWeight = subject.buildBuildPairsWeightFromPastPairing(pairs, devs);
 		
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")))), is(2));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")))), is(1));
 		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev3")))), is(0));
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(0));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(1));
 		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev3")))), is(0));
 		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev4")))), is(0));
 		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")))), is(1));
@@ -456,7 +484,7 @@ public class DayPairsHelperTest {
 		
 		Map<Pair, Integer> pairsWeight = subject.buildBuildPairsWeightFromPastPairing(pairs, devs);
 		
-		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")))), is(1));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(1));
 		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev3")))), is(nullValue()));
 		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev5"), new Developer("dev6")))), is(0));
 	}
@@ -495,16 +523,14 @@ public class DayPairsHelperTest {
 	public void testSetBuildPairWithDifferentWeights() throws Exception {		
 		List<Developer> devs = Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"), new Developer("dev4"));				
 		List<DayPairs> pairs = getPairsList();
-		pairs.get(0).getPairByTrack("track1").setBuildPair(true);
 		pairs.get(1).getPairByTrack("track2").setBuildPair(true);
-		pairs.get(2).getPairByTrack("track1").setBuildPair(true);
 		Map<Pair, Integer> pairsWeight = subject.buildBuildPairsWeightFromPastPairing(pairs, devs);
 		List<Pair> todayPairs = Arrays.asList(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2"))), new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4"))));
 		
 		subject.setBuildPair(todayPairs, pairsWeight);
 		
-		assertThat(todayPairs.get(0).isBuildPair(), is(false));
-		assertThat(todayPairs.get(1).isBuildPair(), is(true));
+		assertThat(todayPairs.get(0).isBuildPair(), is(true));
+		assertThat(todayPairs.get(1).isBuildPair(), is(false));
 	}
 	
 	@Test
