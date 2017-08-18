@@ -170,7 +170,7 @@ public class DayPairsHelperTest {
 		
 		assertThat(dayPairs.getTracks().size(), is(2));
 		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
-		assertThat(dayPairs.getPairByTrack("track1"), is(not(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2"))))));
+		assertThat(dayPairs.getPairByTrack("track1"), is((new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2"))))));
 	}
 
 	@Test
@@ -186,6 +186,22 @@ public class DayPairsHelperTest {
 		assertThat(dayPairs.getTracks().size(), is(1));
 		assertThat(dayPairs.getTracks(), contains("track1"));
 		assertThat(dayPairs.getPairByTrack("track1"), is(new Pair(Arrays.asList(new Developer("dev5"), new Developer("dev6")))));
+	}
+
+	@Test
+	public void testGenerateNewDayPairsOnlyOldDevAvailableForStory() throws Exception {
+		List<DayPairs> pairs = getLongPairsList();
+		List<Developer> devs = Arrays.asList(new Developer("dev1"), new Developer("dev3"), new Developer("dev4"));
+		List<String> tracks = Arrays.asList("track1", "track2", "track3");
+		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
+		
+		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, false);
+		
+		assertThat(dayPairs.getTracks().size(), is(2));
+		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
+		System.out.println(dayPairs.getPairs());
+		assertThat(dayPairs.hasPair(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(true));
+		assertThat(dayPairs.hasPair(new Pair(Arrays.asList(new Developer("dev3")))), is(true));
 	}
 	
 	@Test

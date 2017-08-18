@@ -130,7 +130,7 @@ public class DayPairsHelper {
 			result.addPair(track, pair);
 		}
 		
-		for (String track : result.getPairs().keySet()) {
+		for (String track : possibleTracks) {
 			Pair pair = result.getPairs().get(track);
 			if(!pair.isComplete() && availableDevs.size() > 0){
 				pair = getPairByWeight(pair, availableDevs, pairsWeight);
@@ -257,6 +257,8 @@ public class DayPairsHelper {
 					if( devToStay != null && availableDevs.contains(getDeveloperById(availableDevs, devToStay))) {
 						logger.info("Dev to stay is" + getDeveloperById(availableDevs, devToStay));
 						trackPairToday.addDev(getDeveloperById(availableDevs, devToStay));
+					}else {
+						trackPairToday.addDev(longestDev);
 					}
 				}
 			}else{
