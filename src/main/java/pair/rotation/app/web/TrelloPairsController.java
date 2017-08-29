@@ -1,6 +1,7 @@
 package pair.rotation.app.web;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +68,8 @@ public class TrelloPairsController {
 		logger.info("Building build pairs weight");
 		Map<Pair, Integer> buildPairsWeight = pairsHelper.buildBuildPairsWeightFromPastPairing(pastPairs, pairingBoardTrello.getDevs());
 		logger.info("BuildPairs weight is:" + buildPairsWeight);
+		Map<Pair, Integer> communityPairsWeight = pairsHelper.buildCommunityPairsWeightFromPastPairing(pastPairs, pairingBoardTrello.getDevs());
+		logger.info("CommunityPairs weight is:" + communityPairsWeight);
 		pairsHelper.adaptPairsWeight(pairsWeight, pairingBoardTrello.getDevs());
 		logger.info("Pairs weight after DoD adaptation:" + pairsWeight);
 		DayPairs todayPairs = pairsHelper.generateNewDayPairs(pairingBoardTrello.getTracks(), pairingBoardTrello.getDevs(), pastPairs, pairsWeight, rotate_everyday);
@@ -75,6 +78,8 @@ public class TrelloPairsController {
 		logger.info("After single pair rotation they are: " + todayPairs);
 		logger.info("Setting BuildPair");
 		pairsHelper.setBuildPair(todayPairs.getPairs().values(), buildPairsWeight);
+		logger.info("Setting CommunityPair");
+		pairsHelper.setCommunityPair(todayPairs.getPairs().values(), buildPairsWeight);
 		logger.info("After setting build pair pairs are: " + todayPairs);
 		pairingBoardTrello.addTodayPairsToBoard(todayPairs, daysIntoFuture);
 		logger.info("Trello board has been updated");

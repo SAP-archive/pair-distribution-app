@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -57,6 +58,9 @@ public class DayPairsHelper {
 		return buildPairsWeghtFromPredicate(pastPairs, availableDevs, pair -> pair.isBuildPair());
 	}
 
+	public Map<Pair, Integer> buildCommunityPairsWeightFromPastPairing(List<DayPairs> pastPairs, List<Developer> availableDevs) {
+		return buildPairsWeghtFromPredicate(pastPairs, availableDevs, pair -> pair.isCommunityPair());
+	}
 	
 	private Map<Pair, Integer> buildPairsWeghtFromPredicate(List<DayPairs> pastPairs, List<Developer> availableDevs, Predicate<? super Pair> filter) {
 		final Map<Pair, Integer> result = new HashMap<>(); 
@@ -345,9 +349,21 @@ public class DayPairsHelper {
 	}
 
 	public void setBuildPair(Collection<Pair> pairs, Map<Pair, Integer> buildPairsWeight) {
-		pairs.stream().filter(pair -> buildPairsWeight.get(pair) != null)
-		              .min(Comparator.comparing(pair -> buildPairsWeight.get(pair)))
-		              .ifPresent(pair -> pair.setBuildPair(true));
+		List<Pair> pairsAsList = pairs.stream().collect(Collectors.toList());
+		getPairWithMinWeightValue(pairsAsList, buildPairsWeight, pair -> true).setBuildPair(true);
+	}
+
+	public void setCommunityPair(Collection<Pair> pairs, Map<Pair, Integer> communityPairsWeight) {
+		List<Pair> pairsAsList = pairs.stream().collect(Collectors.toList());
+		getPairWithMinWeightValue(pairsAsList, communityPairsWeight, pair -> !pair.isBuildPair()).setCommunityPair(true);
+		
+	}
+
+	private Pair getPairWithMinWeightValue(List<Pair> pairs, Map<Pair, Integer> pairsWeight, Predicate<? super Pair> skipPair) {
+		return pairs.stream().filter(pair -> pairsWeight.get(pair) != null)
+		                     .filter(skipPair)
+				             .min(Comparator.comparing(pair -> pairsWeight.get(pair)))
+				             .orElseGet(() -> pairs.get(new Random().nextInt(pairs.size())));
 	}
 }
 

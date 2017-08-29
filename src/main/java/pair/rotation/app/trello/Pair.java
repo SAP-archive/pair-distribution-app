@@ -10,6 +10,7 @@ public class Pair {
 
 	private List<Developer> devs;
 	private boolean buildPair;
+	private boolean communityPair;
 
     public Pair() {
     	devs = new ArrayList<Developer>(2);
@@ -112,5 +113,13 @@ public class Pair {
 
 	public void setBuildPair(boolean buildPair) {
 		this.buildPair = buildPair;
+	}
+
+	public void setCommunityPair(boolean communityPair) {
+		this.communityPair = communityPair;
+	}
+
+	public boolean isCommunityPair() {
+		return communityPair;
 	}
 }

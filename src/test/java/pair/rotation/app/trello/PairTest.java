@@ -197,4 +197,22 @@ public class PairTest {
 		
 		assertThat(subject.isBuildPair(), is(true));
 	}
+	
+	@Test
+	public void testIsCommunitydPairFalse() throws Exception {
+		Pair subject = new Pair();
+		
+		subject.setCommunityPair(false);
+		
+		assertThat(subject.isCommunityPair(), is(false));
+	}
+	
+	@Test
+	public void testIsCommunityPairTrue() throws Exception {
+		Pair subject = new Pair();
+		
+		subject.setCommunityPair(true);
+		
+		assertThat(subject.isCommunityPair(), is(true));
+	}
 }

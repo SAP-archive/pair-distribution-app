@@ -521,6 +521,52 @@ public class DayPairsHelperTest {
 	}
 
 	@Test
+	public void testBuildCommunityPairsWeightFromPastPairingWhenAny() throws Exception {
+		List<DayPairs> pairs = getPairsList();
+		pairs.get(0).getPairByTrack("track1").setCommunityPair(true);
+		pairs.get(1).getPairByTrack("track2").setCommunityPair(true);
+		pairs.get(2).getPairByTrack("track1").setCommunityPair(true);
+		List<Developer> devs = Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"), new Developer("dev4"));
+		
+		Map<Pair, Integer> pairsWeight = subject.buildCommunityPairsWeightFromPastPairing(pairs, devs);
+		
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")))), is(1));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev3")))), is(0));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(1));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev3")))), is(0));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev4")))), is(0));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")))), is(1));
+	}
+	
+	@Test
+	public void testBuildCommunityPairsWeightFromPastPairingWhenNoInitialWeight() throws Exception {
+		List<DayPairs> pairs = getPairsList();
+		pairs.get(2).getPairByTrack("track1").setCommunityPair(true);
+		List<Developer> devs = Arrays.asList(new Developer("dev5"), new Developer("dev6"));
+		
+		Map<Pair, Integer> pairsWeight = subject.buildCommunityPairsWeightFromPastPairing(pairs, devs);
+		
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(1));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev3")))), is(nullValue()));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev5"), new Developer("dev6")))), is(0));
+	}
+	
+	@Test
+	public void testBuildCommunityPairsWeightFromPastPairingWhenNon() throws Exception {
+		List<DayPairs> pairs = getPairsList();
+		List<Developer> devs = Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"), new Developer("dev4"));
+		
+		Map<Pair, Integer> pairsWeight = subject.buildCommunityPairsWeightFromPastPairing(pairs, devs);
+		
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")))), is(0));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev3")))), is(0));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(0));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev3")))), is(0));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev2"), new Developer("dev4")))), is(0));
+		assertThat(pairsWeight.get(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")))), is(0));
+	}
+	
+	@Test
 	public void testSetBuildPairWithoutWeights() throws Exception {		
 		List<Developer> devs = Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"), new Developer("dev4"));
 		Map<Pair, Integer> pairsWeight = subject.buildBuildPairsWeightFromPastPairing(getPairsList(), devs);
@@ -550,16 +596,74 @@ public class DayPairsHelperTest {
 	}
 	
 	@Test
-	public void testSetBuildPairWithMissingWeight() throws Exception {		
-		Pair pairWithWeight = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
+	public void testSetBuildPairWithMissingWeights() throws Exception {		
 		Map<Pair, Integer> pairsWeight = new HashMap<Pair, Integer>();
-		pairsWeight.put(pairWithWeight, 1);
-		List<Pair> todayPairs = Arrays.asList(pairWithWeight, new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4"))));
+		List<Pair> todayPairs = Arrays.asList(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2"))), new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4"))));
 		
 		subject.setBuildPair(todayPairs, pairsWeight);
 		
-		assertThat(todayPairs.get(0).isBuildPair(), is(true));
-		assertThat(todayPairs.get(1).isBuildPair(), is(false));
+		
+		if(todayPairs.get(0).isBuildPair()){
+			assertThat(todayPairs.get(1).isBuildPair(), is(false));
+		}else {
+			assertThat(todayPairs.get(1).isBuildPair(), is(true));
+		}
+	}
+	
+	@Test
+	public void testSetCommunityPairWithoutWeightsAndBuildPairAvailable() throws Exception {		
+		List<Developer> devs = Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"), new Developer("dev4"));
+		Map<Pair, Integer> pairsWeight = subject.buildCommunityPairsWeightFromPastPairing(getPairsList(), devs);
+		Pair buildPair = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
+		buildPair.setBuildPair(true);
+		List<Pair> todayPairs = Arrays.asList(buildPair, new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4"))));
+		
+		subject.setCommunityPair(todayPairs, pairsWeight);
+		
+		assertThat(todayPairs.get(0).isCommunityPair(), is(false));
+		assertThat(todayPairs.get(1).isCommunityPair(), is(true));
+	}
+	
+	@Test
+	public void testSetBuildPairWithDifferentWeightsAndMinWeightIsBuildPair() throws Exception {		
+		List<Developer> devs = Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"), new Developer("dev4"));				
+		List<DayPairs> pairs = getPairsList();
+		pairs.get(1).getPairByTrack("track2").setCommunityPair(true);
+		Map<Pair, Integer> pairsWeight = subject.buildCommunityPairsWeightFromPastPairing(pairs, devs);
+		Pair buildPair = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
+		buildPair.setBuildPair(true);
+		List<Pair> todayPairs = Arrays.asList(buildPair, new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4"))));
+		
+		subject.setCommunityPair(todayPairs, pairsWeight);
+		
+		assertThat(todayPairs.get(0).isCommunityPair(), is(false));
+		assertThat(todayPairs.get(1).isCommunityPair(), is(true));
+	}
+	
+	@Test
+	public void testSetCommunityPairWithMissingWeights() throws Exception {		
+		Map<Pair, Integer> pairsWeight = new HashMap<Pair, Integer>();
+		List<Pair> todayPairs = Arrays.asList(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2"))), new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4"))));
+		
+		subject.setCommunityPair(todayPairs, pairsWeight);
+		
+		
+		if(todayPairs.get(0).isCommunityPair()){
+			assertThat(todayPairs.get(1).isCommunityPair(), is(false));
+		}else {
+			assertThat(todayPairs.get(1).isCommunityPair(), is(true));
+		}
+	}
+	
+	@Test
+	public void testSetCommunityPairOnePairAvailable() throws Exception {
+		Pair pair = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
+		pair.setBuildPair(true);
+		List<Pair> todayPairs = Arrays.asList(pair);
+		
+		subject.setCommunityPair(todayPairs, new HashMap<Pair, Integer>());
+		
+		assertThat(todayPairs.get(0).isCommunityPair(), is(true));
 	}
 	
 	private Date getPastDate(int daysCountToPast) {

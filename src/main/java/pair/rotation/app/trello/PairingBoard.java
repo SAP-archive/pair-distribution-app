@@ -18,6 +18,7 @@ import com.julienvey.trello.impl.http.RestTemplateHttpClient;
 public class PairingBoard {
 
 	private static final String BUILD_PAIR_LABEL_COLOR = "orange";
+	private static final String COMMUNITY_PAIR_LABEL_COLOR = "green";
 	private static final String CREATE_LISTS = "/lists?";
     private static final String GET_LIST_CARDS = "/lists/{listId}/cards?";
 	private RestTemplateHttpClient httpClient;
@@ -81,7 +82,8 @@ public class PairingBoard {
 				}
 				for (Card card : cards) {
 					Pair pair = new Pair();
-					pair.setBuildPair(isBuildPair(card));
+					pair.setBuildPair(isPairWithLabel(card, BUILD_PAIR_LABEL_COLOR));
+					pair.setCommunityPair(isPairWithLabel(card, COMMUNITY_PAIR_LABEL_COLOR));
 					pair.setDevs( getDevelopersFromCard(card));
 					pairs.addPair(card.getName(), pair);
 					System.out.println(card.getName());
@@ -112,8 +114,8 @@ public class PairingBoard {
 		}
 	}
 
-	private boolean isBuildPair(Card card) {
-		return card.getLabels().stream().filter(label -> BUILD_PAIR_LABEL_COLOR.equals(label.getColor()))
+	private boolean isPairWithLabel(Card card, String labelColor) {
+		return card.getLabels().stream().filter(label -> labelColor.equals(label.getColor()))
 				                        .findAny()
 				                        .isPresent();
 	}
@@ -168,6 +170,9 @@ public class PairingBoard {
 				Card pairingCard = newPairingList.createCard(card);
 				if(pairByTrack.isBuildPair()){
 					pairingCard.addLabels(BUILD_PAIR_LABEL_COLOR);
+				}
+				if(pairByTrack.isCommunityPair()){
+					pairingCard.addLabels(COMMUNITY_PAIR_LABEL_COLOR);
 				}
 			}
 		}
