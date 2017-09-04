@@ -319,6 +319,19 @@ public class DayPairsHelperTest {
 	}
 	
 	@Test
+	public void testGenerateNewDayPairsNoPastStateAndRotationNeeded() throws Exception {
+		List<DayPairs> pairs = new ArrayList<>();
+		List<Developer> devs = Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"), new Developer("dev4"));
+		List<String> tracks = Arrays.asList("track1", "track2", "track3");
+		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
+		
+		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, true);
+		
+		assertThat(dayPairs.getTracks().size(), is(2));
+		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
+	}
+	
+	@Test
 	public void testDateFormatterFormat() {
 		assertThat(DayPairsHelper.DATE_FORMATTER, is(new SimpleDateFormat("dd-MM-yyyy")));
     }

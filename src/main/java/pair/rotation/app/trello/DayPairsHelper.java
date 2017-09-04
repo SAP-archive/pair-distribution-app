@@ -247,7 +247,10 @@ public class DayPairsHelper {
 		
 		if(rotateEveryday || rotationRequired) {
 			logger.info("time to rotate");
-			if(trackPairOneDayBack.isSolo()){
+			if(trackPairOneDayBack ==  null){
+				logger.info("No history. Add one dev random from available devs");
+				trackPairToday.addDev(getRandomDev(availableDevs));
+			}else if(trackPairOneDayBack.isSolo()){
 				logger.info("Solo don't do anything");
 				// dev should stay on track
 //				trackPairToday.setDevs(trackPairOneDayBack.getDevs());
