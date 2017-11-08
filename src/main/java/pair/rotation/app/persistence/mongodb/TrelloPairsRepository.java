@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import pair.rotation.app.trello.DayPairs;
+import pair.rotation.app.trello.entities.DayPairs;
 
 public interface TrelloPairsRepository extends MongoRepository<DayPairs, String> {
 

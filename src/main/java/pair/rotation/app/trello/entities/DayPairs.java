@@ -1,7 +1,8 @@
-package pair.rotation.app.trello;
+package pair.rotation.app.trello.entities;
 
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,8 +12,10 @@ public class DayPairs implements Comparable<DayPairs>{
 
 	private Map<String, Pair> pairs;
 	private Date date;
+	private SimpleDateFormat dateFormatter;
 	
-	public DayPairs() {
+	public DayPairs(SimpleDateFormat dateFormatter) {
+		this.dateFormatter = dateFormatter;
 		pairs = new HashMap<String, Pair>();
 		date = getDateWithoutTime(new Date());
 	}
@@ -49,7 +52,7 @@ public class DayPairs implements Comparable<DayPairs>{
 
 	@Override
 	public String toString() {
-		return "Pairs [pairs=" + pairs + ", date=" + DayPairsHelper.DATE_FORMATTER.format(date) + "]";
+		return "Pairs [pairs=" + pairs + ", date=" + dateFormatter.format(date) + "]";
 	}
 
 	public boolean hasPair(Pair pair) {
@@ -98,7 +101,7 @@ public class DayPairs implements Comparable<DayPairs>{
 	
 	private Date getDateWithoutTime(Date dateToFormat){
 		try {
-			return DayPairsHelper.DATE_FORMATTER.parse(DayPairsHelper.DATE_FORMATTER.format(dateToFormat));
+			return dateFormatter.parse(dateFormatter.format(dateToFormat));
 		} catch (ParseException e) {
 			throw new IllegalArgumentException(e);
 		}			

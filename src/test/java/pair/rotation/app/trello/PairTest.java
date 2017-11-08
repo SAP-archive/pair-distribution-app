@@ -10,6 +10,9 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
+import pair.rotation.app.trello.entities.Developer;
+import pair.rotation.app.trello.entities.Pair;
+
 public class PairTest {
 
 	@Test

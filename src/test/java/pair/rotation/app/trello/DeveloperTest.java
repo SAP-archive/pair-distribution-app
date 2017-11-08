@@ -6,6 +6,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import pair.rotation.app.trello.entities.Developer;
+
 public class DeveloperTest {
 
 	@Test

@@ -13,22 +13,23 @@ import static org.hamcrest.CoreMatchers.*;
 
 import org.junit.Test;
 
-import pair.rotation.app.trello.DayPairs;
-import pair.rotation.app.trello.DayPairsHelper;
-import pair.rotation.app.trello.Pair;
+import pair.rotation.app.helpers.DayPairsHelper;
+import pair.rotation.app.trello.entities.DayPairs;
+import pair.rotation.app.trello.entities.Developer;
+import pair.rotation.app.trello.entities.Pair;
 
 public class DayPairsTest {
 
 	@Test
 	public void testGetPairsNewInstance() {
-		assertThat(new DayPairs().getPairs().isEmpty(), is(true));
+		assertThat(new DayPairs(DayPairsHelper.DATE_FORMATTER).getPairs().isEmpty(), is(true));
 	}
 	
 	@Test
 	public void testAddPairAndGetTracks(){
 		HashMap<String, Pair> expectedPairs = new HashMap<String, Pair>();
 		expectedPairs.put("testTrack", new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2"))));
-		DayPairs pairs = new DayPairs();
+		DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
 		pairs.addPair("testTrack", expectedPairs.get("testTrack"));
 		
 		assertThat(pairs.getPairs(), is(equalTo(expectedPairs)));
@@ -37,7 +38,7 @@ public class DayPairsTest {
 
 	@Test
 	public void testSetDate() throws Exception {
-		DayPairs pairs = new DayPairs();
+		DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
 		Date expectedDate = new Date();
 		pairs.setDate(expectedDate);
 		
@@ -46,7 +47,7 @@ public class DayPairsTest {
 	
 	@Test
 	public void testGetDate() throws Exception {
-		assertThat(new DayPairs().getDate(), is(equalTo(getDateWithoutTime(new Date()))));
+		assertThat(new DayPairs(DayPairsHelper.DATE_FORMATTER).getDate(), is(equalTo(getDateWithoutTime(new Date()))));
 	}
 
 	private Date getDateWithoutTime(Date date) throws ParseException {
@@ -55,9 +56,9 @@ public class DayPairsTest {
 	
 	@Test
 	public void testCompareTo() throws Exception {
-		DayPairs todaysPairs = new DayPairs();
+		DayPairs todaysPairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
 		todaysPairs.setDate(new Date());
-		DayPairs yesterdayPairs = new DayPairs();
+		DayPairs yesterdayPairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
 		yesterdayPairs.setDate(getYesterdayDate());
 		
 		assertThat(todaysPairs.compareTo(yesterdayPairs), is(equalTo(1)));
@@ -69,7 +70,7 @@ public class DayPairsTest {
 	public void testGetPairByTrack() throws Exception {
 		Pair pair1 = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		Pair pair2 = new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")));
-		DayPairs pairs = new DayPairs();
+		DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
 		pairs.addPair("track1", pair1);
 		pairs.addPair("track2", pair2);
 		
@@ -79,9 +80,9 @@ public class DayPairsTest {
 	
 	@Test
 	public void testHashCode() throws Exception {
-		DayPairs pairsOfToday = new DayPairs();
-		DayPairs differentPairsOfToday = new DayPairs();
-		DayPairs yesterdayPairs = new DayPairs();
+		DayPairs pairsOfToday = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+		DayPairs differentPairsOfToday = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+		DayPairs yesterdayPairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
 		yesterdayPairs.setDate(getYesterdayDate());
 		Pair pair1 = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		Pair pair2 = new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")));
@@ -95,9 +96,9 @@ public class DayPairsTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		DayPairs pairsOfToday = new DayPairs();
-		DayPairs differentPairsOfToday = new DayPairs();
-		DayPairs yesterdayPairs = new DayPairs();
+		DayPairs pairsOfToday = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+		DayPairs differentPairsOfToday = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+		DayPairs yesterdayPairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
 		yesterdayPairs.setDate(getYesterdayDate());
 		Pair pair1 = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		Pair pair2 = new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")));
@@ -111,7 +112,7 @@ public class DayPairsTest {
 	
 	@Test
 	public void testToString() throws Exception {
-		DayPairs pairs = new DayPairs();
+		DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
 		Pair pair = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		pairs.addPair("track", pair);
 		
@@ -120,7 +121,7 @@ public class DayPairsTest {
 	
 	@Test
 	public void testHasPair() throws Exception {
-		DayPairs pairs = new DayPairs();
+		DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
 		Pair pair = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		Pair differentPair = new Pair();
 		pairs.addPair("track", pair);
@@ -131,7 +132,7 @@ public class DayPairsTest {
 	
 	@Test
 	public void testReplacePairWith() throws Exception {
-		DayPairs pairs = new DayPairs();
+		DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
 		Pair pair = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		Pair differentPair = new Pair();
 		pairs.addPair("track", pair);
@@ -147,7 +148,7 @@ public class DayPairsTest {
 	
 	@Test
 	public void testGetTrackByPair() throws Exception {
-		DayPairs pairs = new DayPairs();
+		DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
 		Pair pair = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		Pair differentPair = new Pair();
 		pairs.addPair("track", pair);

@@ -14,6 +14,11 @@ import com.julienvey.trello.impl.TrelloImpl;
 import com.julienvey.trello.impl.TrelloUrl;
 import com.julienvey.trello.impl.http.RestTemplateHttpClient;
 
+import pair.rotation.app.helpers.DayPairsHelper;
+import pair.rotation.app.trello.entities.DayPairs;
+import pair.rotation.app.trello.entities.Developer;
+import pair.rotation.app.trello.entities.Pair;
+
 
 public class PairingBoard {
 
@@ -73,7 +78,7 @@ public class PairingBoard {
 				}
 			}
 			if (listName.toLowerCase().startsWith("pairing")){
-				DayPairs pairs = new DayPairs();
+				DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
 				try {
 					pairs.setDate(getDateFromCradName(tList.getName()));
 				} catch (ParseException e) {

@@ -5,20 +5,11 @@ import java.util.List;
 
 import org.apache.commons.collections4.ListUtils;
 
-import pair.rotation.app.persistence.mongodb.DevsRepository;
 import pair.rotation.app.persistence.mongodb.TracksRepository;
 
 public class Pairs {
 
-	private DevsRepository devsRepository;
-
-	public Pairs(DevsRepository devsRepository, TracksRepository tracksRepository) {
-		this.devsRepository = devsRepository;
-    }
-
-	
-	public List<List<String>> getRandomPairs(){
-        List<Devs> allDevs = devsRepository.findAll();
+	public List<List<String>> getRandomPairs(List<Devs> allDevs){
         if (allDevs.isEmpty()){
         	return Collections.emptyList();
         }else{

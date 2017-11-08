@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import pair.rotation.app.persistence.mongodb.TrelloPairsRepository;
-import pair.rotation.app.trello.DayPairs;
+import pair.rotation.app.trello.entities.DayPairs;
 
 
 @RestController

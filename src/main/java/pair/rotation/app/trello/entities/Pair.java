@@ -1,4 +1,4 @@
-package pair.rotation.app.trello;
+package pair.rotation.app.trello.entities;
 
 import java.util.ArrayList;
 import java.util.Arrays;

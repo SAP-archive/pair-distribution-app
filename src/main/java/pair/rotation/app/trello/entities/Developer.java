@@ -1,4 +1,4 @@
-package pair.rotation.app.trello;
+package pair.rotation.app.trello.entities;
 
 public class Developer implements Comparable<Developer>{
 

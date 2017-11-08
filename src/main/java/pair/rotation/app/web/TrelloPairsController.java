@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import pair.rotation.app.helpers.DayPairsHelper;
 import pair.rotation.app.persistence.mongodb.TrelloPairsRepository;
-import pair.rotation.app.trello.DayPairs;
-import pair.rotation.app.trello.DayPairsHelper;
-import pair.rotation.app.trello.Pair;
 import pair.rotation.app.trello.PairingBoard;
+import pair.rotation.app.trello.entities.DayPairs;
+import pair.rotation.app.trello.entities.Pair;
 
 
 

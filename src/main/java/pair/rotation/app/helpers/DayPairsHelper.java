@@ -1,4 +1,4 @@
-package pair.rotation.app.trello;
+package pair.rotation.app.helpers;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,6 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import pair.rotation.app.persistence.mongodb.TrelloPairsRepository;
+import pair.rotation.app.trello.entities.DayPairs;
+import pair.rotation.app.trello.entities.Developer;
+import pair.rotation.app.trello.entities.Pair;
 
 public class DayPairsHelper {
 	
@@ -123,7 +126,7 @@ public class DayPairsHelper {
 
 	public DayPairs generateNewDayPairs(List<String> tracks, List<Developer> devs, List<DayPairs> pastPairs,
 			Map<Pair, Integer> pairsWeight, boolean rotate_everyday) {
-		DayPairs result = new DayPairs();
+		DayPairs result = new DayPairs(DATE_FORMATTER);
 		sortByDescendDate(pastPairs);
 		List<String> possibleTracks = getPossibleTracks(tracks, devs);
 		List<Developer> availableDevs = new ArrayList<Developer>(devs);

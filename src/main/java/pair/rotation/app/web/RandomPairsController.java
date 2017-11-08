@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import pair.rotation.app.persistence.mongodb.DevsRepository;
+import pair.rotation.app.random.Devs;
 import pair.rotation.app.random.Pairs;
 
 @RestController
@@ -21,6 +22,6 @@ public class RandomPairsController {
 
     @RequestMapping(method = RequestMethod.GET)
     public List<List<String>> pairs() {
-    	return new Pairs(repository, null).getRandomPairs();
+    	return new Pairs().getRandomPairs(repository.findAll());
     }
 }
