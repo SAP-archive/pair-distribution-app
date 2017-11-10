@@ -56,7 +56,7 @@ public class TrelloPairsController {
 
 	private DayPairs generatePairs(int daysIntoFuture) {
 		PairingBoard pairingBoardTrello = new PairingBoard(accessKey, applicationKey, pairingBoardId);
-    	logger.info("Pairing board found. Syncing state now");
+		logger.info("Pairing board found. Syncing state now");
 		pairingBoardTrello.syncTrelloBoardState();
 		logger.info("Syncing state finished. Updating database state");
 		DayPairsHelper pairsHelper = new DayPairsHelper(repository);

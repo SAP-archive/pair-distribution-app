@@ -42,6 +42,7 @@ public class DayPairs implements Comparable<DayPairs>{
 		this.date = getDateWithoutTime(date);
 	}
 
+	@Override
 	public int compareTo(DayPairs otherPair) {
 		return getDate().compareTo(otherPair.getDate());
 	}

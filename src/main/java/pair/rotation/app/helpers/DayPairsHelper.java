@@ -132,57 +132,76 @@ public class DayPairsHelper {
 		List<Developer> availableDevs = new ArrayList<Developer>(devs);
 		boolean rotationTime = isRotationTime(possibleTracks, pastPairs, availableDevs);
 		for (String track : possibleTracks) {
-			Pair pair = tryToFindPair(track, pastPairs, availableDevs, rotate_everyday, rotationTime);
+			Pair pair = tryToFindPairFirstDeveloper(track, pastPairs, availableDevs, rotate_everyday, rotationTime);
 			availableDevs.removeAll(pair.getDevs());
 			result.addPair(track, pair);
 		}
 		
 		for (String track : possibleTracks) {
-			Pair pair = result.getPairs().get(track);
-			if(!pair.isComplete() && availableDevs.size() > 0){
-				pair = getPairByWeight(pair, availableDevs, pairsWeight);
-				if( pair == null && availableDevs.size() == 1){
-					pair = new Pair();
-					pair.setDevs(availableDevs);
-				}
-				
-				if(pair != null){
-					availableDevs.removeAll(pair.getDevs());
-					result.addPair(track, pair);					
-				}
-			}
+			tryToFindPairSecondDeveloper(pairsWeight, result, availableDevs, track);
 		}			
 		return result;
 	}
 
+	private void tryToFindPairSecondDeveloper(Map<Pair, Integer> pairsWeight, DayPairs result, List<Developer> availableDevs,
+			String track) {
+		Pair pair = result.getPairs().get(track);
+		if(!pair.isComplete() && availableDevs.size() > 0){
+			pair = getPairByWeight(pair, availableDevs, pairsWeight);
+			if( pair == null && availableDevs.size() == 1){
+				pair = new Pair(availableDevs);
+			}
+			
+			if(pair != null){
+				availableDevs.removeAll(pair.getDevs());
+				result.addPair(track, pair);					
+			}
+		}
+	}
+
 	public void rotateSoloPairIfAny(DayPairs todayPairs, List<DayPairs> pastPairs, Map<Pair, Integer> pairsWeight) {
-		Pair soloPair = todayPairs.getSoloPair();		
-		if(soloPair != null && (isSoloPairForTwoDays(pastPairs, soloPair) || soloPair.getFirstDev().getDoD() || soloPair.getFirstDev().getNew())){
+		Pair soloPair = todayPairs.getSoloPair();
+		if (soloPair != null && (isSoloPairForTwoDays(pastPairs, soloPair) || soloPair.getFirstDev().getDoD() || soloPair.getFirstDev().getNew())) {
 			Developer soloDeveloper = soloPair.getFirstDev();
-			Pair pairWithHighestWeight = null; 
+			Pair pairWithHighestWeight = null;
 			Developer newPairForSoloDeveloper = null;
-		    Collection<Pair> allPairsOfTheDay = todayPairs.getPairs().values();
+			Collection<Pair> allPairsOfTheDay = todayPairs.getPairs().values();
 			String soloPairCompany = soloDeveloper.getCompany();
-			if (soloDeveloper.getDoD()){
-		    	pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight, hasPairDevFromCompany(soloPairCompany));
-		    	if (pairWithHighestWeight != null){
-		    		newPairForSoloDeveloper = pairWithHighestWeight.isPairFromSameCompany() ? getRandomDev(pairWithHighestWeight.getDevs()) : pairWithHighestWeight.getDevFromCompany(soloPairCompany);
-		    	}
-		    } else if (soloDeveloper.getNew()) { 
-		    	pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight, isPairWithNoNewDevelopers());
-		    	newPairForSoloDeveloper = pairWithHighestWeight == null ? null : getRandomDev(pairWithHighestWeight.getDevs());
-		    } else{
-		    	pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight, alwaysTrue());
-		    	newPairForSoloDeveloper = getRandomDev(pairWithHighestWeight.getDevs());
-		    }
-			if (newPairForSoloDeveloper == null){
-				//No rotation for Solo developer possible
-	    		return;
+			if (soloDeveloper.getDoD()) {
+				pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight,
+						hasPairDevFromCompany(soloPairCompany));
+				newPairForSoloDeveloper = rotateSoloDoD(pairWithHighestWeight, soloPairCompany);
+			} else if (soloDeveloper.getNew()) {
+				pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight, isPairWithNoNewDevelopers());
+				newPairForSoloDeveloper = rotateSoloNewDeveloper(pairWithHighestWeight);
+			} else {
+				pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight, alwaysTrue());
+				newPairForSoloDeveloper = getRandomDev(pairWithHighestWeight.getDevs());
+			}
+			if (newPairForSoloDeveloper == null) {
+				// No rotation for Solo developer possible
+				return;
 			}
 			Pair newPair = new Pair(Arrays.asList(soloPair.getDevs().get(0), newPairForSoloDeveloper));
 			todayPairs.replacePairWith(pairWithHighestWeight, newPair);
 			todayPairs.replacePairWith(soloPair, new Pair(Arrays.asList(pairWithHighestWeight.getOtherDev(newPairForSoloDeveloper))));
 		}
+	}
+
+	private Developer rotateSoloNewDeveloper(Pair pairWithHighestWeight) {
+		Developer newPairForSoloDeveloper;
+		newPairForSoloDeveloper = pairWithHighestWeight == null ? null : getRandomDev(pairWithHighestWeight.getDevs());
+		return newPairForSoloDeveloper;
+	}
+
+	private Developer rotateSoloDoD(Pair pairWithHighestWeight, String soloPairCompany) {
+		Developer result = null;
+		if (pairWithHighestWeight != null) {
+			result = pairWithHighestWeight.isPairFromSameCompany()
+					? getRandomDev(pairWithHighestWeight.getDevs())
+					: pairWithHighestWeight.getDevFromCompany(soloPairCompany);
+		}
+		return result;
 	}
 
 	private Predicate<? super Pair> isPairFromSameCompany() {
@@ -237,50 +256,52 @@ public class DayPairsHelper {
 		return rotation;
 	}
 	
-	private Pair tryToFindPair(String track, List<DayPairs> pastPairs, final List<Developer> availableDevs, boolean rotateEveryday, boolean rotationRequired) {
+	private Pair tryToFindPairFirstDeveloper(String track, List<DayPairs> pastPairs, final List<Developer> availableDevs, boolean rotateEveryday, boolean rotationRequired) {
 		Pair trackPairToday = new Pair();
 		Pair trackPairOneDayBack = getPastPairByTrack(pastPairs, track, 0);
 		Pair trackPairTwoDaysBack = getPastPairByTrack(pastPairs, track, 1);
 		Pair trackPairThreeDaysBack = getPastPairByTrack(pastPairs, track, 2);
-
-		logger.info("Track is: " + track);
-		logger.info("Pair one day back: " + trackPairOneDayBack);
-		logger.info("Pair two days back: " + trackPairTwoDaysBack);
-		logger.info("Pair three days back: " + trackPairThreeDaysBack);
-		
+		logger.info("Track is: " + track + "\nPair one day back: " + trackPairOneDayBack + "\nPair two days back: " + trackPairTwoDaysBack + "\nPair three days back: " + trackPairThreeDaysBack);		
 		if(rotateEveryday || rotationRequired) {
-			logger.info("time to rotate");
-			if(trackPairOneDayBack ==  null){
-				logger.info("No history. Add one dev random from available devs");
-				trackPairToday.addDev(getRandomDev(availableDevs));
-			}else if(trackPairOneDayBack.isSolo()){
-				logger.info("Solo don't do anything");
-				// dev should stay on track
-//				trackPairToday.setDevs(trackPairOneDayBack.getDevs());
-			}else if(hasHistoryForLongestDev(trackPairThreeDaysBack)){
-				logger.info("There is history to find longest dev");
-				Developer longestDevOnStory = getLongestDevOnStory(trackPairOneDayBack, trackPairThreeDaysBack);
-				if (longestDevOnStory != null) {
-					Developer longestDev = getDeveloperById(availableDevs, longestDevOnStory);
-					logger.info("Longest dev is" + longestDev);
-					Developer devToStay = trackPairOneDayBack.getOtherDev(longestDevOnStory);
-					if( devToStay != null && availableDevs.contains(getDeveloperById(availableDevs, devToStay))) {
-						logger.info("Dev to stay is" + getDeveloperById(availableDevs, devToStay));
-						trackPairToday.addDev(getDeveloperById(availableDevs, devToStay));
-					}else {
-						trackPairToday.addDev(longestDev);
-					}
-				}
-			}else{
-				//there is no older history. Remove random one
-				logger.info("No older history. Add one dev random");
-				trackPairToday.addDev(getRandomDev(getAvailableDevs(availableDevs, trackPairOneDayBack.getDevs())));
-			}
+			findFirstDeveloper(availableDevs, trackPairToday, trackPairOneDayBack, trackPairThreeDaysBack);
 		}else if(trackPairOneDayBack != null){
 			logger.info("No rotation required");
 			trackPairToday.setDevs(getAvailableDevs(availableDevs, trackPairOneDayBack.getDevs()));	
 		}
 		return trackPairToday;
+	}
+
+	private void findFirstDeveloper(final List<Developer> availableDevs, Pair trackPairToday, Pair trackPairOneDayBack,
+			Pair trackPairThreeDaysBack) {
+		logger.info("time to rotate");
+		if(trackPairOneDayBack ==  null){
+			logger.info("No history. Add one dev random from available devs");
+			trackPairToday.addDev(getRandomDev(availableDevs));
+		}else if(trackPairOneDayBack.isSolo()){
+			logger.info("Solo dev should stay on track. Don't do anything");
+		}else if(hasHistoryForLongestDev(trackPairThreeDaysBack)){
+			tryToRotateLongestDev(availableDevs, trackPairToday, trackPairOneDayBack, trackPairThreeDaysBack);
+		}else{
+			logger.info("No older history. Add one dev random");
+			trackPairToday.addDev(getRandomDev(getAvailableDevs(availableDevs, trackPairOneDayBack.getDevs())));
+		}
+	}
+
+	private void tryToRotateLongestDev(final List<Developer> availableDevs, Pair trackPairToday, Pair trackPairOneDayBack,
+			Pair trackPairThreeDaysBack) {
+		logger.info("There is history to find longest dev");
+		Developer longestDevOnStory = getLongestDevOnStory(trackPairOneDayBack, trackPairThreeDaysBack);
+		if (longestDevOnStory != null) {
+			Developer longestDev = getDeveloperById(availableDevs, longestDevOnStory);
+			logger.info("Longest dev is" + longestDev);
+			Developer devToStay = trackPairOneDayBack.getOtherDev(longestDevOnStory);
+			if( devToStay != null && availableDevs.contains(getDeveloperById(availableDevs, devToStay))) {
+				logger.info("Dev to stay is" + getDeveloperById(availableDevs, devToStay));
+				trackPairToday.addDev(getDeveloperById(availableDevs, devToStay));
+			}else {
+				trackPairToday.addDev(longestDev);
+			}
+		}
 	}
 
 	private boolean hasHistoryForLongestDev(Pair trackPairThreeDaysBack) {

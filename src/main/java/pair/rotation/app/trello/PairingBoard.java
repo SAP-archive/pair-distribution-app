@@ -64,9 +64,7 @@ public class PairingBoard {
 		pastPairs = new ArrayList<DayPairs>();
 		for (TList tList : getLits()) {
 			String listName = tList.getName();
-			System.out.println("List name is: " + listName);
 			List<Card> cards = getListCards(tList.getId());
-			System.out.println("Cards count is: " + cards.size());
 			if ("devs".equals(listName.toLowerCase())){
 				syncDevs(cards);
 				syncDevsMetadata(cards);
@@ -77,26 +75,32 @@ public class PairingBoard {
 					tracks.add(card.getName());
 				}
 			}
+			
 			if (listName.toLowerCase().startsWith("pairing")){
-				DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
-				try {
-					pairs.setDate(getDateFromCradName(tList.getName()));
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				for (Card card : cards) {
-					Pair pair = new Pair();
-					pair.setBuildPair(isPairWithLabel(card, BUILD_PAIR_LABEL_COLOR));
-					pair.setCommunityPair(isPairWithLabel(card, COMMUNITY_PAIR_LABEL_COLOR));
-					pair.setDevs( getDevelopersFromCard(card));
-					pairs.addPair(card.getName(), pair);
-					System.out.println(card.getName());
-					System.out.println(card.getDesc());
-				}
+				DayPairs pairs = syncPairs(tList, cards);
 				pastPairs.add(pairs);
 			}
 		}
+	}
+
+	private DayPairs syncPairs(TList tList, List<Card> cards) {
+		DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+		try {
+			pairs.setDate(getDateFromCradName(tList.getName()));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for (Card card : cards) {
+			Pair pair = new Pair();
+			pair.setBuildPair(isPairWithLabel(card, BUILD_PAIR_LABEL_COLOR));
+			pair.setCommunityPair(isPairWithLabel(card, COMMUNITY_PAIR_LABEL_COLOR));
+			pair.setDevs( getDevelopersFromCard(card));
+			pairs.addPair(card.getName(), pair);
+			System.out.println(card.getName());
+			System.out.println(card.getDesc());
+		}
+		return pairs;
 	}
 
 	private void syncDevs(List<Card> cards) {
