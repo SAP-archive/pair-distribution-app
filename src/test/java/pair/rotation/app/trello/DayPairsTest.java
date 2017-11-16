@@ -2,6 +2,7 @@ package pair.rotation.app.trello;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -12,6 +13,7 @@ import java.util.HashSet;
 import static org.hamcrest.CoreMatchers.*;
 
 import org.junit.Test;
+import org.springframework.data.annotation.Transient;
 
 import pair.rotation.app.helpers.DayPairsHelper;
 import pair.rotation.app.trello.entities.DayPairs;
@@ -155,6 +157,16 @@ public class DayPairsTest {
 		
 		assertThat(pairs.getTrackByPair(pair), is(equalTo("track")));
 		assertThat(pairs.getTrackByPair(differentPair), is(nullValue()));
+	}
+	
+	@Test
+	public void testSimpleDateFormatNotPersisted() throws Exception {
+		DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+		Field dateFormatterField = pairs.getClass().getDeclaredField("dateFormatter");
+		dateFormatterField.setAccessible(true);
+		Transient annotation = dateFormatterField.getAnnotation(Transient.class);
+		
+		assertThat(annotation, is(not(nullValue())));
 	}
 	
 	private Date getYesterdayDate() {

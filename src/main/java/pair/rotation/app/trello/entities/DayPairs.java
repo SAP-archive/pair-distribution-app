@@ -8,10 +8,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.data.annotation.Transient;
+
 public class DayPairs implements Comparable<DayPairs>{
 
 	private Map<String, Pair> pairs;
 	private Date date;
+	@Transient
 	private SimpleDateFormat dateFormatter;
 	
 	public DayPairs(SimpleDateFormat dateFormatter) {

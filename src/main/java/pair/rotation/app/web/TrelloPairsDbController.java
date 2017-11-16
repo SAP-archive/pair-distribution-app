@@ -27,6 +27,6 @@ public class TrelloPairsDbController {
 
     @RequestMapping(method = RequestMethod.DELETE)
     public void clear() {
-       repository.deleteAll();;
+       repository.deleteAll();
     }
 }

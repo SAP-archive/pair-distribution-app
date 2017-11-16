@@ -70,7 +70,7 @@ public class DayPairsHelper {
 		initPairsInitialWeight(availableDevs, result, false);
 		pastPairs.stream().forEach(dayPairs -> dayPairs.getPairs().values().stream()
 				                                                           .filter(pair -> filter.test(pair))
-		                                                                   .forEach(pair -> result.put(pair, result.getOrDefault(pair, 0) + 1)));
+		                                                                   .forEach(pair -> result.put(pair, Integer.valueOf(result.getOrDefault(pair, Integer.valueOf(0)).intValue() + 1))));
 		return result;
 	}
 
@@ -82,11 +82,11 @@ public class DayPairsHelper {
 		
 		List<Developer> newDevelopers = getFilteredDevs(availableDevs, developer -> developer.getNew());
 		pairsWeight.keySet().stream().filter(pair -> !isPairConform(pair, newDevelopers, isPairWithMixedExpirience()))		
-                                     .forEach(pair -> { logger.info("pair with new Developers and needs adaptation. Pair is: " + pair); addUnconformWeight(pairsWeight, pair);; });
+                                     .forEach(pair -> { logger.info("pair with new Developers and needs adaptation. Pair is: " + pair); addUnconformWeight(pairsWeight, pair); });
 	}
 
 	private void addUnconformWeight(Map<Pair, Integer> pairsWeight, Pair pair) {
-		pairsWeight.put(pair, pairsWeight.get(pair) + 100);
+		pairsWeight.put(pair, Integer.valueOf(pairsWeight.get(pair).intValue() + 100));
 	}
 	
 	private boolean isPairConform(Pair pair, List<Developer> predicateDevelopers, Predicate<? super Pair> predicate){
@@ -105,7 +105,7 @@ public class DayPairsHelper {
 	}
 	
 	private void initPairsInitialWeight(List<Developer> availableDevs, Map<Pair, Integer> result, boolean addSoloPairs) {
-		getAllPairCombinations(availableDevs, addSoloPairs).stream().forEach(pair -> result.put(pair, 0));
+		getAllPairCombinations(availableDevs, addSoloPairs).stream().forEach(pair -> result.put(pair, Integer.valueOf(0)));
 	}
 	
 	private List<Pair> getAllPairCombinations(List<Developer> availableDevs, boolean addSoloPairs) {
