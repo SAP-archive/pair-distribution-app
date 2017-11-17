@@ -1,6 +1,5 @@
 package pair.rotation.app.helpers;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,7 +22,6 @@ import pair.rotation.app.trello.entities.Pair;
 
 public class DayPairsHelper {
 	
-	public static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd-MM-yyyy");
     private static final Logger logger = LoggerFactory.getLogger(DayPairsHelper.class);
 	
 	private TrelloPairsRepository repository;
@@ -126,7 +124,7 @@ public class DayPairsHelper {
 
 	public DayPairs generateNewDayPairs(List<String> tracks, List<Developer> devs, List<DayPairs> pastPairs,
 			Map<Pair, Integer> pairsWeight, boolean rotate_everyday) {
-		DayPairs result = new DayPairs(DATE_FORMATTER);
+		DayPairs result = new DayPairs();
 		sortByDescendDate(pastPairs);
 		List<String> possibleTracks = getPossibleTracks(tracks, devs);
 		List<Developer> availableDevs = new ArrayList<Developer>(devs);

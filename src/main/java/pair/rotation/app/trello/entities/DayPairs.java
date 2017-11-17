@@ -17,8 +17,8 @@ public class DayPairs implements Comparable<DayPairs>{
 	@Transient
 	private SimpleDateFormat dateFormatter;
 	
-	public DayPairs(SimpleDateFormat dateFormatter) {
-		this.dateFormatter = dateFormatter;
+	public DayPairs() {
+		dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
 		pairs = new HashMap<String, Pair>();
 		date = getDateWithoutTime(new Date());
 	}
@@ -109,5 +109,13 @@ public class DayPairs implements Comparable<DayPairs>{
 		} catch (ParseException e) {
 			throw new IllegalArgumentException(e);
 		}			
+	}
+
+	public String format(Date dateToFormat) {
+		return dateFormatter.format(dateToFormat);
+	}
+
+	public Date parse(String dateToParse) throws ParseException {
+		return dateFormatter.parse(dateToParse);
 	}
 }

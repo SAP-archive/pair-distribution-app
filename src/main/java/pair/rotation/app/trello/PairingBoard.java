@@ -14,7 +14,6 @@ import com.julienvey.trello.impl.TrelloImpl;
 import com.julienvey.trello.impl.TrelloUrl;
 import com.julienvey.trello.impl.http.RestTemplateHttpClient;
 
-import pair.rotation.app.helpers.DayPairsHelper;
 import pair.rotation.app.trello.entities.DayPairs;
 import pair.rotation.app.trello.entities.Developer;
 import pair.rotation.app.trello.entities.Pair;
@@ -84,7 +83,7 @@ public class PairingBoard {
 	}
 
 	private DayPairs syncPairs(TList tList, List<Card> cards) {
-		DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+		DayPairs pairs = new DayPairs();
 		try {
 			pairs.setDate(getDateFromCradName(tList.getName()));
 		} catch (ParseException e) {
@@ -152,7 +151,7 @@ public class PairingBoard {
 	
 	public Date getDateFromCradName(String name) throws ParseException{
 		String date = name.substring(name.indexOf("(") + 1, name.lastIndexOf(")"));
-		return DayPairsHelper.DATE_FORMATTER.parse(date);
+		return new DayPairs().parse(date);
 	}
 	
 	
@@ -193,7 +192,7 @@ public class PairingBoard {
 	
 	private TList createNewPairingList(DayPairs pairs, int daysIntoFuture) {
 		TrelloUrl createListURL = TrelloUrl.createUrl(CREATE_LISTS);
-		String name = "pairing(" + DayPairsHelper.DATE_FORMATTER.format(getFutureDate(pairs.getDate(), daysIntoFuture)) + ")";
+		String name = "pairing(" + pairs.format(getFutureDate(pairs.getDate(), daysIntoFuture)) + ")";
 		TList tList = new TList();
 		tList.setName(name);
 		tList.setIdBoard(pairingBoardId);

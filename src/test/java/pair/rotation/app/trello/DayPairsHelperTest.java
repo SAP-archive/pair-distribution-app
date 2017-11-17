@@ -53,7 +53,7 @@ public class DayPairsHelperTest {
 	@Test
 	public void testUpdateDataBaseWithTrelloContent() throws Exception {
 		List<DayPairs> pairsList = getPairsList();
-		DayPairs oldPairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+		DayPairs oldPairs = new DayPairs();
 		oldPairs.setDate(pairsList.get(0).getDate());
 		oldPairs.addPair("oldTrack", new Pair());
 		when(trelloPairsRepository.findByDate(pairsList.get(0).getDate())).thenReturn(Arrays.asList(oldPairs));
@@ -219,7 +219,7 @@ public class DayPairsHelperTest {
 		developer3.setCompany("someCompany");
 		Developer developer4 = new Developer("dev4");
 		developer4.setCompany("someOtherCompany");
-		DayPairs dayPairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+		DayPairs dayPairs = new DayPairs();
 		dayPairs.addPair("track1", new Pair(Arrays.asList(developer1, developer4)));
 		dayPairs.addPair("track2", new Pair(Arrays.asList(developer2, developer3)));
 		dayPairs.setDate(getPastDate(1));
@@ -245,7 +245,7 @@ public class DayPairsHelperTest {
 		developer2.setCompany("someCompany");
 		Developer developer3 = new Developer("dev3");
 		developer3.setCompany("someCompany");
-		DayPairs dayPairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+		DayPairs dayPairs = new DayPairs();
 		dayPairs.addPair("track1", new Pair(Arrays.asList(developer1)));
 		dayPairs.addPair("track2", new Pair(Arrays.asList(developer2, developer3)));
 		dayPairs.setDate(getPastDate(1));
@@ -290,7 +290,7 @@ public class DayPairsHelperTest {
 		developer1.setNew(true);
 		Developer developer2 = new Developer("dev2");
 		Developer developer3 = new Developer("dev3");
-		DayPairs dayPairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+		DayPairs dayPairs = new DayPairs();
 		dayPairs.addPair("track1", new Pair(Arrays.asList(developer1)));
 		dayPairs.addPair("track2", new Pair(Arrays.asList(developer2, developer3)));
 		dayPairs.setDate(getPastDate(1));
@@ -335,11 +335,6 @@ public class DayPairsHelperTest {
 		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
 	}
 	
-	@Test
-	public void testDateFormatterFormat() {
-		assertThat(DayPairsHelper.DATE_FORMATTER, is(new SimpleDateFormat("dd-MM-yyyy")));
-    }
-	
 	private List<DayPairs> getPairsList() {
 		return getPairsListFromDevs(Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"), new Developer("dev4")));
 	}
@@ -352,13 +347,13 @@ public class DayPairsHelperTest {
 	private List<DayPairs> getPairsListFromDevs(List<Developer> devs) {
 		ArrayList<DayPairs> result = new ArrayList<DayPairs>();
 		for(int i = 1; i < 3 ; i++){
-			DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+			DayPairs pairs = new DayPairs();
 			pairs.setDate(getPastDate(i));
 			pairs.addPair("track1", new Pair(Arrays.asList(devs.get(0), devs.get(1))));
 			pairs.addPair("track2", new Pair(Arrays.asList(devs.get(2), devs.get(3))));
 			result.add(pairs);
 		}
-		DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+		DayPairs pairs = new DayPairs();
 		pairs.setDate(getPastDate(3));
 		pairs.addPair("track1", new Pair(Arrays.asList(devs.get(0), devs.get(3))));
 		pairs.addPair("track2", new Pair(Arrays.asList(devs.get(2), devs.get(1))));
@@ -370,7 +365,7 @@ public class DayPairsHelperTest {
 	private List<DayPairs> getPairsListWithLongestDevFromDevs(List<Developer> devs) {
 		ArrayList<DayPairs> result = new ArrayList<DayPairs>();
 		for(int i = 1; i < 3 ; i++){
-			DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+			DayPairs pairs = new DayPairs();
 			pairs.setDate(getPastDate(i));
 			pairs.addPair("track1", new Pair(Arrays.asList(devs.get(0), devs.get(3))));
 			pairs.addPair("track2", new Pair(Arrays.asList(devs.get(2), devs.get(5))));
@@ -379,7 +374,7 @@ public class DayPairsHelperTest {
 		}
 		
 		for(int i = 3; i < 5 ; i++){
-			DayPairs pairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+			DayPairs pairs = new DayPairs();
 			pairs.setDate(getPastDate(i));
 			pairs.addPair("track1", new Pair(Arrays.asList(devs.get(0), devs.get(1))));
 			pairs.addPair("track2", new Pair(Arrays.asList(devs.get(2), devs.get(3))));
@@ -417,7 +412,7 @@ public class DayPairsHelperTest {
 		developer2.setCompany("someOtherCompany");
 		List<Developer> availableDevs = Arrays.asList(developer1, developer2, soloDeveloper);
 		List<DayPairs> pairs = new ArrayList<>();
-		DayPairs todayPairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+		DayPairs todayPairs = new DayPairs();
 		todayPairs.addPair("track1", new Pair(Arrays.asList(developer1, developer2)));
 		Pair soloPair = new Pair(Arrays.asList(soloDeveloper));
 		todayPairs.addPair("track2", soloPair);
@@ -443,7 +438,7 @@ public class DayPairsHelperTest {
 		developer2.setCompany("company");
 		List<Developer> availableDevs = Arrays.asList(developer1, developer2, soloDeveloper);
 		List<DayPairs> pairs = new ArrayList<>();
-		DayPairs todayPairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+		DayPairs todayPairs = new DayPairs();
 		todayPairs.addPair("track1", new Pair(Arrays.asList(developer1, developer2)));
 		Pair soloPair = new Pair(Arrays.asList(soloDeveloper));
 		todayPairs.addPair("track2", soloPair);
@@ -468,7 +463,7 @@ public class DayPairsHelperTest {
 		developer2.setCompany("someOtherCompany");
 		List<Developer> availableDevs = Arrays.asList(developer1, developer2, soloDeveloper);
 		List<DayPairs> pairs = new ArrayList<>();
-		DayPairs todayPairs = new DayPairs(DayPairsHelper.DATE_FORMATTER);
+		DayPairs todayPairs = new DayPairs();
 		todayPairs.addPair("track1", new Pair(Arrays.asList(developer1, developer2)));
 		Pair soloPair = new Pair(Arrays.asList(soloDeveloper));
 		todayPairs.addPair("track2", soloPair);
@@ -488,7 +483,7 @@ public class DayPairsHelperTest {
 		List<DayPairs> pairs = new ArrayList<>();
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3")));
 
-		subject.rotateSoloPairIfAny(new DayPairs(DayPairsHelper.DATE_FORMATTER), pairs, pairsWeight);
+		subject.rotateSoloPairIfAny(new DayPairs(), pairs, pairsWeight);
 	}
 	
 	@Test
