@@ -3,13 +3,13 @@ package pair.rotation.app.trello.entities;
 public class Developer implements Comparable<Developer>{
 
 	private String id;
-	private String company;
+	private Company company;
 	private boolean developerOnDuty;
 	private boolean newDeveloper;
 
 	public Developer(String id) {
 		this.id = id;
-		this.company = "";
+		this.company = new Company("");
 		this.developerOnDuty = false;
 		this.newDeveloper = false;
 	}
@@ -18,11 +18,11 @@ public class Developer implements Comparable<Developer>{
 		return id;
 	}
 
-	public void setCompany(String company) {
+	public void setCompany(Company company) {
 		this.company = company;
 	}
 	
-	public String getCompany() {
+	public Company getCompany() {
 		return company;
 	}
 

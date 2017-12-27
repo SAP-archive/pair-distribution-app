@@ -14,6 +14,7 @@ import com.julienvey.trello.impl.TrelloImpl;
 import com.julienvey.trello.impl.TrelloUrl;
 import com.julienvey.trello.impl.http.RestTemplateHttpClient;
 
+import pair.rotation.app.trello.entities.Company;
 import pair.rotation.app.trello.entities.DayPairs;
 import pair.rotation.app.trello.entities.Developer;
 import pair.rotation.app.trello.entities.Pair;
@@ -29,6 +30,7 @@ public class PairingBoard {
 	private TrelloImpl trelloImpl;
 	private List<Developer> availableDevelopers;
 	private List<Developer> allDevelopers;
+	private List<Company> allCompanies;
 	private List<String> tracks;
 	private List<DayPairs> pastPairs;
 	private String accessKey;
@@ -41,6 +43,7 @@ public class PairingBoard {
 		this.pairingBoardId = pairingBoardId;
 		availableDevelopers = new ArrayList<Developer>();
 		allDevelopers = new ArrayList<>();
+		allCompanies = new ArrayList<>();
 		httpClient = new RestTemplateHttpClient();
     	trelloImpl = new TrelloImpl(applicationKey, accessKey, httpClient);
 	}
@@ -117,7 +120,7 @@ public class PairingBoard {
 				card.getIdMembers().forEach(developerId -> getDeveloperById(developerId).setNew(true));
 				break;
 			default:
-				setDevsCompany(card.getName().toLowerCase(), card);
+				setDevsCompany(card.getName(), card);
 			}
 		}
 	}
@@ -132,10 +135,21 @@ public class PairingBoard {
 		return card.getIdMembers().stream().map(developerId -> getDeveloperById(developerId)).collect(Collectors.toList());
 	}
 	
-	private void setDevsCompany(String company, Card card) {
+	private void setDevsCompany(String companyName, Card card) {
+		Company company = getCompanyByName(companyName);
 		card.getIdMembers().stream().map(developerId -> getDeveloperById(developerId)).forEach(developer -> developer.setCompany(company));
 	}
 
+	private Company getCompanyByName(String companyName){
+		Company result = allCompanies.stream().filter(company -> company.getName().equals(companyName)).findFirst().orElse(null);
+		if(result == null){
+			result = new Company(companyName);
+			allCompanies.add(result);
+		}
+		
+		return result;
+	}
+	
 	private Developer getDeveloperById(String developerId){
 		Developer result = allDevelopers.stream().filter(developer -> developer.equals(new Developer(developerId))).findFirst().orElse(new Developer(developerId));
 		if(!allDevelopers.contains(result)){

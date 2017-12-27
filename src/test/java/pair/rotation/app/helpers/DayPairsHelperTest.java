@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import pair.rotation.app.helpers.DayPairsHelper;
 import pair.rotation.app.persistence.mongodb.TrelloPairsRepository;
+import pair.rotation.app.trello.entities.Company;
 import pair.rotation.app.trello.entities.DayPairs;
 import pair.rotation.app.trello.entities.Developer;
 import pair.rotation.app.trello.entities.Pair;
@@ -84,14 +85,14 @@ public class DayPairsHelperTest {
 	public void testAdaptPairsWeightForDoD() throws Exception {
 		
 		Developer developer1 = new Developer("dev1");
-		developer1.setCompany("someCompany");
+		developer1.setCompany(new Company("someCompany"));
 		Developer developer2 = new Developer("dev2");
-		developer2.setCompany("someCompany");
+		developer2.setCompany(new Company("someCompany"));
 		developer2.setDoD(true);
 		Developer developer3 = new Developer("dev3");
-		developer3.setCompany("someCompany");
+		developer3.setCompany(new Company("someCompany"));
 		Developer developer4 = new Developer("dev4");
-		developer4.setCompany("someOtherCompany");
+		developer4.setCompany(new Company("someOtherCompany"));
 		List<Developer> devs = Arrays.asList(developer1, developer2, developer3, developer4);
 		List<DayPairs> pairs = getPairsListFromDevs(devs);
 		
@@ -211,14 +212,14 @@ public class DayPairsHelperTest {
 	@Test
 	public void testGenerateNewDayPairsDoDAvailable() throws Exception {
 		Developer developer1 = new Developer("dev1");
-		developer1.setCompany("someCompany");
+		developer1.setCompany(new Company("someCompany"));
 		developer1.setDoD(true);
 		Developer developer2 = new Developer("dev2");
-		developer2.setCompany("someCompany");
+		developer2.setCompany(new Company("someCompany"));
 		Developer developer3 = new Developer("dev3");
-		developer3.setCompany("someCompany");
+		developer3.setCompany(new Company("someCompany"));
 		Developer developer4 = new Developer("dev4");
-		developer4.setCompany("someOtherCompany");
+		developer4.setCompany(new Company("someOtherCompany"));
 		DayPairs dayPairs = new DayPairs();
 		dayPairs.addPair("track1", new Pair(Arrays.asList(developer1, developer4)));
 		dayPairs.addPair("track2", new Pair(Arrays.asList(developer2, developer3)));
@@ -239,12 +240,12 @@ public class DayPairsHelperTest {
 	@Test
 	public void testGenerateNewDayPairsDoDAvailableAndSolo() throws Exception {
 		Developer developer1 = new Developer("dev1");
-		developer1.setCompany("someCompany");
+		developer1.setCompany(new Company("someCompany"));
 		developer1.setDoD(true);
 		Developer developer2 = new Developer("dev2");
-		developer2.setCompany("someCompany");
+		developer2.setCompany(new Company("someCompany"));
 		Developer developer3 = new Developer("dev3");
-		developer3.setCompany("someCompany");
+		developer3.setCompany(new Company("someCompany"));
 		DayPairs dayPairs = new DayPairs();
 		dayPairs.addPair("track1", new Pair(Arrays.asList(developer1)));
 		dayPairs.addPair("track2", new Pair(Arrays.asList(developer2, developer3)));
@@ -405,11 +406,11 @@ public class DayPairsHelperTest {
 	public void testRotateSoloPairOnDoD() throws Exception {
 		Developer soloDeveloper = new Developer("dev3");
 		soloDeveloper.setDoD(true);
-		soloDeveloper.setCompany("company");
+		soloDeveloper.setCompany(new Company("company"));
 		Developer developer1 = new Developer("dev1");
-		developer1.setCompany("company");
+		developer1.setCompany(new Company("company"));
 		Developer developer2 = new Developer("dev2");
-		developer2.setCompany("someOtherCompany");
+		developer2.setCompany(new Company("someOtherCompany"));
 		List<Developer> availableDevs = Arrays.asList(developer1, developer2, soloDeveloper);
 		List<DayPairs> pairs = new ArrayList<>();
 		DayPairs todayPairs = new DayPairs();
@@ -431,11 +432,11 @@ public class DayPairsHelperTest {
 	public void testRotateSoloPairOnDoDAllDevFromSameCompany() throws Exception {
 		Developer soloDeveloper = new Developer("dev3");
 		soloDeveloper.setDoD(true);
-		soloDeveloper.setCompany("company");
+		soloDeveloper.setCompany(new Company("company"));
 		Developer developer1 = new Developer("dev1");
-		developer1.setCompany("company");
+		developer1.setCompany(new Company("company"));
 		Developer developer2 = new Developer("dev2");
-		developer2.setCompany("company");
+		developer2.setCompany(new Company("company"));
 		List<Developer> availableDevs = Arrays.asList(developer1, developer2, soloDeveloper);
 		List<DayPairs> pairs = new ArrayList<>();
 		DayPairs todayPairs = new DayPairs();
@@ -456,11 +457,11 @@ public class DayPairsHelperTest {
 	public void testRotateSoloPairOnDoDNoPairFromSameCompany() throws Exception {
 		Developer soloDeveloper = new Developer("dev3");
 		soloDeveloper.setDoD(true);
-		soloDeveloper.setCompany("company");
+		soloDeveloper.setCompany(new Company("company"));
 		Developer developer1 = new Developer("dev1");
-		developer1.setCompany("someOtherCompany");
+		developer1.setCompany(new Company("someOtherCompany"));
 		Developer developer2 = new Developer("dev2");
-		developer2.setCompany("someOtherCompany");
+		developer2.setCompany(new Company("someOtherCompany"));
 		List<Developer> availableDevs = Arrays.asList(developer1, developer2, soloDeveloper);
 		List<DayPairs> pairs = new ArrayList<>();
 		DayPairs todayPairs = new DayPairs();

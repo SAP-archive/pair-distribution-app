@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import pair.rotation.app.persistence.mongodb.TrelloPairsRepository;
+import pair.rotation.app.trello.entities.Company;
 import pair.rotation.app.trello.entities.DayPairs;
 import pair.rotation.app.trello.entities.Developer;
 import pair.rotation.app.trello.entities.Pair;
@@ -164,7 +165,7 @@ public class DayPairsHelper {
 			Pair pairWithHighestWeight = null;
 			Developer newPairForSoloDeveloper = null;
 			Collection<Pair> allPairsOfTheDay = todayPairs.getPairs().values();
-			String soloPairCompany = soloDeveloper.getCompany();
+			Company soloPairCompany = soloDeveloper.getCompany();
 			if (soloDeveloper.getDoD()) {
 				pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight,
 						hasPairDevFromCompany(soloPairCompany));
@@ -192,7 +193,7 @@ public class DayPairsHelper {
 		return newPairForSoloDeveloper;
 	}
 
-	private Developer rotateSoloDoD(Pair pairWithHighestWeight, String soloPairCompany) {
+	private Developer rotateSoloDoD(Pair pairWithHighestWeight, Company soloPairCompany) {
 		Developer result = null;
 		if (pairWithHighestWeight != null) {
 			result = pairWithHighestWeight.isPairFromSameCompany()
@@ -220,8 +221,8 @@ public class DayPairsHelper {
 		return firstDayPair!= null && secondDayPair != null && firstDayPair.hasPair(soloPair) && secondDayPair.hasPair(soloPair);
 	}
 	
-	private Predicate<? super Pair> hasPairDevFromCompany(String company) {
-		return p -> p.getDevFromCompany(company) != null;
+	private Predicate<? super Pair> hasPairDevFromCompany(Company soloPairCompany) {
+		return p -> p.getDevFromCompany(soloPairCompany) != null;
 	}
 	
 	private Predicate<? super Pair> alwaysTrue() {

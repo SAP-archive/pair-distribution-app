@@ -96,8 +96,8 @@ public class Pair {
 		return devs.size() == 1;
 	}
 
-	public Developer getDevFromCompany(String company) {
-		return devs.stream().filter(developer -> developer.getCompany().equals(company)).findFirst().orElse(null);
+	public Developer getDevFromCompany(Company soloPairCompany) {
+		return devs.stream().filter(developer -> developer.getCompany().equals(soloPairCompany)).findFirst().orElse(null);
 	}
 
 	public boolean isPairFromSameCompany() {

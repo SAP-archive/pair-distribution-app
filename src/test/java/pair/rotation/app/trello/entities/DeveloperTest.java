@@ -21,15 +21,15 @@ public class DeveloperTest {
 	public void testCompanyDefault() {
 		Developer developer = new Developer("developerId");
 		
-		assertThat(developer.getCompany(), is(""));
+		assertThat(developer.getCompany(), is(new Company("")));
 	}
 	
 	@Test
 	public void testCompany() {
 		Developer developer = new Developer("developerId");
-		developer.setCompany("my-company");
+		developer.setCompany(new Company("my-company"));
 		
-		assertThat(developer.getCompany(), is("my-company"));
+		assertThat(developer.getCompany(), is(new Company("my-company")));
 	}
 	
 	@Test
