@@ -1,4 +1,4 @@
-package pair.rotation.app.trello;
+package pair.rotation.app.helpers;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
