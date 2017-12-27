@@ -211,6 +211,24 @@ public class PairTest {
 	}
 	
 	@Test
+	public void testIsOpsPairTrue() throws Exception {
+		Pair subject = new Pair();
+		
+		subject.setOpsPair(true);
+		
+		assertThat(subject.isOpsPair(), is(true));
+	}
+	
+	@Test
+	public void testIsOpsPairFalse() throws Exception {
+		Pair subject = new Pair();
+		
+		subject.setOpsPair(false);
+		
+		assertThat(subject.isOpsPair(), is(false));
+	}
+	
+	@Test
 	public void testIsCommunityPairTrue() throws Exception {
 		Pair subject = new Pair();
 		

@@ -13,6 +13,11 @@ public class CompanyTest {
 	}
 	
 	@Test
+	public void testGetCompanyNameWithSaces() {
+		assertThat(new Company("  company  ").getName(), is("company"));
+	}
+	
+	@Test
 	public void testGetCompanyNameWithUpperCase() {
 		assertThat(new Company("COMPANY").getName(), is("company"));
 	}

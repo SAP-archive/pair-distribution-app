@@ -38,14 +38,14 @@ public class PairingBoard {
 	private String pairingBoardId;
     
 	public PairingBoard(String accessKey, String applicationKey, String pairingBoardId) {
-    	this.accessKey = accessKey;
+    		this.accessKey = accessKey;
 		this.applicationKey = applicationKey;
 		this.pairingBoardId = pairingBoardId;
 		availableDevelopers = new ArrayList<Developer>();
 		allDevelopers = new ArrayList<>();
 		allCompanies = new ArrayList<>();
 		httpClient = new RestTemplateHttpClient();
-    	trelloImpl = new TrelloImpl(applicationKey, accessKey, httpClient);
+		trelloImpl = new TrelloImpl(applicationKey, accessKey, httpClient);
 	}
     
 	public List<Developer> getDevs() {
@@ -112,16 +112,30 @@ public class PairingBoard {
 	
 	private void syncDevsMetadata(List<Card> cards) {
 		for (Card card : cards) {
-			switch (card.getName().toLowerCase()) {
-			case "dod":
-				card.getIdMembers().forEach(developerId -> getDeveloperById(developerId).setDoD(true));
-				break;
-			case "new":
+			String lowerCaseCardName = card.getName().toLowerCase();
+			if (lowerCaseCardName.startsWith("devops")) {
+				String[] companyNames = parseDevOpsCompanies(lowerCaseCardName);
+				initDevOpsCompanies(companyNames);
+			} else if ("new".equals(lowerCaseCardName)) {
 				card.getIdMembers().forEach(developerId -> getDeveloperById(developerId).setNew(true));
-				break;
-			default:
+			} else {
 				setDevsCompany(card.getName(), card);
 			}
+		}
+	}
+
+	protected String[] parseDevOpsCompanies(String lowerCaseCardName) {
+		String companies = lowerCaseCardName.replaceFirst("devops:", "");
+		if ("".equals(companies)){
+			return new String[0];
+		}
+		return companies.split(",");
+	}
+
+	private void initDevOpsCompanies(String[] companyNames) {
+		for (String companyName : companyNames) {
+			Company company = getCompanyByName(companyName);
+			company.setDevOps(true);
 		}
 	}
 

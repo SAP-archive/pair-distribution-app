@@ -11,10 +11,12 @@ public class Pair {
 	private List<Developer> devs;
 	private boolean buildPair;
 	private boolean communityPair;
+	private boolean opsPair;
 
     public Pair() {
-    	devs = new ArrayList<Developer>(2);
-    	buildPair = false;
+    		devs = new ArrayList<Developer>(2);
+    		buildPair = false;
+    		opsPair = false;
     }
 
     public Pair(List<Developer> devs) {
@@ -121,5 +123,13 @@ public class Pair {
 
 	public boolean isCommunityPair() {
 		return communityPair;
+	}
+
+	public void setOpsPair(boolean opsPair) {
+		this.opsPair = opsPair;
+	}
+
+	public boolean isOpsPair() {
+		return opsPair;
 	}
 }

@@ -3,9 +3,10 @@ package pair.rotation.app.trello.entities;
 public class Company {
 
 	private String name;
+	private boolean devOps;
 
 	public Company(String name) {
-		this.name = name;
+		this.name = name.trim();
 	}
 
 	public String getName() {
@@ -14,6 +15,14 @@ public class Company {
 
 	public String getOriginalName() {
 		return name;
+	}
+	
+	public void setDevOps(boolean devOps) {
+		this.devOps = devOps;
+	}
+	
+	public boolean getDevOps() {
+		return devOps;
 	}
 	
 	@Override
