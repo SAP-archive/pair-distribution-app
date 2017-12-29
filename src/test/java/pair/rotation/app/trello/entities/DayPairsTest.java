@@ -1,6 +1,10 @@
 package pair.rotation.app.trello.entities;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertThat;
 
 import java.lang.reflect.Field;
 import java.text.ParseException;
@@ -10,15 +14,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import static org.hamcrest.CoreMatchers.*;
-
 import org.junit.Test;
 import org.springframework.data.annotation.Transient;
-
-import pair.rotation.app.helpers.DayPairsHelper;
-import pair.rotation.app.trello.entities.DayPairs;
-import pair.rotation.app.trello.entities.Developer;
-import pair.rotation.app.trello.entities.Pair;
 
 public class DayPairsTest {
 
@@ -39,7 +36,7 @@ public class DayPairsTest {
 	}
 
 	@Test
-	public void testSetDate() throws Exception {
+	public void testSetDate() throws ParseException {
 		DayPairs pairs = new DayPairs();
 		Date expectedDate = new Date();
 		pairs.setDate(expectedDate);
@@ -48,7 +45,7 @@ public class DayPairsTest {
 	}
 	
 	@Test
-	public void testGetDate() throws Exception {
+	public void testGetDate() throws ParseException {
 		assertThat(new DayPairs().getDate(), is(equalTo(getDateWithoutTime(new Date()))));
 	}
 
@@ -57,7 +54,7 @@ public class DayPairsTest {
 	}
 	
 	@Test
-	public void testCompareTo() throws Exception {
+	public void testCompareTo() {
 		DayPairs todaysPairs = new DayPairs();
 		todaysPairs.setDate(new Date());
 		DayPairs yesterdayPairs = new DayPairs();
@@ -69,7 +66,7 @@ public class DayPairsTest {
 	}
 	
 	@Test
-	public void testGetPairByTrack() throws Exception {
+	public void testGetPairByTrack() {
 		Pair pair1 = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		Pair pair2 = new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4")));
 		DayPairs pairs = new DayPairs();
@@ -81,7 +78,7 @@ public class DayPairsTest {
 	}
 	
 	@Test
-	public void testHashCode() throws Exception {
+	public void testHashCode() {
 		DayPairs pairsOfToday = new DayPairs();
 		DayPairs differentPairsOfToday = new DayPairs();
 		DayPairs yesterdayPairs = new DayPairs();
@@ -97,7 +94,7 @@ public class DayPairsTest {
 	}
 	
 	@Test
-	public void testEquals() throws Exception {
+	public void testEquals() {
 		DayPairs pairsOfToday = new DayPairs();
 		DayPairs differentPairsOfToday = new DayPairs();
 		DayPairs yesterdayPairs = new DayPairs();
@@ -113,7 +110,7 @@ public class DayPairsTest {
 	}
 	
 	@Test
-	public void testToString() throws Exception {
+	public void testToString() {
 		DayPairs pairs = new DayPairs();
 		Pair pair = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		pairs.addPair("track", pair);
@@ -122,7 +119,7 @@ public class DayPairsTest {
 	}
 	
 	@Test
-	public void testHasPair() throws Exception {
+	public void testHasPair() {
 		DayPairs pairs = new DayPairs();
 		Pair pair = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		Pair differentPair = new Pair();
@@ -133,7 +130,7 @@ public class DayPairsTest {
 	}
 	
 	@Test
-	public void testReplacePairWith() throws Exception {
+	public void testReplacePairWith() {
 		DayPairs pairs = new DayPairs();
 		Pair pair = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		Pair differentPair = new Pair();
@@ -149,7 +146,7 @@ public class DayPairsTest {
 	}
 	
 	@Test
-	public void testGetTrackByPair() throws Exception {
+	public void testGetTrackByPair() {
 		DayPairs pairs = new DayPairs();
 		Pair pair = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		Pair differentPair = new Pair();
@@ -160,7 +157,7 @@ public class DayPairsTest {
 	}
 	
 	@Test
-	public void testSimpleDateFormatNotPersisted() throws Exception {
+	public void testSimpleDateFormatNotPersisted() throws NoSuchFieldException, SecurityException {
 		DayPairs pairs = new DayPairs();
 		Field dateFormatterField = pairs.getClass().getDeclaredField("dateFormatter");
 		dateFormatterField.setAccessible(true);

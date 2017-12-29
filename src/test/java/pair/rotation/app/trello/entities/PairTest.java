@@ -16,7 +16,7 @@ import pair.rotation.app.trello.entities.Pair;
 public class PairTest {
 
 	@Test
-	public void testGetAndSetDevs() throws Exception {
+	public void testGetAndSetDevs()  {
 		Pair subject = new Pair();
 		subject.setDevs(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		
@@ -24,7 +24,7 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testGetAndSetDevsWithNullValues() throws Exception {
+	public void testGetAndSetDevsWithNullValues()  {
 		Pair subject = new Pair();
 		subject.setDevs(Arrays.asList(null, new Developer("dev2")));
 		
@@ -32,14 +32,14 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testAddDev() throws Exception {
+	public void testAddDev()  {
 		Pair subject = new Pair(Arrays.asList(new Developer("dev1")));
 		
 		assertThat(subject.getDevs(), is(equalTo(Arrays.asList(new Developer("dev1")))));
 	}
 	
 	@Test
-	public void testAddDevWithNull() throws Exception {
+	public void testAddDevWithNull()  {
 		Pair subject = new Pair();
 		
 		subject.addDev(null);
@@ -48,49 +48,49 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testHasDev() throws Exception {
+	public void testHasDev()  {
 		Pair subject = new Pair(Arrays.asList(new Developer("dev1")));
 		
 		assertThat(subject.hasDev(new Developer("dev1")), is(true));
 	}
 	
 	@Test
-	public void testGetOtherDev() throws Exception {
+	public void testGetOtherDev()  {
 		Pair subject = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		
 		assertThat(subject.getOtherDev(new Developer("dev1")), is(equalTo(new Developer("dev2"))));
 	}
 	
 	@Test
-	public void testOtherDevWithOneDev() throws Exception {
+	public void testOtherDevWithOneDev()  {
 		Pair subject = new Pair(Arrays.asList(new Developer("dev1")));
 		
 		assertThat(subject.getOtherDev(new Developer("dev1")), nullValue());
 	}
 	
 	@Test
-	public void testIsComplete() throws Exception {
+	public void testIsComplete()  {
 		Pair subject = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		
 		assertThat(subject.isComplete(), is(true));
 	}
 	
 	@Test
-	public void testIsCompleteWithOneDev() throws Exception {
+	public void testIsCompleteWithOneDev()  {
 		Pair subject = new Pair(Arrays.asList(new Developer("dev1")));
 		
 		assertThat(subject.isComplete(), is(false));
 	}
 	
 	@Test
-	public void testToString() throws Exception {
+	public void testToString()  {
 		Pair subject = new Pair(Arrays.asList(new Developer("dev1")));
 		
-		assertThat(subject.toString(), is(equalTo("Pair [devs=[dev1]]")));
+		assertThat(subject.toString(), is(equalTo("Pair [devs=[dev1], opsPair=false]")));
 	}
 	
 	@Test
-	public void testHashCode() throws Exception {
+	public void testHashCode()  {
 		Pair subject = new Pair(Arrays.asList(new Developer("dev1")));
 		Pair subject2 = new Pair(Arrays.asList(new Developer("dev1")));
 		
@@ -98,7 +98,7 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testHashCodeNotEqual() throws Exception {
+	public void testHashCodeNotEqual()  {
 		Pair subject = new Pair(Arrays.asList(new Developer("dev1")));
 		Pair subject2 = new Pair(Arrays.asList(new Developer("dev2")));
 		
@@ -106,7 +106,7 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testEqual() throws Exception {
+	public void testEqual()  {
 		Pair subject = new Pair(Arrays.asList(new Developer("dev1")));
 		Pair subject2 = new Pair(Arrays.asList(new Developer("dev1")));
 		
@@ -114,7 +114,27 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testEqualDifferentPairs() throws Exception {
+	public void testEqualWithOpsTrue()  {
+		Pair subject = new Pair(Arrays.asList(new Developer("dev1")));
+		subject.setOpsPair(true);
+		Pair subject2 = new Pair(Arrays.asList(new Developer("dev1")));
+		subject2.setOpsPair(true);
+		
+		assertThat(subject.equals(subject2), is(true));
+	}
+	
+	@Test
+	public void testEqualWithDifferentOpsValues()  {
+		Pair subject = new Pair(Arrays.asList(new Developer("dev1")));
+		subject.setOpsPair(true);
+		Pair subject2 = new Pair(Arrays.asList(new Developer("dev1")));
+		subject2.setOpsPair(false);
+		
+		assertThat(subject.equals(subject2), is(false));
+	}
+	
+	@Test
+	public void testEqualDifferentPairs()  {
 		Pair subject = new Pair(Arrays.asList(new Developer("dev1")));
 		Pair subject2 = new Pair(Arrays.asList(new Developer("dev2")));
 		
@@ -122,7 +142,7 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testIsSolo() throws Exception {
+	public void testIsSolo()  {
 		Pair subject = new Pair(Arrays.asList(new Developer("dev1")));
 		Pair subject2 = new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")));
 		
@@ -131,7 +151,7 @@ public class PairTest {
 		
 	
 	@Test
-	public void testGetDevFromCompany() throws Exception {
+	public void testGetDevFromCompany()  {
 		Developer developer = new Developer("dev1");
 		developer.setCompany(new Company("company"));
 		Developer developer2 = new Developer("dev2");
@@ -142,7 +162,7 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testGetDevFromCompanyNoDev() throws Exception {
+	public void testGetDevFromCompanyNoDev()  {
 		Developer developer = new Developer("dev1");
 		developer.setCompany(new Company("someOtherCompany"));
 		Developer developer2 = new Developer("dev2");
@@ -153,7 +173,7 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testIsPairFromSameCompanyFalse() throws Exception {
+	public void testIsPairFromSameCompanyFalse()  {
 		Developer developer = new Developer("dev1");
 		developer.setCompany(new Company("someCompany"));
 		Developer developer2 = new Developer("dev2");
@@ -164,7 +184,7 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testIsPairFromSameCompanyTrue() throws Exception {
+	public void testIsPairFromSameCompanyTrue()  {
 		Developer developer = new Developer("dev1");
 		developer.setCompany(new Company("someCompany"));
 		Developer developer2 = new Developer("dev2");
@@ -175,7 +195,7 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testIsPairFromSameCompanyForSolo() throws Exception {
+	public void testIsPairFromSameCompanyForSolo()  {
 		Developer developer = new Developer("dev1");
 		developer.setCompany(new Company("someCompany"));
 		Pair subject = new Pair(Arrays.asList(developer));
@@ -184,7 +204,7 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testIsBuildPairFalse() throws Exception {
+	public void testIsBuildPairFalse()  {
 		Pair subject = new Pair();
 		
 		subject.setBuildPair(false);
@@ -193,7 +213,7 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testIsBuildPairTrue() throws Exception {
+	public void testIsBuildPairTrue()  {
 		Pair subject = new Pair();
 		
 		subject.setBuildPair(true);
@@ -202,7 +222,7 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testIsCommunitydPairFalse() throws Exception {
+	public void testIsCommunitydPairFalse()  {
 		Pair subject = new Pair();
 		
 		subject.setCommunityPair(false);
@@ -211,7 +231,7 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testIsOpsPairTrue() throws Exception {
+	public void testIsOpsPairTrue()  {
 		Pair subject = new Pair();
 		
 		subject.setOpsPair(true);
@@ -220,7 +240,7 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testIsOpsPairFalse() throws Exception {
+	public void testIsOpsPairFalse()  {
 		Pair subject = new Pair();
 		
 		subject.setOpsPair(false);
@@ -229,7 +249,7 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testIsCommunityPairTrue() throws Exception {
+	public void testIsCommunityPairTrue()  {
 		Pair subject = new Pair();
 		
 		subject.setCommunityPair(true);

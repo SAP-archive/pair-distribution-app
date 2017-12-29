@@ -15,7 +15,9 @@ import pair.rotation.app.helpers.DayPairsHelper;
 import pair.rotation.app.persistence.mongodb.TrelloPairsRepository;
 import pair.rotation.app.trello.PairingBoard;
 import pair.rotation.app.trello.entities.DayPairs;
+import pair.rotation.app.trello.entities.DevPairCombinations;
 import pair.rotation.app.trello.entities.Pair;
+import pair.rotation.app.trello.entities.PairCombinations;
 
 
 
@@ -62,18 +64,20 @@ public class TrelloPairsController {
 		pairsHelper.updateDataBaseWithTrelloContent(pairingBoardTrello.getPastPairs());
 		List<DayPairs> pastPairs = repository.findAll();
 		logger.info("Database state is: " + pastPairs.toString());
-		Map<Pair, Integer> pairsWeight = pairsHelper.buildPairsWeightFromPastPairing(pastPairs, pairingBoardTrello.getDevs());
+		DayPairs todayPairs = null;
+		PairCombinations pairCombination = new DevPairCombinations(pastPairs);
+		Map<Pair, Integer> pairsWeight = pairsHelper.buildPairsWeightFromPastPairing(pairCombination, pairingBoardTrello.getDevs());
 		logger.info("Pairs weight is:" + pairsWeight);
 		logger.info("Building build pairs weight");
-		Map<Pair, Integer> buildPairsWeight = pairsHelper.buildBuildPairsWeightFromPastPairing(pastPairs, pairingBoardTrello.getDevs());
+		Map<Pair, Integer> buildPairsWeight = pairsHelper.buildBuildPairsWeightFromPastPairing(pairCombination, pairingBoardTrello.getDevs());
 		logger.info("BuildPairs weight is:" + buildPairsWeight);
-		Map<Pair, Integer> communityPairsWeight = pairsHelper.buildCommunityPairsWeightFromPastPairing(pastPairs, pairingBoardTrello.getDevs());
+		Map<Pair, Integer> communityPairsWeight = pairsHelper.buildCommunityPairsWeightFromPastPairing(pairCombination, pairingBoardTrello.getDevs());
 		logger.info("CommunityPairs weight is:" + communityPairsWeight);
 		pairsHelper.adaptPairsWeight(pairsWeight, pairingBoardTrello.getDevs());
 		logger.info("Pairs weight after DoD adaptation:" + pairsWeight);
-		DayPairs todayPairs = pairsHelper.generateNewDayPairs(pairingBoardTrello.getTracks(), pairingBoardTrello.getDevs(), pastPairs, pairsWeight, rotate_everyday);
+		todayPairs = pairsHelper.generateNewDayPairs(pairingBoardTrello.getTracks(), pairingBoardTrello.getDevs(), pairCombination, pairsWeight, rotate_everyday);
 		logger.info("Today pairs are: " + todayPairs);
-		pairsHelper.rotateSoloPairIfAny(todayPairs, pastPairs, pairsWeight);
+		pairsHelper.rotateSoloPairIfAny(todayPairs, pairCombination, pairsWeight);
 		logger.info("After single pair rotation they are: " + todayPairs);
 		logger.info("Setting BuildPair");
 		pairsHelper.setBuildPair(todayPairs.getPairs().values(), buildPairsWeight);

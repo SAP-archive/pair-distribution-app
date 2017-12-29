@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import pair.rotation.app.persistence.mongodb.TrelloPairsRepository;
 import pair.rotation.app.trello.entities.Company;
+import pair.rotation.app.trello.entities.PairCombinations;
 import pair.rotation.app.trello.entities.DayPairs;
 import pair.rotation.app.trello.entities.Developer;
 import pair.rotation.app.trello.entities.Pair;
@@ -52,24 +53,22 @@ public class DayPairsHelper {
 		}
 	}
 	
-	public Map<Pair, Integer> buildPairsWeightFromPastPairing(List<DayPairs> pastPairs, List<Developer> availableDevs) {
+	public Map<Pair, Integer> buildPairsWeightFromPastPairing(PairCombinations pastPairs, List<Developer> availableDevs) {
 		return buildPairsWeghtFromPredicate(pastPairs, availableDevs, pair -> pair.isComplete());
 	}
 
-	public Map<Pair, Integer> buildBuildPairsWeightFromPastPairing(List<DayPairs> pastPairs, List<Developer> availableDevs) {
+	public Map<Pair, Integer> buildBuildPairsWeightFromPastPairing(PairCombinations pastPairs, List<Developer> availableDevs) {
 		return buildPairsWeghtFromPredicate(pastPairs, availableDevs, pair -> pair.isBuildPair());
 	}
 
-	public Map<Pair, Integer> buildCommunityPairsWeightFromPastPairing(List<DayPairs> pastPairs, List<Developer> availableDevs) {
+	public Map<Pair, Integer> buildCommunityPairsWeightFromPastPairing(PairCombinations pastPairs, List<Developer> availableDevs) {
 		return buildPairsWeghtFromPredicate(pastPairs, availableDevs, pair -> pair.isCommunityPair());
 	}
 	
-	private Map<Pair, Integer> buildPairsWeghtFromPredicate(List<DayPairs> pastPairs, List<Developer> availableDevs, Predicate<? super Pair> filter) {
+	private Map<Pair, Integer> buildPairsWeghtFromPredicate(PairCombinations pairCombinations, List<Developer> availableDevs, Predicate<? super Pair> filter) {
 		final Map<Pair, Integer> result = new HashMap<>(); 
 		initPairsInitialWeight(availableDevs, result, false);
-		pastPairs.stream().forEach(dayPairs -> dayPairs.getPairs().values().stream()
-				                                                           .filter(pair -> filter.test(pair))
-		                                                                   .forEach(pair -> result.put(pair, Integer.valueOf(result.getOrDefault(pair, Integer.valueOf(0)).intValue() + 1))));
+		pairCombinations.getPairs().stream().filter(pair -> filter.test(pair)).forEach(pair -> result.put(pair, Integer.valueOf(result.getOrDefault(pair, Integer.valueOf(0)).intValue() + 1)));
 		return result;
 	}
 
@@ -123,15 +122,14 @@ public class DayPairsHelper {
 		return result;
 	}
 
-	public DayPairs generateNewDayPairs(List<String> tracks, List<Developer> devs, List<DayPairs> pastPairs,
+	public DayPairs generateNewDayPairs(List<String> tracks, List<Developer> devs, PairCombinations pairCombination,
 			Map<Pair, Integer> pairsWeight, boolean rotate_everyday) {
 		DayPairs result = new DayPairs();
-		sortByDescendDate(pastPairs);
 		List<String> possibleTracks = getPossibleTracks(tracks, devs);
 		List<Developer> availableDevs = new ArrayList<Developer>(devs);
-		boolean rotationTime = isRotationTime(possibleTracks, pastPairs, availableDevs);
+		boolean rotationTime = pairCombination.isRotationTime(possibleTracks, availableDevs);
 		for (String track : possibleTracks) {
-			Pair pair = tryToFindPairFirstDeveloper(track, pastPairs, availableDevs, rotate_everyday, rotationTime);
+			Pair pair = tryToFindPairFirstDeveloper(track, pairCombination, availableDevs, rotate_everyday, rotationTime);
 			availableDevs.removeAll(pair.getDevs());
 			result.addPair(track, pair);
 		}
@@ -158,9 +156,9 @@ public class DayPairsHelper {
 		}
 	}
 
-	public void rotateSoloPairIfAny(DayPairs todayPairs, List<DayPairs> pastPairs, Map<Pair, Integer> pairsWeight) {
+	public void rotateSoloPairIfAny(DayPairs todayPairs, PairCombinations pairCombination, Map<Pair, Integer> pairsWeight) {
 		Pair soloPair = todayPairs.getSoloPair();
-		if (soloPair != null && (isSoloPairForTwoDays(pastPairs, soloPair) || soloPair.getFirstDev().getDoD() || soloPair.getFirstDev().getNew())) {
+		if (soloPair != null && (isSoloPairForTwoDays(pairCombination, soloPair) || soloPair.getFirstDev().getDoD() || soloPair.getFirstDev().getNew())) {
 			Developer soloDeveloper = soloPair.getFirstDev();
 			Pair pairWithHighestWeight = null;
 			Developer newPairForSoloDeveloper = null;
@@ -215,10 +213,10 @@ public class DayPairsHelper {
 		return p -> !(p.getFirstDev().getNew() || p.getOtherDev(p.getFirstDev()).getNew());
 	}
 	
-	private boolean isSoloPairForTwoDays(List<DayPairs> pastPairs, Pair soloPair) {
-		DayPairs firstDayPair = pastPairs.size() > 0 ? pastPairs.get(0) : null;
-		DayPairs secondDayPair = pastPairs.size() > 1 ? pastPairs.get(1) : null;
-		return firstDayPair!= null && secondDayPair != null && firstDayPair.hasPair(soloPair) && secondDayPair.hasPair(soloPair);
+	private boolean isSoloPairForTwoDays(PairCombinations pairCombination, Pair soloPair) {
+		List<Pair> firstDayPair = pairCombination.getPastPairs(0);
+		List<Pair> secondDayPair = pairCombination.getPastPairs(1);
+		return firstDayPair!= null && secondDayPair != null && firstDayPair.contains(soloPair) && secondDayPair.contains(soloPair);
 	}
 	
 	private Predicate<? super Pair> hasPairDevFromCompany(Company soloPairCompany) {
@@ -234,32 +232,17 @@ public class DayPairsHelper {
 				              .filter(pair -> predicate.test(pair))
 				              .max(Comparator.comparing(pair -> pairsWeight.get(pair))).orElse(null);
 	}
-	
-	private void sortByDescendDate(List<DayPairs> pastPairs) {
-		Collections.sort(pastPairs);
-		Collections.reverse(pastPairs);
-	}
-		
+			
 	private List<String> getPossibleTracks(List<String> todaysTracks, List<Developer> todaysDevs){
 		int possibleTracksCount = (int) Math.ceil(todaysDevs.size() / 2.0);
 		return todaysTracks.size() > possibleTracksCount ? todaysTracks.subList(0, possibleTracksCount) : todaysTracks;
 	}
 	
-	private boolean isRotationTime(List<String> possibleTracks, List<DayPairs> pastPairs, final List<Developer> availableDevs) {
-		boolean rotation = false;
-		for (String track : possibleTracks) {
-			Pair trackPairOneDayBack = getPastPairByTrack(pastPairs, track, 0);
-			Pair trackPairTwoDaysBack = getPastPairByTrack(pastPairs, track, 1);
-			rotation = rotation || isPairRotationTime(trackPairOneDayBack, trackPairTwoDaysBack, availableDevs);
-		}
-		return rotation;
-	}
-	
-	private Pair tryToFindPairFirstDeveloper(String track, List<DayPairs> pastPairs, final List<Developer> availableDevs, boolean rotateEveryday, boolean rotationRequired) {
+	private Pair tryToFindPairFirstDeveloper(String track, PairCombinations pairCombination, final List<Developer> availableDevs, boolean rotateEveryday, boolean rotationRequired) {
 		Pair trackPairToday = new Pair();
-		Pair trackPairOneDayBack = getPastPairByTrack(pastPairs, track, 0);
-		Pair trackPairTwoDaysBack = getPastPairByTrack(pastPairs, track, 1);
-		Pair trackPairThreeDaysBack = getPastPairByTrack(pastPairs, track, 2);
+		Pair trackPairOneDayBack = pairCombination.getPastPairByTrack(0, track);
+		Pair trackPairTwoDaysBack = pairCombination.getPastPairByTrack(1, track);
+		Pair trackPairThreeDaysBack = pairCombination.getPastPairByTrack(2, track);
 		logger.info("Track is: " + track + "\nPair one day back: " + trackPairOneDayBack + "\nPair two days back: " + trackPairTwoDaysBack + "\nPair three days back: " + trackPairThreeDaysBack);		
 		if(rotateEveryday || rotationRequired) {
 			findFirstDeveloper(availableDevs, trackPairToday, trackPairOneDayBack, trackPairThreeDaysBack);
@@ -307,27 +290,7 @@ public class DayPairsHelper {
 		return trackPairThreeDaysBack != null;
 	}
 
-	private boolean isPairRotationTime(Pair trackPairOneDayBack, Pair trackPairTwoDaysBack, List<Developer> availableDevs) {
-		if(trackPairOneDayBack != null){
-			boolean pairForTwoDays = isPairForTwoDays(trackPairOneDayBack, trackPairTwoDaysBack);
-			boolean pairDoDConform = isPairConform(trackPairOneDayBack, getFilteredDevs(availableDevs, developer -> developer.getDoD()), isPairFromSameCompany());
-			boolean pairNewDevConform = isPairConform(trackPairOneDayBack, getFilteredDevs(availableDevs, developer -> developer.getNew()), isPairWithMixedExpirience());
-			logger.info("Rotation time for longest dev is : " + pairForTwoDays);
-			logger.info("Rotation time for DoDConform is : " + !pairDoDConform);
-			logger.info("Rotation time for NewDevelopers is : " + !pairNewDevConform);
-			return trackPairOneDayBack != null && (pairForTwoDays || !pairDoDConform || !pairNewDevConform);			
-		}
-		return false;
-	}
 
-	private boolean isPairForTwoDays(Pair trackPairOneDayBack, Pair trackPairTwoDaysBack) {
-		return trackPairOneDayBack.equals(trackPairTwoDaysBack);
-	}
-	
-	private Pair getPastPairByTrack(List<DayPairs> pastPairs, String track, int numberOfDaysBack){
-		return numberOfDaysBack < pastPairs.size() ? pastPairs.get(numberOfDaysBack).getPairByTrack(track) : null;
-	}
-	
 	private Pair getPairByWeight(Pair pairCandidate, List<Developer> availableDevs, Map<Pair, Integer> pairsWeight) {
 		Pair result = null;
 		if(pairCandidate.getDevs().isEmpty()){

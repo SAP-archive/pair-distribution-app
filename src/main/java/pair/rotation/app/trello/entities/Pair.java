@@ -24,6 +24,11 @@ public class Pair {
 		this.setDevs(devs);
     }
 
+    public Pair(List<Developer> devs, boolean opsPair) {
+		this(devs);
+		this.setOpsPair(opsPair);
+}
+    
 	public List<Developer> getDevs() {
 		return Arrays.asList(devs.toArray(new Developer[0]));
 	}
@@ -69,6 +74,7 @@ public class Pair {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((devs == null) ? 0 : devs.hashCode());
+		result = prime * result + (opsPair ? 1231 : 1237);
 		return result;
 	}
 
@@ -86,12 +92,14 @@ public class Pair {
 				return false;
 		} else if (!devs.equals(other.devs))
 			return false;
+		if (opsPair != other.opsPair)
+			return false;
 		return true;
 	}
 	
 	@Override
 	public String toString() {
-		return "Pair [devs=" + devs + "]";
+		return "Pair [devs=" + devs + ", opsPair=" + opsPair + "]";
 	}
 
 	public boolean isSolo() {
