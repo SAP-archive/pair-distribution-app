@@ -33,21 +33,6 @@ public class DeveloperTest {
 	}
 	
 	@Test
-	public void testDoDDefault() {
-		Developer developer = new Developer("developerId");
-		
-		assertThat(developer.getDoD(), is(false));
-	}
-	
-	@Test
-	public void testDoD() {
-		Developer developer = new Developer("developerId");
-		developer.setDoD(true);
-		
-		assertThat(developer.getDoD(), is(true));
-	}
-	
-	@Test
 	public void testNew() {
 		Developer developer = new Developer("developerId");
 		

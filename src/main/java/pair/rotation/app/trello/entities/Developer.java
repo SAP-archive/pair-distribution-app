@@ -4,13 +4,11 @@ public class Developer implements Comparable<Developer>{
 
 	private String id;
 	private Company company;
-	private boolean developerOnDuty;
 	private boolean newDeveloper;
 
 	public Developer(String id) {
 		this.id = id;
 		this.company = new Company("");
-		this.developerOnDuty = false;
 		this.newDeveloper = false;
 	}
 
@@ -24,14 +22,6 @@ public class Developer implements Comparable<Developer>{
 	
 	public Company getCompany() {
 		return company;
-	}
-
-	public boolean getDoD() {
-		return developerOnDuty;
-	}
-
-	public void setDoD(boolean developerOnDuty) {
-		this.developerOnDuty = developerOnDuty;
 	}
 
 	public boolean getNew() {

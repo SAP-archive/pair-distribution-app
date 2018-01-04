@@ -16,11 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import pair.rotation.app.persistence.mongodb.TrelloPairsRepository;
-import pair.rotation.app.trello.entities.Company;
-import pair.rotation.app.trello.entities.PairCombinations;
 import pair.rotation.app.trello.entities.DayPairs;
 import pair.rotation.app.trello.entities.Developer;
 import pair.rotation.app.trello.entities.Pair;
+import pair.rotation.app.trello.entities.PairCombinations;
 
 public class DayPairsHelper {
 	
@@ -74,10 +73,6 @@ public class DayPairsHelper {
 
 	
 	public void adaptPairsWeight(Map<Pair, Integer> pairsWeight, List<Developer> availableDevs) {
-		List<Developer> developersOnDoD = getFilteredDevs(availableDevs, developer -> developer.getDoD());
-		pairsWeight.keySet().stream().filter(pair -> !isPairConform(pair, developersOnDoD, isPairFromSameCompany()))
-		                             .forEach(pair -> { logger.info("pair needs DoD adaptation. Pair is: " + pair); addUnconformWeight(pairsWeight, pair); });
-		
 		List<Developer> newDevelopers = getFilteredDevs(availableDevs, developer -> developer.getNew());
 		pairsWeight.keySet().stream().filter(pair -> !isPairConform(pair, newDevelopers, isPairWithMixedExpirience()))		
                                      .forEach(pair -> { logger.info("pair with new Developers and needs adaptation. Pair is: " + pair); addUnconformWeight(pairsWeight, pair); });
@@ -158,17 +153,12 @@ public class DayPairsHelper {
 
 	public void rotateSoloPairIfAny(DayPairs todayPairs, PairCombinations pairCombination, Map<Pair, Integer> pairsWeight) {
 		Pair soloPair = todayPairs.getSoloPair();
-		if (soloPair != null && (isSoloPairForTwoDays(pairCombination, soloPair) || soloPair.getFirstDev().getDoD() || soloPair.getFirstDev().getNew())) {
+		if (soloPair != null && (isSoloPairForTwoDays(pairCombination, soloPair) || soloPair.getFirstDev().getNew())) {
 			Developer soloDeveloper = soloPair.getFirstDev();
 			Pair pairWithHighestWeight = null;
 			Developer newPairForSoloDeveloper = null;
 			Collection<Pair> allPairsOfTheDay = todayPairs.getPairs().values();
-			Company soloPairCompany = soloDeveloper.getCompany();
-			if (soloDeveloper.getDoD()) {
-				pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight,
-						hasPairDevFromCompany(soloPairCompany));
-				newPairForSoloDeveloper = rotateSoloDoD(pairWithHighestWeight, soloPairCompany);
-			} else if (soloDeveloper.getNew()) {
+			if (soloDeveloper.getNew()) {
 				pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight, isPairWithNoNewDevelopers());
 				newPairForSoloDeveloper = rotateSoloNewDeveloper(pairWithHighestWeight);
 			} else {
@@ -190,21 +180,6 @@ public class DayPairsHelper {
 		newPairForSoloDeveloper = pairWithHighestWeight == null ? null : getRandomDev(pairWithHighestWeight.getDevs());
 		return newPairForSoloDeveloper;
 	}
-
-	private Developer rotateSoloDoD(Pair pairWithHighestWeight, Company soloPairCompany) {
-		Developer result = null;
-		if (pairWithHighestWeight != null) {
-			result = pairWithHighestWeight.isPairFromSameCompany()
-					? getRandomDev(pairWithHighestWeight.getDevs())
-					: pairWithHighestWeight.getDevFromCompany(soloPairCompany);
-		}
-		return result;
-	}
-
-	private Predicate<? super Pair> isPairFromSameCompany() {
-		return p -> p.getFirstDev().getCompany().equals(p.getOtherDev(p.getFirstDev()).getCompany());
-	}
-	
 	private Predicate<? super Pair> isPairWithMixedExpirience() {
 		return p -> !(p.getFirstDev().getNew() && p.getOtherDev(p.getFirstDev()).getNew());
 	}
@@ -219,9 +194,6 @@ public class DayPairsHelper {
 		return firstDayPair!= null && secondDayPair != null && firstDayPair.contains(soloPair) && secondDayPair.contains(soloPair);
 	}
 	
-	private Predicate<? super Pair> hasPairDevFromCompany(Company soloPairCompany) {
-		return p -> p.getDevFromCompany(soloPairCompany) != null;
-	}
 	
 	private Predicate<? super Pair> alwaysTrue() {
 		return p -> true;

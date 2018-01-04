@@ -74,12 +74,9 @@ public class DevPairCombinations implements PairCombinations {
 	private boolean isPairRotationTime(Pair trackPairOneDayBack, Pair trackPairTwoDaysBack, List<Developer> availableDevs) {
 		if(trackPairOneDayBack != null){
 			boolean pairForTwoDays = isPairForTwoDays(trackPairOneDayBack, trackPairTwoDaysBack);
-			boolean pairDoDConform = isPairConform(trackPairOneDayBack, getFilteredDevs(availableDevs, developer -> developer.getDoD()), isPairFromSameCompany());
 			boolean pairNewDevConform = isPairConform(trackPairOneDayBack, getFilteredDevs(availableDevs, developer -> developer.getNew()), isPairWithMixedExpirience());
-			logger.info("Rotation time for longest dev is : " + pairForTwoDays);
-			logger.info("Rotation time for DoDConform is : " + !pairDoDConform);
-			logger.info("Rotation time for NewDevelopers is : " + !pairNewDevConform);
-			return trackPairOneDayBack != null && (pairForTwoDays || !pairDoDConform || !pairNewDevConform);			
+			logger.info("Rotation time for longest dev is : " + pairForTwoDays + " and for NewDevelopers is : " + !pairNewDevConform);
+			return pairForTwoDays || !pairNewDevConform;			
 		}
 		return false;
 	}
@@ -90,10 +87,6 @@ public class DevPairCombinations implements PairCombinations {
 	
 	private List<Developer> getFilteredDevs(List<Developer> availableDevs, Predicate<? super Developer> predicate) {
 		return availableDevs.stream().filter(predicate).collect(Collectors.toList());
-	}
-	
-	private Predicate<? super Pair> isPairFromSameCompany() {
-		return p -> p.getFirstDev().getCompany().equals(p.getOtherDev(p.getFirstDev()).getCompany());
 	}
 	
 	private Predicate<? super Pair> isPairWithMixedExpirience() {
