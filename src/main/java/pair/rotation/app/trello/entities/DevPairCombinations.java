@@ -54,8 +54,8 @@ public class DevPairCombinations implements PairCombinations {
 	public boolean isRotationTime(List<String> possibleTracks, final List<Developer> availableDevs) {
 		boolean rotation = false;
 		for (String track : possibleTracks) {
-			Pair trackPairOneDayBack = getPastPairByTrack(track, 0);
-			Pair trackPairTwoDaysBack = getPastPairByTrack(track, 1);
+			Pair trackPairOneDayBack = getPastPairByTrack(0, track);
+			Pair trackPairTwoDaysBack = getPastPairByTrack(1, track);
 			rotation = rotation || isPairRotationTime(trackPairOneDayBack, trackPairTwoDaysBack, availableDevs);
 		}
 		return rotation;
@@ -67,10 +67,6 @@ public class DevPairCombinations implements PairCombinations {
 	}
 
 		
-	private Pair getPastPairByTrack(String track, int numberOfDaysBack){
-		return numberOfDaysBack < pastPairs.size() ? pastPairs.get(numberOfDaysBack).getPairByTrack(track) : null;
-	}
-
 	private boolean isPairRotationTime(Pair trackPairOneDayBack, Pair trackPairTwoDaysBack, List<Developer> availableDevs) {
 		if(trackPairOneDayBack != null){
 			boolean pairForTwoDays = isPairForTwoDays(trackPairOneDayBack, trackPairTwoDaysBack);
