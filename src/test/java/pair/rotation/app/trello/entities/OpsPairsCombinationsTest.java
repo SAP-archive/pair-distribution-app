@@ -88,6 +88,22 @@ public class OpsPairsCombinationsTest {
 	}
 	
 	@Test
+	public void testGetPastPairByTrackForMissingTrack() {
+		OpsPairCombinations devPairCombinations = new OpsPairCombinations(getPairsListFromDevs(getStandardDevs()));
+		
+		
+		assertThat(devPairCombinations.getPastPairByTrack(1, "track5"), is(nullValue()));
+	}
+	
+	@Test
+	public void testIsRotationTimeForEmptyHistory() {
+		OpsPairCombinations devPairCombinations = new OpsPairCombinations(new ArrayList<>());
+		
+		
+		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1"), getStandardDevs()), is(false));
+	}
+	
+	@Test
 	public void testIsRotationTimeForSameWeek() {
 		List<Developer> standardDevs = getStandardDevs();
 		DayPairs pairs = new DayPairs();

@@ -74,7 +74,6 @@ public class Pair {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((devs == null) ? 0 : devs.hashCode());
-		result = prime * result + (opsPair ? 1231 : 1237);
 		return result;
 	}
 
@@ -91,8 +90,6 @@ public class Pair {
 			if (other.devs != null)
 				return false;
 		} else if (!devs.equals(other.devs))
-			return false;
-		if (opsPair != other.opsPair)
 			return false;
 		return true;
 	}

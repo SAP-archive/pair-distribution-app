@@ -42,8 +42,8 @@ public class DevPairCombinations implements PairCombinations {
 	public Pair getPastPairByTrack(int daysBack, String track) {
 		if(pastPairs.size() > daysBack) {
 			Pair pairByTrack = pastPairs.get(daysBack).getPairByTrack(track);
-			if(pairByTrack.isOpsPair()) {
-				throw new RuntimeException("Dev Pair shouldn't be Ops");
+			if(pairByTrack != null && pairByTrack.isOpsPair()) {
+				throw new RuntimeException("Dev Pair shouldn't be Ops for track: " + track);
 			}
 			return pairByTrack;
 		}

@@ -78,6 +78,11 @@ public class DayPairs implements Comparable<DayPairs>{
 				                      .orElse(null);
 	}
 	
+	public void addPiars(Map<String, Pair> pairsToAdd) {
+		pairs.putAll(pairsToAdd);
+	}
+	
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

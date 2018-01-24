@@ -24,6 +24,7 @@ public class PairingBoard {
 
 	private static final String BUILD_PAIR_LABEL_COLOR = "orange";
 	private static final String COMMUNITY_PAIR_LABEL_COLOR = "green";
+	private static final String DEVOPS_PAIR_DESCRIPTION = "devops";
 	private static final String CREATE_LISTS = "/lists?";
     private static final String GET_LIST_CARDS = "/lists/{listId}/cards?";
 	private RestTemplateHttpClient httpClient;
@@ -31,6 +32,7 @@ public class PairingBoard {
 	private List<Developer> availableDevelopers;
 	private List<Developer> allDevelopers;
 	private List<Company> allCompanies;
+	private List<Company> devOpsCompanies;
 	private List<String> tracks;
 	private List<DayPairs> pastPairs;
 	private String accessKey;
@@ -44,6 +46,7 @@ public class PairingBoard {
 		availableDevelopers = new ArrayList<Developer>();
 		allDevelopers = new ArrayList<>();
 		allCompanies = new ArrayList<>();
+		devOpsCompanies = new ArrayList<>();
 		httpClient = new RestTemplateHttpClient();
 		trelloImpl = new TrelloImpl(applicationKey, accessKey, httpClient);
 	}
@@ -60,7 +63,10 @@ public class PairingBoard {
 	   return pastPairs;
    }
 
-	
+   public List<Company> getDevOpsCompanies(){
+	   return devOpsCompanies;
+   }
+   
 	public void syncTrelloBoardState() {
 		tracks = new ArrayList<String>();
 		pastPairs = new ArrayList<DayPairs>();
@@ -97,12 +103,17 @@ public class PairingBoard {
 			Pair pair = new Pair();
 			pair.setBuildPair(isPairWithLabel(card, BUILD_PAIR_LABEL_COLOR));
 			pair.setCommunityPair(isPairWithLabel(card, COMMUNITY_PAIR_LABEL_COLOR));
+			pair.setOpsPair(isPairDevOpsPair(card.getDesc()));
 			pair.setDevs( getDevelopersFromCard(card));
 			pairs.addPair(card.getName(), pair);
 			System.out.println(card.getName());
 			System.out.println(card.getDesc());
 		}
 		return pairs;
+	}
+
+	private boolean isPairDevOpsPair(String description) {
+		return DEVOPS_PAIR_DESCRIPTION.equals(description);
 	}
 
 	private void syncDevs(List<Card> cards) {
@@ -134,8 +145,7 @@ public class PairingBoard {
 
 	private void initDevOpsCompanies(String[] companyNames) {
 		for (String companyName : companyNames) {
-			Company company = getCompanyByName(companyName);
-			company.setDevOps(true);
+			devOpsCompanies.add(getCompanyByName(companyName));
 		}
 	}
 
@@ -196,13 +206,25 @@ public class PairingBoard {
 	}
 
 	private void addPairsToList(DayPairs pairs, TList newPairingList) {
-		for (int i = tracks.size() - 1; i >= 0; i--) {
-			if(pairs.getTracks().contains(tracks.get(i))){
-				String trackName = tracks.get(i);
+		addTracksToList(pairs, getDevOpsTracks(), newPairingList);
+		addTracksToList(pairs, tracks, newPairingList);
+	}
+
+	private List<String> getDevOpsTracks() {
+		return devOpsCompanies.stream().map(company -> company.getTrack()).collect(Collectors.toList());
+	}
+
+	private void addTracksToList(DayPairs pairs, List<String> tracksToAdd, TList newPairingList) {
+		for (int i = tracksToAdd.size() - 1; i >= 0; i--) {
+			if(pairs.getTracks().contains(tracksToAdd.get(i))){
+				String trackName = tracksToAdd.get(i);
 				Pair pairByTrack = pairs.getPairByTrack(trackName);
 				Card card = new Card();
 				card.setName(trackName);
 				card.setIdMembers(getIdsFromDevelopers(pairByTrack));
+				if(pairByTrack.isOpsPair()) {
+					card.setDesc(DEVOPS_PAIR_DESCRIPTION);
+				}
 				Card pairingCard = newPairingList.createCard(card);
 				if(pairByTrack.isBuildPair()){
 					pairingCard.addLabels(BUILD_PAIR_LABEL_COLOR);

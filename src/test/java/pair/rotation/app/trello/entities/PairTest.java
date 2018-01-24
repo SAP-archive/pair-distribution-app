@@ -124,16 +124,6 @@ public class PairTest {
 	}
 	
 	@Test
-	public void testEqualWithDifferentOpsValues()  {
-		Pair subject = new Pair(Arrays.asList(new Developer("dev1")));
-		subject.setOpsPair(true);
-		Pair subject2 = new Pair(Arrays.asList(new Developer("dev1")));
-		subject2.setOpsPair(false);
-		
-		assertThat(subject.equals(subject2), is(false));
-	}
-	
-	@Test
 	public void testEqualDifferentPairs()  {
 		Pair subject = new Pair(Arrays.asList(new Developer("dev1")));
 		Pair subject2 = new Pair(Arrays.asList(new Developer("dev2")));

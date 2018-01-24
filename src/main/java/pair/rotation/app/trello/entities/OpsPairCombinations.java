@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.WeekFields;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -13,10 +14,16 @@ import java.util.stream.Collectors;
 public class OpsPairCombinations implements PairCombinations {
 	
 	private List<DayPairs> pastPairs;
+	private int daysIntoFuture;
+
+	public OpsPairCombinations(List<DayPairs> dayPairs, int daysIntoFuture) {
+		this.pastPairs = dayPairs;
+		this.daysIntoFuture = daysIntoFuture;
+		sortByDescendDate();
+	}
 
 	public OpsPairCombinations(List<DayPairs> dayPairs) {
-		this.pastPairs = dayPairs;
-		sortByDescendDate();
+		this(dayPairs, 0);
 	}
 	
 	@Override
@@ -30,10 +37,14 @@ public class OpsPairCombinations implements PairCombinations {
 
 	@Override
 	public boolean isRotationTime(List<String> possibleTracks, List<Developer> availableDevs) {
-		LocalDateTime currentWeekDate = LocalDateTime.ofInstant(new Date().toInstant(), ZoneId.systemDefault());
-		LocalDateTime lastPairWeekDate = LocalDateTime.ofInstant(getLastDayPairs().getDate().toInstant(), ZoneId.systemDefault());
-		WeekFields weekFields = WeekFields.of(Locale.getDefault());
-		return currentWeekDate.get(weekFields.weekOfWeekBasedYear()) != lastPairWeekDate.get(weekFields.weekOfWeekBasedYear());
+		LocalDateTime currentWeekDate = LocalDateTime.ofInstant(getStartDate().toInstant(), ZoneId.systemDefault());
+		DayPairs lastDayPairs = getLastDayPairs();
+		if (lastDayPairs != null) {
+			LocalDateTime lastPairWeekDate = LocalDateTime.ofInstant(lastDayPairs.getDate().toInstant(), ZoneId.systemDefault());
+			WeekFields weekFields = WeekFields.of(Locale.getDefault());
+			return currentWeekDate.get(weekFields.weekOfWeekBasedYear()) != lastPairWeekDate.get(weekFields.weekOfWeekBasedYear());
+		}
+		return false;
 	}
 
 	@Override
@@ -48,8 +59,8 @@ public class OpsPairCombinations implements PairCombinations {
 	public Pair getPastPairByTrack(int daysBack, String track) {
 		if(pastPairs.size() > daysBack) {
 			Pair pairByTrack = pastPairs.get(daysBack).getPairByTrack(track);
-			if(!pairByTrack.isOpsPair()) {
-				throw new RuntimeException("Dev Pair should be Ops");
+			if(pairByTrack != null && !pairByTrack.isOpsPair()) {
+				throw new RuntimeException("Dev Pair should be Ops for track: " + track);
 			}
 			return pairByTrack;
 		}
@@ -66,5 +77,12 @@ public class OpsPairCombinations implements PairCombinations {
 			return pastPairs.get(0);
 		}
 		return null;
+	}
+	
+	private Date getStartDate() {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new Date());
+		cal.add(Calendar.DATE, daysIntoFuture);
+		return cal.getTime();
 	}
 }

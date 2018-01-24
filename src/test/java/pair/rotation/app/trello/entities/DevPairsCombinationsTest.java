@@ -23,8 +23,10 @@ public class DevPairsCombinationsTest {
 		
 		List<Pair> pairs = new DevPairCombinations(pairsListFromDevs).getPairs();
 		
-		assertThat(pairs.contains(opsPair), is(false));
 		assertThat(pairs.size(), is(5));
+		for (Pair pair : pairs) {
+			assertThat(pair.isOpsPair(), is(false));
+		}
 	}
 	
 	@Test
@@ -85,6 +87,14 @@ public class DevPairsCombinationsTest {
 		
 		
 		assertThat(devPairCombinations.getPastPairByTrack(3, "track1"), is(nullValue()));
+	}
+	
+	@Test
+	public void testGetPastPairByTrackForMissingTrack() {
+		DevPairCombinations devPairCombinations = new DevPairCombinations(getPairsListFromDevs(getStandardDevs()));
+		
+		
+		assertThat(devPairCombinations.getPastPairByTrack(1, "track4"), is(nullValue()));
 	}
 	
 	@Test
