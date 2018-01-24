@@ -138,60 +138,7 @@ public class PairTest {
 		
 		assertThat(subject.equals(subject2), is(false));
 	}
-		
-	
-	@Test
-	public void testGetDevFromCompany()  {
-		Developer developer = new Developer("dev1");
-		developer.setCompany(new Company("company"));
-		Developer developer2 = new Developer("dev2");
-		developer2.setCompany(new Company("someOtherCompany"));
-		Pair subject = new Pair(Arrays.asList(developer, developer2));
-		
-		assertThat(subject.getDevFromCompany(new Company("company")), is(developer));
-	}
-	
-	@Test
-	public void testGetDevFromCompanyNoDev()  {
-		Developer developer = new Developer("dev1");
-		developer.setCompany(new Company("someOtherCompany"));
-		Developer developer2 = new Developer("dev2");
-		developer2.setCompany(new Company("someOtherCompany"));
-		Pair subject = new Pair(Arrays.asList(developer, developer2));
-		
-		assertThat(subject.getDevFromCompany(new Company("company")), is(nullValue()));
-	}
-	
-	@Test
-	public void testIsPairFromSameCompanyFalse()  {
-		Developer developer = new Developer("dev1");
-		developer.setCompany(new Company("someCompany"));
-		Developer developer2 = new Developer("dev2");
-		developer2.setCompany(new Company("someOtherCompany"));
-		Pair subject = new Pair(Arrays.asList(developer, developer2));
-		
-		assertThat(subject.isPairFromSameCompany(), is(false));
-	}
-	
-	@Test
-	public void testIsPairFromSameCompanyTrue()  {
-		Developer developer = new Developer("dev1");
-		developer.setCompany(new Company("someCompany"));
-		Developer developer2 = new Developer("dev2");
-		developer2.setCompany(new Company("someCompany"));
-		Pair subject = new Pair(Arrays.asList(developer, developer2));
-		
-		assertThat(subject.isPairFromSameCompany(), is(true));
-	}
-	
-	@Test
-	public void testIsPairFromSameCompanyForSolo()  {
-		Developer developer = new Developer("dev1");
-		developer.setCompany(new Company("someCompany"));
-		Pair subject = new Pair(Arrays.asList(developer));
-		
-		assertThat(subject.isPairFromSameCompany(), is(true));
-	}
+
 	
 	@Test
 	public void testIsBuildPairFalse()  {

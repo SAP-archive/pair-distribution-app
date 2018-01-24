@@ -106,7 +106,7 @@ public class TrelloPairsController {
 		logger.info("Setting BuildPair");
 		pairsHelper.setBuildPair(todayDevPairs.getPairs().values(), buildPairsWeight);
 		logger.info("Setting CommunityPair");
-		pairsHelper.setCommunityPair(todayDevPairs.getPairs().values(), buildPairsWeight);
+		pairsHelper.setCommunityPair(todayDevPairs.getPairs().values(), communityPairsWeight);
 		logger.info("After setting build pair pairs are: " + todayDevPairs);
 		return todayDevPairs;
 	}
@@ -115,7 +115,7 @@ public class TrelloPairsController {
 			List<Developer> todayDevs, List<Company> devOpsCompanies) {
 		List<DayPairs> todayPairs = new ArrayList<>();
 		for (Company company : devOpsCompanies) {
-			List<Developer> companyDevs = company.getCompanyDevs(todayDevs);
+			List<Developer> companyDevs = company.getCompanyExperiencedDevs(todayDevs);
 			logger.info("Company :" + company.getName() + "devs are: " + companyDevs);
 			Map<Pair, Integer> companyDevOpsPairsWeight = pairsHelper.buildPairsWeightFromPastPairing(devOpsPairCombination, companyDevs);
 			logger.info("DevOpsPairs weight for company: " + company.getName() + " is " + companyDevOpsPairsWeight);

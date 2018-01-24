@@ -103,17 +103,6 @@ public class Pair {
 		return devs.size() == 1;
 	}
 
-	public Developer getDevFromCompany(Company soloPairCompany) {
-		return devs.stream().filter(developer -> developer.getCompany().equals(soloPairCompany)).findFirst().orElse(null);
-	}
-
-	public boolean isPairFromSameCompany() {
-		if(isComplete()){
-			return devs.get(0).getCompany().equals(devs.get(1).getCompany());
-		}
-		return true;
-	}
-
 	public boolean isBuildPair() {
 		return buildPair;
 	}

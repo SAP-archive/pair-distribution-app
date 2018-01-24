@@ -19,8 +19,8 @@ public class Company {
 		return name;
 	}
 		
-	public List<Developer> getCompanyDevs(List<Developer> todayDevs) {
-		return todayDevs.stream().filter(developer -> developer.getCompany().getName().equals(this.getName())).collect(Collectors.toList());
+	public List<Developer> getCompanyExperiencedDevs(List<Developer> todayDevs) {
+		return todayDevs.stream().filter(developer -> !developer.getNew()).filter(developer -> developer.getCompany().getName().equals(this.getName())).collect(Collectors.toList());
 	}
 
 	public String getTrack() {
