@@ -25,7 +25,7 @@ public class Company {
 	}
 
 	public String getTrack() {
-		return name.toUpperCase() + "-internal";
+		return name.toUpperCase() + "-ops/interrupt";
 	}
 
 	public String getCompanyTrack(List<String> possibleTracks) {

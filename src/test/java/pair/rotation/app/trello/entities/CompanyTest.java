@@ -34,7 +34,7 @@ public class CompanyTest {
 	
 	@Test
 	public void testGetTrack() {
-		assertThat(new Company("Company").getTrack(), is("COMPANY-internal"));
+		assertThat(new Company("Company").getTrack(), is("COMPANY-ops/interrupt"));
 	}
 	
 	@Test
