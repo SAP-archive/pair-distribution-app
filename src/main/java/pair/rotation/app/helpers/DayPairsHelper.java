@@ -208,9 +208,8 @@ public class DayPairsHelper {
 		for (Company company : companies) {
 			String companyTrack = company.getCompanyTrack(possibleTracks);
 			List<Developer> companyDevs = company.getDevs(todaysDevs);
-			int possibleCompanyTracksCount = (int) Math.ceil(companyDevs.size() / 2.0);
-			if ((companyDevs.size() == 1 && companyTrack != null) || (possibleCompanyTracksCount >= 2)) {
-				throw new RuntimeException("Company '" + company + "' has no devs for its tracks");
+			if (companyDevs.size() <= 1 && companyTrack != null) {
+				throw new RuntimeException("Company '" + company.getName() + "' has no devs for its tracks");
 			}
 		}
 		
