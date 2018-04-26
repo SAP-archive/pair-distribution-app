@@ -120,13 +120,16 @@ public class TrelloPairsController {
 			todayPairs.add(dayPairs);
 			logger.info("Today DevOpsPairs for company: " + company.getName() + " are " + todayPairs);
 		}
-		logger.info("Setting BuildPair");
-		List<Pair> allDayPairs = new ArrayList<>();
-		todayPairs.stream().map(dayPairs -> allDayPairs.addAll(dayPairs.getPairs().values()));
-		pairsHelper.setBuildPair(allDayPairs, buildPairsWeight);
-		logger.info("Setting CommunityPair");
-		pairsHelper.setCommunityPair(allDayPairs, communityPairsWeight);
-		logger.info("After setting build pair pairs are: " + allDayPairs);
+		
+		if(todayPairs.size() > 0) {
+			logger.info("Setting BuildPair");
+			List<Pair> allDayPairs = new ArrayList<>();
+			todayPairs.stream().map(dayPairs -> allDayPairs.addAll(dayPairs.getPairs().values()));
+			pairsHelper.setBuildPair(allDayPairs, buildPairsWeight);
+			logger.info("Setting CommunityPair");
+			pairsHelper.setCommunityPair(allDayPairs, communityPairsWeight);
+			logger.info("After setting build pair pairs are: " + allDayPairs);			
+		}
 		return todayPairs;
 	}
 }
