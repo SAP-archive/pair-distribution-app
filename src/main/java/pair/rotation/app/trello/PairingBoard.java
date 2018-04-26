@@ -66,6 +66,10 @@ public class PairingBoard {
    public List<Company> getDevOpsCompanies(){
 	   return devOpsCompanies;
    }
+
+   public List<Company> getCompanies(){
+	   return allCompanies;
+   }
    
 	public void syncTrelloBoardState() {
 		tracks = new ArrayList<String>();
