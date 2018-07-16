@@ -98,10 +98,9 @@ public class PairingBoard {
 	private DayPairs syncPairs(TList tList, List<Card> cards) {
 		DayPairs pairs = new DayPairs();
 		try {
-			pairs.setDate(getDateFromCradName(tList.getName()));
+			pairs.setDate(getDateFromListName(tList.getName()));
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException("Unsupported date format in list name: " + tList.getName(), e);
 		}
 		for (Card card : cards) {
 			Pair pair = new Pair();
@@ -191,7 +190,7 @@ public class PairingBoard {
 		return trelloImpl.getBoardLists(pairingBoardId);
 	}
 	
-	public Date getDateFromCradName(String name) throws ParseException{
+	public Date getDateFromListName(String name) throws ParseException{
 		String date = name.substring(name.indexOf("(") + 1, name.lastIndexOf(")"));
 		return new DayPairs().parse(date);
 	}

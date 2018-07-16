@@ -23,10 +23,8 @@ public class Application extends SpringBootServletInitializer
     
 	public static void main(String[] args)
 	{
-    	SecurityContextHolder.getContext()
-		.setAuthentication(new UsernamePasswordAuthenticationToken("user", "N/A",
-				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER")));
-    	
-		SpringApplication.run(Application.class, args);
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken("user", "N/A", AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+        SpringApplication.run(Application.class, args);
 	}
 }
