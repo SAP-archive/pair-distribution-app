@@ -1,66 +1,82 @@
-# pair-rotation-app
+# Pair Rotation Applicaiton
 
-This is a CloudFoundry application which can be used for pair generation. The applicaiton can support teams which do development and operation in pairing mode. Currently, supported use cases are: 
-- One team from one company which does development
-  - optional operation support
-- Multiple teams from different companies developing together 
-  - optional operation support
-  - optioal support for company specific projects
+The `pair-rotation-app` supports teams which do pair programming and operations in pairing mode (DevOps). It is a CloudFoundry application which can generate pair combinations based on different strategies.  Currently, supported use cases for pair programming are: 
+* One team from one company which does development
+* One team from one company which does development and operations
+* Multiple teams from different companies developing together
+* Multiple teams from different companies developing together and some of the companies do operations
+* Multiple teams from different companies developing together and some of the companies do operations and company specific projects
 
 There are different strategies for pair generation. Currently, supported strategies are:
-- For develpment
-  - rotate every two days
-  - developer with more days in the track rotates out
-  - creates new pair combinations based on the pair weight. For each pair combination, a weight is computed which is related to how often they worked together. A higher weight means that a pair combination worked more often together than a pair with smaller weight. Pair generation takes the pairs with the smallest weight.
-- In case of multiple companies with company specific projects
-  - only developers from the company owning the project are considered
-  - the rest of the rules are the same like for development
-- For operation
-  - rotate every week
-  - only developers from the same company are considered
-  - the rest of the rules are the same like for development
+* For development
+  * rotate every two days
+  * the developer with more days in the track rotates out
+  * new pair combinations are generated based on the pair weights. Based on it's history the `pair-rotation-app` computes for each pair combination, a weight which is related to how often a pair worked together. A higher weight means that a pair combination worked more often together than a pair with smaller weight. Pair generation takes the pairs with the smallest weight.
+* For operations
+  * rotate every week
+  * for each company which do operations one operations pair is generated. The operations pairs are developers from the same company and have a card title `<company-name>-ops/interrupt` 
+  * the rest of the rules are the same like for development
+* In case of multiple companies with company specific projects
+  * for each company with company specific projects one pair is generated. The pairs are build with developers from the same company and have a card title `<company-name>-<company-project>`
+  * the rest of the rules are the same like for development
 
-## REST APIs
+### REST APIs
 * For production use: `/pairs/trello`
 * For testing `pairs/test/trello?days=<days-in-the-future`
 
 # Requirements
 
-- Access to maven central repository
-- Java 8
-- CloudFoundry enviroment with MongoDB service
+- [MVN CLI](https://maven.apache.org/download.cgi#Installation) 
+- [Java 8](https://java.com/download/)
+- [CloudFoundry](https://www.cloudfoundry.org/) enviroment with MongoDB service
 - [Trello](http://trello.com) account
 
-#### Download an Installation
+# Download an Installation
 
-- Clone this repository locally
-- Log in to your CloudFoundry account with the CF CLI
-- Deploy the application by executing the `deploy.sh` script. This script will build the application and deploy it to the CF account you logged in in the previous step.
-
+* Clone this repository locally
+* Log in to your CloudFoundry account with the CF CLI
+* Build the application and deploy it to CloudFundry. The application configuration has to be completed before deploying it. 
+  * Windows:
+  ```
+  $ cd <project-root-folder>
+  
+  # build and execute unit tests
+  $ mvn clean install
+  
+  # deploy the application to CloudFoundry
+  $ cf push
+  ```
+  * Mac OS or Linxus: 
+  ```
+  $ cd <project-root-folder>
+  # execute the script
+  $ ./deploy.sh
+  ```
 
 # Configuration 
 
-## Configure Trello access
+### Configure Trello access
 
 ```
-cp deploy/application.properties.template deploy/application.properties
-cp deploy/manifest.yml.template deploy/manifest.yml
+$ cd <project-root-folder>
+$ cp deploy/application.properties.template src/main/resources/application.properties
+$ cp deploy/manifest.yml.template manifest.yml
 ```
-Replace all place holders `<...>` inside. Trello credentials for your account can be generated [here](https://developers.trello.com/get-started/start-building#authenticate). You will need also the Id of your trello board. Use the sandbox provided by trello available [here](https://developers.trello.com/sandbox) to get it. With your API key you can executed samples in the sandbox. Execute the `Get Boards` sample to find out the Id of your board. 
+Edit both files and replace all place holders `<...>` inside. Trello credentials for your account can be generated [here](https://developers.trello.com/get-started/start-building#authenticate). You will need also the Id of your trello board. Use the sandbox provided by trello available [here](https://developers.trello.com/sandbox) to get it. With your API key you can executed samples in the sandbox. Execute the `Get Boards` sample to find out the Id of your board. 
 
-## Trello account preparation
-The pair-rotation-application accesses information about developers, tracks and companies via Trello-APIs, uses its history and generates the new pairs for the day which is a Trello list.
+### Trello account preparation
+The `pair-rotation-app` accesses information about developers, tracks and companies via Trello-APIs, uses its history and generates the new pairs for the day which is a Trello list.
 * Create a list called `Devs`. 
-  * Create a card called `Devs` and add all developers of your team as members of to this card. Rotation app will use this information for pair generation.
-  * If operation pair is required create a card called `DevOps: <company-name>`. This will automatically generate an operation pair for the `<company-name>`. 
-  * create a card called `New`. This card is for all new developer. The members of this card will not be considered for the operation pair.
-  * create a card `<company-name>` and add all developers of the `<company-name>` as members of this card.
+  * Create a card called `Devs` and add all developers of your team as members to this card. Rotation app will use this information for pair generation.
+  * If operations pair is required create a card called `DevOps: <company-name>`. This will automatically generate an operations pair for the `<company-name>`. 
+  * create a card called `New`. This card is for all new developer. The members of this card will not be considered for the operations pair.
+  * create a card `<company-name>` for each company and add all developers of a `<company-name>` as members of their company card.
 * create a list called `Tracks`. 
-  * For company specific project create a track wiht card title `<company-name>-<project-name>`
   * Create a card for each track prioritized from the top to the bottom. 
+  * For company specific project create a card with title `<company-name>-<project-name>`
   
 
-## Prepare persistence
+### Prepare persistence
 Create the MongoDB service instance required for the application. E.g. with follwoing command:
 ```
 cf cs mongodb <service-plan> pairsdb
@@ -68,18 +84,18 @@ cf cs mongodb <service-plan> pairsdb
 
 # Limitations
 
-## Trello use
+### Trello use
 The use of the Trello APIs and Trello service are subject to applicable Trello agreements.
 
-## Pair Generation
-Pair generation doesn't consider tracks. This means tracks don't play any role yet during pair generation.
-This is a missing feature which can improve the pair generation
+### Pair Generation
+Pair generation doesn't consider tracks. This means tracks don't play any role during pair generation.
+This is a missing feature which can improve the pair generation.
 
 # License
 Copyright (c) 2017 SAP SE
 
 Except as provided below, this software is licensed under the Apache License, Version 2.0 (the "License"); you may not use this software except in compliance with the License.You may obtain a copy of the License at:
 
-http://www.apache.org/licenses/LICENSE-2.0
+https://github.com/SAP/pair-rotation-app/blob/master/LICENSE
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
