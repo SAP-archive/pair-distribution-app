@@ -35,20 +35,20 @@ public class PairingBoard {
 	private List<Company> devOpsCompanies;
 	private List<String> tracks;
 	private List<DayPairs> pastPairs;
-	private String accessKey;
-	private String applicationKey;
+	private String apiToken;
+	private String apiKey;
 	private String pairingBoardId;
     
-	public PairingBoard(String accessKey, String applicationKey, String pairingBoardId) {
-    		this.accessKey = accessKey;
-		this.applicationKey = applicationKey;
+	public PairingBoard(String apiToken, String apiKey, String pairingBoardId) {
+		this.apiToken = apiToken;
+		this.apiKey = apiKey;
 		this.pairingBoardId = pairingBoardId;
 		availableDevelopers = new ArrayList<>();
 		allDevelopers = new ArrayList<>();
 		allCompanies = new ArrayList<>();
 		devOpsCompanies = new ArrayList<>();
 		httpClient = new RestTemplateHttpClient();
-		trelloImpl = new TrelloImpl(applicationKey, accessKey, httpClient);
+		trelloImpl = new TrelloImpl(apiKey, apiToken, httpClient);
 	}
     
 	public List<Developer> getDevs() {
@@ -194,7 +194,7 @@ public class PairingBoard {
 	
 	public List<Card> getListCards(String listId) {
 		TrelloUrl getListCardsURL = TrelloUrl.createUrl(GET_LIST_CARDS);
-		return Arrays.asList(httpClient.get(getListCardsURL.asString(), Card[].class, listId, applicationKey, accessKey));
+		return Arrays.asList(httpClient.get(getListCardsURL.asString(), Card[].class, listId, apiKey, apiToken));
 	}
 
 	public void addTodayPairsToBoard(DayPairs pairs, int daysIntoFuture) {
@@ -245,7 +245,7 @@ public class PairingBoard {
 		tList.setName(name);
 		tList.setIdBoard(pairingBoardId);
 		createListURL.params();
-		return httpClient.postForObject(createListURL.asString(), tList, TList.class, applicationKey, accessKey);
+		return httpClient.postForObject(createListURL.asString(), tList, TList.class, apiKey, apiToken);
 	}
 	
 	private Date getFutureDate(Date dateToStart, int daysIntoFuture) {

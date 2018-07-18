@@ -33,11 +33,11 @@ public class TrelloPairsController {
     private boolean rotateEveryday = false;
     
     private TrelloPairsRepository repository;
-	@Value("${trello.access.key}")
-	private String accessKey;
-	@Value("${trello.application.key}")
-	private String applicationKey;
-	@Value("${trello.pairing.board}")
+	@Value("${trello.api.token}")
+	private String apiToken;
+	@Value("${trello.api.key}")
+	private String apiKey;
+	@Value("${trello.pairing.board.id}")
 	private String pairingBoardId;
 	
     @Autowired
@@ -61,7 +61,7 @@ public class TrelloPairsController {
     }
 
 	private DayPairs generatePairs(int daysIntoFuture) {
-		PairingBoard pairingBoardTrello = new PairingBoard(accessKey, applicationKey, pairingBoardId);
+		PairingBoard pairingBoardTrello = new PairingBoard(apiToken, apiKey, pairingBoardId);
 		pairingBoardTrello.syncTrelloBoardState();
 		logger.info("Syncing state finished. Updating database state");
 		DayPairsHelper pairsHelper = new DayPairsHelper(repository);
