@@ -29,11 +29,11 @@ public class Company {
 	}
 
 	public String getCompanyTrack(List<String> possibleTracks) {
-		return possibleTracks.stream().filter(track -> isCompanyTrack(track)).findFirst().orElse(null);
+		return possibleTracks.stream().filter(this::isCompanyTrack).findFirst().orElse(null);
 	}
 
 	public boolean isCompanyTrack(String track) {
-		return track.split("-")[0].toLowerCase().equals(getName());
+		return track.split("-")[0].equalsIgnoreCase(getName());
 	}
 
 	public List<Developer> getDevs(List<Developer> todayDevs) {

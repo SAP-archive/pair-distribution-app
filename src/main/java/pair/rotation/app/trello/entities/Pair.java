@@ -14,7 +14,7 @@ public class Pair {
 	private boolean opsPair;
 
     public Pair() {
-    		devs = new ArrayList<Developer>(2);
+    		devs = new ArrayList<>(2);
     		buildPair = false;
     		opsPair = false;
     }
@@ -89,8 +89,9 @@ public class Pair {
 		if (devs == null) {
 			if (other.devs != null)
 				return false;
-		} else if (!devs.equals(other.devs))
+		} else if (!devs.equals(other.devs)) {
 			return false;
+		}
 		return true;
 	}
 	

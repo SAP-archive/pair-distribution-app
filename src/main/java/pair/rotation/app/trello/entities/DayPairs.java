@@ -19,7 +19,7 @@ public class DayPairs implements Comparable<DayPairs>{
 	
 	public DayPairs() {
 		dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
-		pairs = new HashMap<String, Pair>();
+		pairs = new HashMap<>();
 		date = getDateWithoutTime(new Date());
 	}
 	
@@ -74,7 +74,7 @@ public class DayPairs implements Comparable<DayPairs>{
 	public Pair getSoloPair() {
 		return pairs.keySet().stream().filter(track -> getPairByTrack(track).isSolo() )
 				                      .findFirst()
-				                      .map(soloTrack -> getPairByTrack(soloTrack))
+				                      .map(this::getPairByTrack)
 				                      .orElse(null);
 	}
 	
@@ -103,8 +103,9 @@ public class DayPairs implements Comparable<DayPairs>{
 		if (date == null) {
 			if (other.date != null)
 				return false;
-		} else if (!date.equals(other.date))
+		} else if (!date.equals(other.date)) {
 			return false;
+		}
 		return true;
 	}
 	

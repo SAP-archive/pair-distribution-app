@@ -43,7 +43,7 @@ public class PairingBoard {
     		this.accessKey = accessKey;
 		this.applicationKey = applicationKey;
 		this.pairingBoardId = pairingBoardId;
-		availableDevelopers = new ArrayList<Developer>();
+		availableDevelopers = new ArrayList<>();
 		allDevelopers = new ArrayList<>();
 		allCompanies = new ArrayList<>();
 		devOpsCompanies = new ArrayList<>();
@@ -72,17 +72,17 @@ public class PairingBoard {
    }
    
 	public void syncTrelloBoardState() {
-		tracks = new ArrayList<String>();
-		pastPairs = new ArrayList<DayPairs>();
+		tracks = new ArrayList<>();
+		pastPairs = new ArrayList<>();
 		for (TList tList : getLits()) {
 			String listName = tList.getName();
 			List<Card> cards = getListCards(tList.getId());
-			if ("devs".equals(listName.toLowerCase())){
+			if ("devs".equalsIgnoreCase(listName)){
 				syncDevs(cards);
 				syncDevsMetadata(cards);
 			}
 			
-			if ("tracks".equals(listName.toLowerCase())){
+			if ("tracks".equalsIgnoreCase(listName)){
 				for (Card card : cards) {
 					tracks.add(card.getName());
 				}
@@ -109,8 +109,6 @@ public class PairingBoard {
 			pair.setOpsPair(isPairDevOpsPair(card.getDesc()));
 			pair.setDevs( getDevelopersFromCard(card));
 			pairs.addPair(card.getName(), pair);
-			System.out.println(card.getName());
-			System.out.println(card.getDesc());
 		}
 		return pairs;
 	}
@@ -120,14 +118,14 @@ public class PairingBoard {
 	}
 
 	private void syncDevs(List<Card> cards) {
-		cards.stream().filter(card -> "devs".equals(card.getName().toLowerCase()))
+		cards.stream().filter(card -> "devs".equalsIgnoreCase(card.getName()))
 		              .forEach(card -> availableDevelopers.addAll(getDevelopersFromCard(card)));
 	}
 	
 	private void syncDevsMetadata(List<Card> cards) {
 		for (Card card : cards) {
 			String lowerCaseCardName = card.getName().toLowerCase();
-			if (lowerCaseCardName.startsWith("devops")) {
+			if (lowerCaseCardName.startsWith(DEVOPS_PAIR_DESCRIPTION)) {
 				String[] companyNames = parseDevOpsCompanies(lowerCaseCardName);
 				initDevOpsCompanies(companyNames);
 			} else if ("new".equals(lowerCaseCardName)) {
@@ -153,18 +151,16 @@ public class PairingBoard {
 	}
 
 	private boolean isPairWithLabel(Card card, String labelColor) {
-		return card.getLabels().stream().filter(label -> labelColor.equals(label.getColor()))
-				                        .findAny()
-				                        .isPresent();
+		return card.getLabels().stream().anyMatch(label -> labelColor.equals(label.getColor()));
 	}
 	
 	private List<Developer> getDevelopersFromCard(Card card) {
-		return card.getIdMembers().stream().map(developerId -> getDeveloperById(developerId)).collect(Collectors.toList());
+		return card.getIdMembers().stream().map(this::getDeveloperById).collect(Collectors.toList());
 	}
 	
 	private void setDevsCompany(String companyName, Card card) {
 		Company company = getCompanyByName(companyName);
-		card.getIdMembers().stream().map(developerId -> getDeveloperById(developerId)).forEach(developer -> developer.setCompany(company));
+		card.getIdMembers().stream().map(this::getDeveloperById).forEach(developer -> developer.setCompany(company));
 	}
 
 	private Company getCompanyByName(String companyName){
@@ -191,15 +187,14 @@ public class PairingBoard {
 	}
 	
 	public Date getDateFromListName(String name) throws ParseException{
-		String date = name.substring(name.indexOf("(") + 1, name.lastIndexOf(")"));
+		String date = name.substring(name.indexOf('(') + 1, name.lastIndexOf(')'));
 		return new DayPairs().parse(date);
 	}
 	
 	
 	public List<Card> getListCards(String listId) {
 		TrelloUrl getListCardsURL = TrelloUrl.createUrl(GET_LIST_CARDS);
-		List<Card> listCards = Arrays.asList(httpClient.get(getListCardsURL.asString(), Card[].class, listId, applicationKey, accessKey));
-		return listCards;
+		return Arrays.asList(httpClient.get(getListCardsURL.asString(), Card[].class, listId, applicationKey, accessKey));
 	}
 
 	public void addTodayPairsToBoard(DayPairs pairs, int daysIntoFuture) {
@@ -214,7 +209,7 @@ public class PairingBoard {
 	}
 
 	private List<String> getDevOpsTracks() {
-		return devOpsCompanies.stream().map(company -> company.getTrack()).collect(Collectors.toList());
+		return devOpsCompanies.stream().map(Company::getTrack).collect(Collectors.toList());
 	}
 
 	private void addTracksToList(DayPairs pairs, List<String> tracksToAdd, TList newPairingList) {
@@ -240,7 +235,7 @@ public class PairingBoard {
 	}
 
 	private List<String> getIdsFromDevelopers(Pair pair) {
-		return pair.getDevs().stream().map(developer -> developer.getId()).collect(Collectors.toList());
+		return pair.getDevs().stream().map(Developer::getId).collect(Collectors.toList());
 	}
 	
 	private TList createNewPairingList(DayPairs pairs, int daysIntoFuture) {
@@ -250,8 +245,7 @@ public class PairingBoard {
 		tList.setName(name);
 		tList.setIdBoard(pairingBoardId);
 		createListURL.params();
-		TList newPairingList = httpClient.postForObject(createListURL.asString(), tList, TList.class, applicationKey, accessKey);
-		return newPairingList;
+		return httpClient.postForObject(createListURL.asString(), tList, TList.class, applicationKey, accessKey);
 	}
 	
 	private Date getFutureDate(Date dateToStart, int daysIntoFuture) {

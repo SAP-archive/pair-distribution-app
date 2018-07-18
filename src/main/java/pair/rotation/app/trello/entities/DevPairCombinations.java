@@ -26,7 +26,7 @@ public class DevPairCombinations implements PairCombinations {
 		List<Pair> result = new ArrayList<>();
 		pastPairs.stream().forEach(dayPairs -> dayPairs.getPairs().values().stream()
                 .filter(pair -> !pair.isOpsPair())
-                .forEach(pair -> result.add(pair)));
+                .forEach(result::add));
 		return result;
 	}
 
@@ -71,7 +71,7 @@ public class DevPairCombinations implements PairCombinations {
 		if(trackPairOneDayBack != null){
 			boolean pairForTwoDays = isPairForTwoDays(trackPairOneDayBack, trackPairTwoDaysBack);
 			boolean pairNewDevConform = isPairConform(trackPairOneDayBack, getFilteredDevs(availableDevs, developer -> developer.getNew()), isPairWithMixedExpirience());
-			logger.info("Rotation time for longest dev is : " + pairForTwoDays + " and for NewDevelopers is : " + !pairNewDevConform);
+			logger.info("Rotation time for longest dev is : {} and for NewDevelopers is : {}", pairForTwoDays, !pairNewDevConform);
 			return pairForTwoDays || !pairNewDevConform;			
 		}
 		return false;

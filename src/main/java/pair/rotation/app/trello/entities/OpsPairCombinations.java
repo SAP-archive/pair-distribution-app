@@ -29,9 +29,7 @@ public class OpsPairCombinations implements PairCombinations {
 	@Override
 	public List<Pair> getPairs() {
 		List<Pair> result = new ArrayList<>();
-		pastPairs.stream().forEach(dayPairs -> dayPairs.getPairs().values().stream()
-                .filter(pair -> pair.isOpsPair())
-                .forEach(pair -> result.add(pair)));
+		pastPairs.stream().forEach(dayPairs -> dayPairs.getPairs().values().stream().filter(Pair::isOpsPair).forEach(result::add));
 		return result;
 	}
 
@@ -50,7 +48,7 @@ public class OpsPairCombinations implements PairCombinations {
 	@Override
 	public List<Pair> getPastPairs(int daysBack) {
 		if(pastPairs.size() > daysBack) {
-			return pastPairs.get(daysBack).getPairs().values().stream().filter(pair -> pair.isOpsPair()).collect(Collectors.toList());
+			return pastPairs.get(daysBack).getPairs().values().stream().filter(Pair::isOpsPair).collect(Collectors.toList());
 		}
 		return null;
 	}
@@ -73,7 +71,7 @@ public class OpsPairCombinations implements PairCombinations {
 	}
 	
 	private DayPairs getLastDayPairs() {
-		if(pastPairs.size() > 0) {
+		if(!pastPairs.isEmpty()) {
 			return pastPairs.get(0);
 		}
 		return null;

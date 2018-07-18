@@ -30,7 +30,7 @@ import pair.rotation.app.trello.entities.PairCombinations;
 public class TrelloPairsController {
    
     private static final Logger logger = LoggerFactory.getLogger(TrelloPairsController.class);
-    private boolean rotate_everyday = false;
+    private boolean rotateEveryday = false;
     
     private TrelloPairsRepository repository;
 	@Value("${trello.access.key}")
@@ -57,7 +57,7 @@ public class TrelloPairsController {
     
     @RequestMapping(value = "/pairs/rotate", method = RequestMethod.PUT)
     public void pairs(@RequestParam("everyday") boolean everyday ) {
-    		rotate_everyday = everyday;
+    		rotateEveryday = everyday;
     }
 
 	private DayPairs generatePairs(int daysIntoFuture) {
@@ -67,12 +67,12 @@ public class TrelloPairsController {
 		DayPairsHelper pairsHelper = new DayPairsHelper(repository);
 		pairsHelper.updateDataBaseWithTrelloContent(pairingBoardTrello.getPastPairs());
 		List<DayPairs> pastPairs = repository.findAll();
-		logger.info("Database state is: " + pastPairs.toString());
+		logger.info("Database state is: {}", pastPairs);
 		PairCombinations pairCombination = new DevPairCombinations(pastPairs);
 		OpsPairCombinations devOpsPairCombination = new OpsPairCombinations(pastPairs, daysIntoFuture);
 		
 		List<DayPairs> todayDevOpsPairs = generateTodayOpsPairs(pairingBoardTrello, pairsHelper, devOpsPairCombination, pairingBoardTrello.getDevs(), pairingBoardTrello.getDevOpsCompanies());
-		DayPairs todayPairs = generateTodayDevPairs(pairingBoardTrello, pairsHelper, pairCombination, getTodayDevelopers(pairingBoardTrello, todayDevOpsPairs), todayDevOpsPairs.size() > 0);
+		DayPairs todayPairs = generateTodayDevPairs(pairingBoardTrello, pairsHelper, pairCombination, getTodayDevelopers(pairingBoardTrello, todayDevOpsPairs), !todayDevOpsPairs.isEmpty());
 		todayDevOpsPairs.stream().forEach(devOpsPairs -> todayPairs.addPiars(devOpsPairs.getPairs()));
 		
 		pairingBoardTrello.addTodayPairsToBoard(todayPairs, daysIntoFuture);
@@ -83,28 +83,28 @@ public class TrelloPairsController {
 
 	private List<Developer> getTodayDevelopers(PairingBoard pairingBoardTrello, List<DayPairs> todayDevOpsPairs) {
 		List<Developer> todayDevDevelopers = new ArrayList<>(pairingBoardTrello.getDevs());
-		todayDevOpsPairs.stream().forEach(dayPairs -> { dayPairs.getPairs().values().stream().forEach(pair -> todayDevDevelopers.removeAll(pair.getDevs())); });
+		todayDevOpsPairs.stream().forEach(dayPairs -> dayPairs.getPairs().values().stream().forEach(pair -> todayDevDevelopers.removeAll(pair.getDevs())));
 		return todayDevDevelopers;
 	}
 
 	private DayPairs generateTodayDevPairs(PairingBoard pairingBoardTrello, DayPairsHelper pairsHelper, PairCombinations pairCombination, List<Developer> todayDevs, boolean opsPair) {
 		Map<Pair, Integer> pairsWeight = pairsHelper.buildPairsWeightFromPastPairing(pairCombination, todayDevs);
-		logger.info("Pairs weight is:" + pairsWeight);
+		logger.info("Pairs weight is: {}", pairsWeight);
 		pairsHelper.adaptPairsWeight(pairsWeight, todayDevs);
-		logger.info("Pairs weight after adaptation:" + pairsWeight);
-		logger.info("Tracks are: " + pairingBoardTrello.getTracks() + " today devs are: " + todayDevs);
-		DayPairs todayDevPairs = pairsHelper.generateNewDayPairs(pairingBoardTrello.getTracks(), todayDevs, pairCombination, pairsWeight, rotate_everyday, pairingBoardTrello.getCompanies());
-		logger.info("Today pairs are: " + todayDevPairs);
+		logger.info("Pairs weight after adaptation: {}", pairsWeight);
+		logger.info("Tracks are: {} today devs are: {}", pairingBoardTrello.getTracks(), todayDevs);
+		DayPairs todayDevPairs = pairsHelper.generateNewDayPairs(pairingBoardTrello.getTracks(), todayDevs, pairCombination, pairsWeight, rotateEveryday, pairingBoardTrello.getCompanies());
+		logger.info("Today pairs are: {}",  todayDevPairs);
 		pairsHelper.rotateSoloPairIfAny(todayDevPairs, pairCombination, pairsWeight);
-		logger.info("After single pair rotation they are: " + todayDevPairs);
+		logger.info("After single pair rotation they are: {}", todayDevPairs);
 
 		if(!opsPair) {
 			Map<Pair, Integer> buildPairsWeight = pairsHelper.buildBuildPairsWeightFromPastPairing(pairCombination, todayDevs);
 			Map<Pair, Integer> communityPairsWeight = pairsHelper.buildCommunityPairsWeightFromPastPairing(pairCombination, todayDevs);
-			logger.info("CommunityPairs weight is:" + communityPairsWeight + "BuildPairs weight is:" + buildPairsWeight);
+			logger.info("CommunityPairs weight is: {} BuildPairs weight is: {}", communityPairsWeight, buildPairsWeight);
 			pairsHelper.setBuildPair(todayDevPairs.getPairs().values(), buildPairsWeight);
 			pairsHelper.setCommunityPair(todayDevPairs.getPairs().values(), communityPairsWeight);
-			logger.info("After setting build pair pairs are: " + todayDevPairs);
+			logger.info("After setting build pair pairs are: {}", todayDevPairs);
 		}
 		return todayDevPairs;
 	}
@@ -115,13 +115,13 @@ public class TrelloPairsController {
 
 		for (Company company : devOpsCompanies) {
 			List<Developer> companyDevs = company.getCompanyExperiencedDevs(todayDevs);
-			logger.info("Company :" + company.getName() + "devs are: " + companyDevs);
+			logger.info("Company : {} devs are: {}", company.getName(), companyDevs);
 			Map<Pair, Integer> companyDevOpsPairsWeight = pairsHelper.buildPairsWeightFromPastPairing(devOpsPairCombination, companyDevs);
-			logger.info("DevOpsPairs weight for company: " + company.getName() + " is " + companyDevOpsPairsWeight);
-			DayPairs dayPairs = pairsHelper.generateNewDayPairs(Arrays.asList(company.getTrack()), companyDevs, devOpsPairCombination, companyDevOpsPairsWeight, rotate_everyday, pairingBoardTrello.getCompanies());
+			logger.info("DevOpsPairs weight for company: {} is {}", company.getName(), companyDevOpsPairsWeight);
+			DayPairs dayPairs = pairsHelper.generateNewDayPairs(Arrays.asList(company.getTrack()), companyDevs, devOpsPairCombination, companyDevOpsPairsWeight, rotateEveryday, pairingBoardTrello.getCompanies());
 			dayPairs.getPairs().values().stream().forEach(pair -> { pair.setOpsPair(true); pair.setBuildPair(true); pair.setCommunityPair(true); });
 			todayPairs.add(dayPairs);
-			logger.info("Today DevOpsPairs for company: " + company.getName() + " are " + todayPairs);
+			logger.info("Today DevOpsPairs for company: {} are {}", company.getName(), todayPairs);
 		}
 		
 		return todayPairs;
