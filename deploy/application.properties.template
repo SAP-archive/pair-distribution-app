@@ -7,5 +7,5 @@ trello.api.token=<trello-api-token>
 trello.pairing.board.id=<trello-pairing-board-id>
 
 #basic auth
-spring.devtools.remote.secret=<basic-auth-password>
-security.user.name=<basic-auth-user>
+security.user.name=<basic-auth-user-name>
+security.user.password=<basic-auth-password>
