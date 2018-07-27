@@ -1,15 +1,20 @@
 package pair.distribution.app.trello.entities;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Developer implements Comparable<Developer>{
 
 	private String id;
 	private Company company;
 	private boolean newDeveloper;
+	private Map<String, Integer> trackWeights;
 
 	public Developer(String id) {
 		this.id = id;
 		this.company = new Company("");
 		this.newDeveloper = false;
+		this.trackWeights = new HashMap<>();
 	}
 
 	public String getId() {
@@ -30,6 +35,14 @@ public class Developer implements Comparable<Developer>{
 
 	public void setNew(boolean newDeveloper) {
 		this.newDeveloper = newDeveloper;
+	}
+	
+	public int getTrackWeight(String track) {
+		return this.trackWeights.getOrDefault(track, 0);
+	}
+
+	public void updateTrackWeight(String track) {
+		this.trackWeights.put(track, getTrackWeight(track) + 1);
 	}
 	
 	@Override

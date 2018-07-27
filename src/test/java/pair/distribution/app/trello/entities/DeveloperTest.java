@@ -94,4 +94,20 @@ public class DeveloperTest {
 		
 		assertThat(developer.toString(), is("developerId"));
 	}
+	
+	@Test
+	public void testGetTrackWeightNone() {
+		Developer developer = new Developer("developerId");
+		
+		assertThat(developer.getTrackWeight("track"), is(0));
+	}
+	
+	@Test
+	public void testGetTrackWeightOne() {
+		Developer developer = new Developer("developerId");
+		
+		developer.updateTrackWeight("track");
+		
+		assertThat(developer.getTrackWeight("track"), is(1));
+	}
 }

@@ -193,4 +193,20 @@ public class PairTest {
 		
 		assertThat(subject.isCommunityPair(), is(true));
 	}
+	
+	@Test
+	public void testTrackDefault() {
+		Pair subject = new Pair();
+		
+		assertThat(subject.getTrack(), is(""));
+	}
+	
+	@Test
+	public void testTrackSet() {
+		Pair subject = new Pair();
+		
+		subject.setTrack("track");
+		
+		assertThat(subject.getTrack(), is("track"));
+	}
 }

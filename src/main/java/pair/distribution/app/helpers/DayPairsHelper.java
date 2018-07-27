@@ -6,9 +6,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -167,7 +169,7 @@ public class DayPairsHelper {
 			String track) {
 		Pair pair = result.getPairs().get(track);
 		if(!pair.isComplete() && !availableDevs.isEmpty()){
-			pair = getPairByWeight(pair, availableDevs, pairsWeight);
+			pair = getPairByWeight(pair, availableDevs, pairsWeight, track);
 			if( pair == null && availableDevs.size() == 1){
 				pair = new Pair(availableDevs);
 			}
@@ -298,7 +300,7 @@ public class DayPairsHelper {
 	}
 
 
-	private Pair getPairByWeight(Pair pairCandidate, List<Developer> availableDevs, Map<Pair, Integer> pairsWeight) {
+	private Pair getPairByWeight(Pair pairCandidate, List<Developer> availableDevs, Map<Pair, Integer> pairsWeight, String track) {
 		Pair result = null;
 		if(pairCandidate.getDevs().isEmpty()){
 			result = getPairWithSmallestWeight(availableDevs, pairsWeight);
@@ -360,6 +362,11 @@ public class DayPairsHelper {
 		                     .filter(skipPair)
 				             .min(Comparator.comparing(pairsWeight::get))
 				             .orElseGet(() -> pairs.get(new Random().nextInt(pairs.size())));
+	}
+
+	public void buildDevTracksWeightFromPastPairing(PairCombinations pairCombinations,
+			List<Developer> availableDevs) {
+		pairCombinations.getPairs().stream().forEach(pair -> pair.getDevs().stream().filter(availableDevs::contains).forEach(developer -> availableDevs.get(availableDevs.indexOf(developer)).updateTrackWeight(pair.getTrack())));
 	}
 }
 

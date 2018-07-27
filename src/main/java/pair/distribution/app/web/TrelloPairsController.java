@@ -92,6 +92,7 @@ public class TrelloPairsController {
 		logger.info("Pairs weight is: {}", pairsWeight);
 		pairsHelper.adaptPairsWeight(pairsWeight, todayDevs);
 		logger.info("Pairs weight after adaptation: {}", pairsWeight);
+		pairsHelper.buildDevTracksWeightFromPastPairing(pairCombination, todayDevs);
 		logger.info("Tracks are: {} today devs are: {}", pairingBoardTrello.getTracks(), todayDevs);
 		DayPairs todayDevPairs = pairsHelper.generateNewDayPairs(pairingBoardTrello.getTracks(), todayDevs, pairCombination, pairsWeight, rotateEveryday, pairingBoardTrello.getCompanies());
 		logger.info("Today pairs are: {}",  todayDevPairs);
