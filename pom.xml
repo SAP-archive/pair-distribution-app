@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.sap.cloud</groupId>
-	<artifactId>pair-rotation-application</artifactId>
+	<artifactId>pair-distribution-application</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 
-	<name>pair-rotation-application</name>
-	<description>An application to get pair rotation</description>
+	<name>pair-distribution-application</name>
+	<description>An application to get pair distribution</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>

@@ -1,6 +1,6 @@
-# Pair Rotation Application
+# Pair Distribution Application
 
-The `pair-rotation-app` supports teams which do pair programming and operations in pairing mode (DevOps). It is a CloudFoundry application which can generate pair combinations based on different strategies.  Currently, supported use cases for pair programming are: 
+The `pair-distribution-app` supports teams which do pair programming and operations in pairing mode (DevOps). It is a CloudFoundry application which can generate pair combinations based on different strategies.  Currently, supported use cases for pair programming are: 
 * One team from one company which does development
 * One team from one company which does development and operations
 * Multiple teams from different companies developing together
@@ -11,7 +11,7 @@ There are different strategies for pair generation. Currently, supported strateg
 * For development
   * rotate every two days
   * the developer with more days in the track rotates out
-  * new pair combinations are generated based on the pair weights. Based on its history the `pair-rotation-app` computes for each pair combination, a weight which represents how often a pair worked together. A higher weight means that a pair combination worked more often together than a pair with smaller weight. Pair generation takes the pairs with the smallest weight.
+  * new pair combinations are generated based on the pair weights. Based on its history the `pair-distribution-app` computes for each pair combination, a weight which represents how often a pair worked together. A higher weight means that a pair combination worked more often together than a pair with smaller weight. Pair generation takes the pairs with the smallest weight.
 * For operations
   * rotate every week
   * for each company which do operations one operations pair is generated. The operations pairs are developers from the same company and have a card title `<company-name>-ops/interrupt` 
@@ -69,7 +69,7 @@ Trello credentials for your account can be generated [here](https://developers.t
 
 ### Trello Account Preparation
 
-The `pair-rotation-app` accesses information about developers, tracks and companies via Trello-APIs, uses its history and generates the new pairs for the day which is a Trello list.
+The `pair-distribution-app` accesses information about developers, tracks and companies via Trello-APIs, uses its history and generates the new pairs for the day which is a Trello list.
 * Create a list called `Devs`. 
   * create a card called `Devs` and add all developers of your team as members to this card. The application will use this information for pair generation.
   * if operations pair is required create a card called `DevOps: <company-name>`. This will automatically generate an operations pair for the `<company-name>`. 
@@ -95,7 +95,7 @@ The use of the Trello APIs and Trello service are subject to applicable Trello a
 
 ### Pair Generation
 
-Pair generation doesn't consider tracks. This means tracks don't play any role during pair generation.
+Pair distribution doesn't consider tracks. This means tracks don't play any role during pair generation.
 This is a missing feature which can improve the pair generation.
 
 # License
@@ -104,7 +104,7 @@ Copyright (c) 2017 SAP SE
 
 Except as provided below, this software is licensed under the Apache License, Version 2.0 (the "License"); you may not use this software except in compliance with the License.You may obtain a copy of the License at:
 
-[LICENSE](https://github.com/SAP/pair-rotation-app/blob/master/LICENSE)
+[LICENSE](https://github.com/SAP/pair-distribution-app/blob/master/LICENSE)
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
