@@ -98,6 +98,10 @@ The use of the Trello APIs and Trello service are subject to applicable Trello a
 Pair distribution doesn't consider tracks. This means tracks don't play any role during pair generation.
 This is a missing feature which can improve the pair generation.
 
+# How to obtain support
+
+Please create a [new issue](https://github.com/SAP/pair-distribution-app/issues/new) if you find any problems.
+
 # License
 
 Copyright (c) 2017 SAP SE
