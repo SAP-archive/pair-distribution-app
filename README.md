@@ -29,9 +29,10 @@ There are different strategies for pair generation. Currently, supported strateg
 - [MVN CLI](https://maven.apache.org/download.cgi#Installation) 
 - [Java 8](https://java.com/download/)
 - [CloudFoundry](https://www.cloudfoundry.org/) enviroment with MongoDB service
+- [CloudFoundry Command Line Interface (CLI)](https://github.com/cloudfoundry/cli) to interact with CloudFoundry
 - [Trello](http://trello.com) account
 
-# Download an Installation
+# Download & Installation
 
 * Clone this repository locally
 * Log in to your CloudFoundry account with the CF CLI
@@ -65,7 +66,7 @@ Edit both files and replace all place holders `<...>` inside.
 
 ### Configure Trello Access
 
-Trello credentials for your account can be generated [here](https://developers.trello.com/get-started/start-building#authenticate). You will need also the Id of your Trello board. Use the sandbox provided by Trello available [here](https://developers.trello.com/sandbox) to get it. With your API key you can executed samples in the sandbox. Execute the `Get Boards` sample to find out the Id of your board. 
+First, you will need to [generate credentials for your Trello account](https://developers.trello.com/get-started/start-building#authenticate). You will need also the Id of your Trello board. Use the [Trello sandbox](https://developers.trello.com/sandbox) to get the Id.  With your API key you can execute samples in the sandbox. Execute the `Get Boards` sample to find out the Id of your board. 
 
 ### Trello Account Preparation
 
