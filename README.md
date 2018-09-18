@@ -57,6 +57,8 @@ There are different strategies for pair generation. Currently, supported strateg
 
 # Configuration 
 
+### Configure Application and Trello Access
+
 First, you will need to [generate credentials for your Trello account](https://developers.trello.com/get-started/start-building#authenticate). You will need also the Id of your Trello board. Use the [Trello sandbox](https://developers.trello.com/sandbox) to get the Id.  With your API key you can execute samples in the sandbox. Execute the `Get Boards` sample to find out the Id of your board. The Trello `api.key`, `api.token` and `board.id` have to be added to the `application.properties` file.
 
 ```
