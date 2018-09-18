@@ -57,16 +57,14 @@ There are different strategies for pair generation. Currently, supported strateg
 
 # Configuration 
 
+First, you will need to [generate credentials for your Trello account](https://developers.trello.com/get-started/start-building#authenticate). You will need also the Id of your Trello board. Use the [Trello sandbox](https://developers.trello.com/sandbox) to get the Id.  With your API key you can execute samples in the sandbox. Execute the `Get Boards` sample to find out the Id of your board. The Trello `api.key`, `api.token` and `board.id` have to be added to the `application.properties` file.
+
 ```
 $ cd <project-root-folder>
 $ cp deploy/application.properties.template src/main/resources/application.properties
 $ cp deploy/manifest.yml.template manifest.yml
 ```
-Edit both files and replace all place holders `<...>` inside. 
-
-### Configure Trello Access
-
-First, you will need to [generate credentials for your Trello account](https://developers.trello.com/get-started/start-building#authenticate). You will need also the Id of your Trello board. Use the [Trello sandbox](https://developers.trello.com/sandbox) to get the Id.  With your API key you can execute samples in the sandbox. Execute the `Get Boards` sample to find out the Id of your board. 
+Edit both files and replace all place holders `<...>` inside.  
 
 ### Trello Account Preparation
 
