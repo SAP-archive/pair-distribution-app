@@ -113,7 +113,7 @@ public class OpsPairsCombinationsTest {
 		List<Developer> standardDevs = getStandardDevs();
 		DayPairs pairs = new DayPairs();
 		pairs.setDate(new Date());
-		pairs.addPair("track1", new Pair(Arrays.asList(standardDevs.get(0), standardDevs.get(1)), true));
+		pairs.addPair("track1", new Pair(Arrays.asList(standardDevs.get(0), standardDevs.get(1)), true, "track1"));
 		
 		OpsPairCombinations devPairCombinations = new OpsPairCombinations(Arrays.asList(pairs));
 		
@@ -126,7 +126,7 @@ public class OpsPairsCombinationsTest {
 		List<Developer> standardDevs = getStandardDevs();
 		DayPairs pairs = new DayPairs();
 		pairs.setDate(getDateWeeksBefore(1));
-		pairs.addPair("track1", new Pair(Arrays.asList(standardDevs.get(0), standardDevs.get(1)), true));
+		pairs.addPair("track1", new Pair(Arrays.asList(standardDevs.get(0), standardDevs.get(1)), true, "track1"));
 		
 		OpsPairCombinations devPairCombinations = new OpsPairCombinations(Arrays.asList(pairs));
 		
@@ -150,14 +150,14 @@ public class OpsPairsCombinationsTest {
 		for(int i = 1; i < 3 ; i++){
 			DayPairs pairs = new DayPairs();
 			pairs.setDate(getPastDate(i));
-			pairs.addPair("track1", new Pair(Arrays.asList(devs.get(0), devs.get(1)), ops));
-			pairs.addPair("track2", new Pair(Arrays.asList(devs.get(2), devs.get(3)), ops));
+			pairs.addPair("track1", new Pair(Arrays.asList(devs.get(0), devs.get(1)), ops, "track1"));
+			pairs.addPair("track2", new Pair(Arrays.asList(devs.get(2), devs.get(3)), ops, "track2"));
 			result.add(pairs);
 		}
 		DayPairs pairs = new DayPairs();
 		pairs.setDate(getPastDate(3));
-		pairs.addPair("track1", new Pair(Arrays.asList(devs.get(0), devs.get(3)), ops));
-		pairs.addPair("track2", new Pair(Arrays.asList(devs.get(2), devs.get(1)), ops));
+		pairs.addPair("track1", new Pair(Arrays.asList(devs.get(0), devs.get(3)), ops, "track1"));
+		pairs.addPair("track2", new Pair(Arrays.asList(devs.get(2), devs.get(1)), ops, "track2"));
 		result.add(pairs);
 		
 		return result;

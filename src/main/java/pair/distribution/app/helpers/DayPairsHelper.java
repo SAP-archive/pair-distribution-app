@@ -77,12 +77,17 @@ public class DayPairsHelper {
 	}
 
 	public void buildDevelopersPairingDays(PairCombinations pastPairs, List<Developer> todayDevs) {
-		for (Developer developer : todayDevs) {
-			pastPairs.getPairs().stream().filter(pair -> pair.hasDev(developer))
-					.forEach(pair -> developer.setPairingDays(developer.getPairingDays() + 1));
-		}
+		todayDevs.stream().forEach(developer -> pastPairs.getPairs().stream().filter(pair -> pair.hasDev(developer))
+				.forEach(pair -> developer.udpatePairingDays()));
 	}
 
+	public void buildDevelopersTracksWeightFromPastPairing(PairCombinations pastPairs,
+			List<Developer> availableDevs) {
+		availableDevs.stream()
+				.forEach(developer -> pastPairs.getPairs().stream().filter(pair -> pair.hasDev(developer))
+						.forEach(pair -> developer.updateTrackWeight(pair.getTrack())));
+	}
+	
 	public void adaptPairsWeight(Map<Pair, Integer> pairsWeight, List<Developer> availableDevs) {
 		List<Developer> newDevelopers = getFilteredDevs(availableDevs, Developer::getNew);
 		pairsWeight.keySet().stream().filter(pair -> !isPairConform(pair, newDevelopers, isPairWithMixedExpirience()))
@@ -187,7 +192,7 @@ public class DayPairsHelper {
 			List<Developer> availableDevs, String track) {
 		Pair pair = result.getPairs().get(track);
 		if (!pair.isComplete() && !availableDevs.isEmpty()) {
-			pair = getPairByWeight(pair, availableDevs, pairsWeight);
+			pair = getPairByWeight(pair, availableDevs, pairsWeight, track);
 			if (pair == null && availableDevs.size() == 1) {
 				pair = new Pair(availableDevs);
 			}
@@ -327,12 +332,12 @@ public class DayPairsHelper {
 		return trackPairThreeDaysBack != null;
 	}
 
-	private Pair getPairByWeight(Pair pairCandidate, List<Developer> availableDevs, Map<Pair, Integer> pairsWeight) {
+	private Pair getPairByWeight(Pair pairCandidate, List<Developer> availableDevs, Map<Pair, Integer> pairsWeight, String track) {
 		Pair result = null;
 		if (pairCandidate.getDevs().isEmpty()) {
 			result = getPairWithSmallestWeight(availableDevs, pairsWeight);
 		} else if (pairCandidate.getDevs().size() == 1) {
-			result = findPairForDevByPairingWeight(pairCandidate.getDevs().get(0), availableDevs, pairsWeight);
+			result = findPairForDevByPairingWeight(pairCandidate.getDevs().get(0), availableDevs, pairsWeight, track);
 		}
 		return result;
 	}
@@ -343,20 +348,23 @@ public class DayPairsHelper {
 	}
 
 	private Pair findPairForDevByPairingWeight(Developer pairFirstDeveloper, List<Developer> availableDevs,
-			Map<Pair, Integer> pairsWeight) {
+			Map<Pair, Integer> pairsWeight, String track) {
 		Developer otherDev = pairsWeight.keySet().stream().filter(pair -> pair.hasDev(pairFirstDeveloper))
 				.filter(pair -> availableDevs.contains(pair.getOtherDev(pairFirstDeveloper)))
-				.min(Comparator.comparing(pair -> getPairWeightRelativeToPairingDays(pair, pairFirstDeveloper,
-						pairsWeight, availableDevs)))
+				.min(Comparator.comparing(pair -> getWeightRelativeToPairingDays(pair, pairFirstDeveloper,
+						pairsWeight, availableDevs, track)))
 				.map(pair -> pair.getOtherDev(pairFirstDeveloper)).orElse(null);
 		return new Pair(Arrays.asList(pairFirstDeveloper, otherDev));
 	}
 
-	private float getPairWeightRelativeToPairingDays(Pair pair, Developer pairFirstDeveloper,
-			Map<Pair, Integer> pairsWeight, List<Developer> availableDevs) {
+	private float getWeightRelativeToPairingDays(Pair pair, Developer pairFirstDeveloper,
+			Map<Pair, Integer> pairsWeight, List<Developer> availableDevs, String track) {
 		Developer pairOtherDev = getDeveloperById(availableDevs, pair.getOtherDev(pairFirstDeveloper));
-		if (pairOtherDev != null && pairOtherDev.getPairingDays() > 0) {
-			return (float) pairsWeight.get(pair) / pairOtherDev.getPairingDays();
+		if (pairOtherDev != null) {
+			float devPairWeightRelativeToPairingDays =  pairOtherDev.getPairingDays() > 0 ? (float) pairsWeight.get(pair) / pairOtherDev.getPairingDays() : 0;
+			float devTrackWeightRelativeToPairingDays =  pairOtherDev.getTrackWeight(track) > 0 ? (float)  pairOtherDev.getTrackWeight(track) / pairOtherDev.getPairingDays() : 0;
+			
+			return devPairWeightRelativeToPairingDays + devTrackWeightRelativeToPairingDays;
 		} else {
 			return pairsWeight.get(pair);
 		}

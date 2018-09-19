@@ -12,11 +12,13 @@ public class Pair {
 	private boolean buildPair;
 	private boolean communityPair;
 	private boolean opsPair;
+	private String track;
 
     public Pair() {
     		devs = new ArrayList<>(2);
     		buildPair = false;
     		opsPair = false;
+    		track = "";
     }
 
     public Pair(List<Developer> devs) {
@@ -24,9 +26,10 @@ public class Pair {
 		this.setDevs(devs);
     }
 
-    public Pair(List<Developer> devs, boolean opsPair) {
+    public Pair(List<Developer> devs, boolean opsPair, String track) {
 		this(devs);
 		this.setOpsPair(opsPair);
+		this.track = track;
 }
     
 	public List<Developer> getDevs() {
@@ -126,5 +129,13 @@ public class Pair {
 
 	public boolean isOpsPair() {
 		return opsPair;
+	}
+
+	public void setTrack(String track) {
+		this.track = track;
+	}
+	
+	public String getTrack() {
+		return this.track;
 	}
 }

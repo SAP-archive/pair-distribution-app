@@ -108,6 +108,7 @@ public class PairingBoard {
 			pair.setCommunityPair(isPairWithLabel(card, COMMUNITY_PAIR_LABEL_COLOR));
 			pair.setOpsPair(isPairDevOpsPair(card.getDesc()));
 			pair.setDevs( getDevelopersFromCard(card));
+			pair.setTrack(card.getName());
 			pairs.addPair(card.getName(), pair);
 		}
 		return pairs;

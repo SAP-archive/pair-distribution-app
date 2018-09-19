@@ -94,4 +94,36 @@ public class DeveloperTest {
 		
 		assertThat(developer.toString(), is("developerId"));
 	}
+	
+	@Test
+	public void testGetTrackWeightDefault() {
+		Developer developer = new Developer("developerId");
+		
+		assertThat(developer.getTrackWeight("track"), is(0));
+	}
+	
+	@Test
+	public void testGetTrackWeightOne() {
+		Developer developer = new Developer("developerId");
+		
+		developer.updateTrackWeight("track");
+		
+		assertThat(developer.getTrackWeight("track"), is(1));
+	}
+	
+	@Test
+	public void testGetPairingDaysDefault() {
+		Developer developer = new Developer("developerId");
+		
+		assertThat(developer.getPairingDays(), is(0));
+	}
+	
+	@Test
+	public void testGetPairingDaysOne() {
+		Developer developer = new Developer("developerId");
+		
+		developer.udpatePairingDays();
+		
+		assertThat(developer.getPairingDays(), is(1));
+	}
 }
