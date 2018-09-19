@@ -11,7 +11,7 @@ There are different strategies for pair generation. Currently, supported strateg
 * For development
   * rotate every two days
   * the developer with more days in the track rotates out
-  * new pair combinations are generated based on the pair weights. Based on its history the `pair-distribution-app` computes for each pair combination, a weight which represents how often a pair worked together. A higher weight means that a pair combination worked more often together than a pair with smaller weight. Pair generation takes the pairs with the smallest weight.
+  * new pair combinations are generated based on the pair weights. Based on its history the `pair-distribution-app` computes for each pair combination, a weight which represents how often a pair worked together and how often a developer from the pair was in a track. Pair generation takes the pair with the smallest weight for a track. In case that more than one combination have the same weight then a random one is choosen.
 * For operations
   * rotate every week
   * for each company which do operations one operations pair is generated. The operations pairs are developers from the same company and have a card title `<company-name>-ops/interrupt` 
@@ -93,11 +93,6 @@ cf cs mongodb <service-plan> pairsdb
 ### Trello use
 
 The use of the Trello APIs and Trello service are subject to applicable Trello agreements.
-
-### Pair Generation
-
-Pair distribution doesn't consider tracks. This means tracks don't play any role during pair generation.
-This is a missing feature which can improve the pair generation.
 
 # How to obtain support
 
