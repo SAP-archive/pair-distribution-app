@@ -89,6 +89,7 @@ public class TrelloPairsController {
 
 	private DayPairs generateTodayDevPairs(PairingBoard pairingBoardTrello, DayPairsHelper pairsHelper, PairCombinations pairCombination, List<Developer> todayDevs, boolean opsPair) {
 		Map<Pair, Integer> pairsWeight = pairsHelper.buildPairsWeightFromPastPairing(pairCombination, todayDevs);
+		pairsHelper.buildDevelopersPairingDays(pairCombination, todayDevs);
 		logger.info("Pairs weight is: {}", pairsWeight);
 		pairsHelper.adaptPairsWeight(pairsWeight, todayDevs);
 		logger.info("Pairs weight after adaptation: {}", pairsWeight);

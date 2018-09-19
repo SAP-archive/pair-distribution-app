@@ -5,6 +5,7 @@ public class Developer implements Comparable<Developer>{
 	private String id;
 	private Company company;
 	private boolean newDeveloper;
+	private int pairingDays;
 
 	public Developer(String id) {
 		this.id = id;
@@ -31,7 +32,15 @@ public class Developer implements Comparable<Developer>{
 	public void setNew(boolean newDeveloper) {
 		this.newDeveloper = newDeveloper;
 	}
-	
+
+	public int getPairingDays() {
+		return pairingDays;
+	}
+
+	public void setPairingDays(int pairingDays) {
+		this.pairingDays = pairingDays;
+	}
+
 	@Override
 	public int compareTo(Developer anotherDeveloper) {
 		return this.getId().compareTo(anotherDeveloper.getId());
