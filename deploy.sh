@@ -2,11 +2,11 @@
 
 set -e
 
-environment=$1
+environment="$1"
 
 #setup environment
 mkdir -p src/main/resources/
-if [ -z environment ]; then
+if [ -z "$environment" ]; then
   mvn clean install
 else
   cp deploy/$environment/manifest.yml .
