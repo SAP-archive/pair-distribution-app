@@ -67,7 +67,6 @@ public class TrelloPairsController {
 		DayPairsHelper pairsHelper = new DayPairsHelper(repository);
 		pairsHelper.updateDataBaseWithTrelloContent(pairingBoardTrello.getPastPairs());
 		List<DayPairs> pastPairs = repository.findAll();
-		logger.info("Database state is: {}", pastPairs);
 		PairCombinations pairCombination = new DevPairCombinations(pastPairs);
 		OpsPairCombinations devOpsPairCombination = new OpsPairCombinations(pastPairs, daysIntoFuture);
 		
@@ -89,7 +88,6 @@ public class TrelloPairsController {
 
 	private DayPairs generateTodayDevPairs(PairingBoard pairingBoardTrello, DayPairsHelper pairsHelper, PairCombinations pairCombination, List<Developer> todayDevs, boolean opsPair) {
 		Map<Pair, Integer> pairsWeight = pairsHelper.buildPairsWeightFromPastPairing(pairCombination, todayDevs);
-		logger.info("Pairs weight is: {}", pairsWeight);
 		pairsHelper.buildDevelopersPairingDays(pairCombination, todayDevs);
 		pairsHelper.adaptPairsWeight(pairsWeight, todayDevs);
 		logger.info("Pairs weight after adaptation: {}", pairsWeight);
