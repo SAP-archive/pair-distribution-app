@@ -8,6 +8,7 @@ public class Developer implements Comparable<Developer>{
 	private String id;
 	private Company company;
 	private boolean newDeveloper;
+	private boolean hasContext;
 	private int pairingDays;
 	private Map<String, Integer> trackWeights;
 
@@ -15,6 +16,7 @@ public class Developer implements Comparable<Developer>{
 		this.id = id;
 		this.company = new Company("");
 		this.newDeveloper = false;
+		this.hasContext = false;
 		this.trackWeights = new HashMap<>();
 	}
 
@@ -60,6 +62,14 @@ public class Developer implements Comparable<Developer>{
 	
 	public void setTrackWeight(String track, int weight) {
 		this.trackWeights.put(track, weight);
+	}
+
+	public boolean hasContext() {
+		return hasContext;
+	}
+	
+	public void setHasContext(boolean hasContext) {
+		this.hasContext = hasContext;
 	}
 	
 	@Override

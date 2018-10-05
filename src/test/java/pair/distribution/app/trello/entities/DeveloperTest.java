@@ -45,6 +45,17 @@ public class DeveloperTest {
 	}
 	
 	@Test
+	public void testHasContext() {
+		Developer developer = new Developer("developerId");
+		
+		assertThat(developer.hasContext(), is(false));
+		
+		developer.setHasContext(true);
+		
+		assertThat(developer.hasContext(), is(true));
+	}
+	
+	@Test
 	public void testCompareTo() {
 		Developer developer = new Developer("developerId");
 		Developer developer2 = new Developer("developerId2");

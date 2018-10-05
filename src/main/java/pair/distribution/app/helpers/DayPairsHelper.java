@@ -208,25 +208,25 @@ public class DayPairsHelper {
 		if (soloPair != null && (isSoloPairForTwoDays(pairCombination, soloPair) || soloPair.getFirstDev().getNew())) {
 			Developer soloDeveloper = soloPair.getFirstDev();
 			Pair pairWithHighestWeight = null;
-			Developer newPairForSoloDeveloper = null;
+			Developer newSoloDeveloper = null;
 			Collection<Pair> allPairsOfTheDay = todayPairs.getPairs().values();
 			if (soloDeveloper.getNew()) {
 				pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight,
 						isPairWithNoNewDevelopers());
-				newPairForSoloDeveloper = rotateSoloNewDeveloper(pairWithHighestWeight);
+				newSoloDeveloper = getNewSoloDeveloper(pairWithHighestWeight);
 			} else {
 				pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight,
 						alwaysTrue());
-				newPairForSoloDeveloper = getRandomDev(pairWithHighestWeight.getDevs());
+				newSoloDeveloper = getDevWithContextOrRandom(pairWithHighestWeight.getDevs());
 			}
-			if (newPairForSoloDeveloper == null) {
+			if (newSoloDeveloper == null) {
 				// No rotation for Solo developer possible
 				return;
 			}
-			Pair newPair = new Pair(Arrays.asList(soloPair.getDevs().get(0), newPairForSoloDeveloper));
+			Pair newPair = new Pair(Arrays.asList(soloPair.getDevs().get(0), newSoloDeveloper));
 			todayPairs.replacePairWith(pairWithHighestWeight, newPair);
 			todayPairs.replacePairWith(soloPair,
-					new Pair(Arrays.asList(pairWithHighestWeight.getOtherDev(newPairForSoloDeveloper))));
+					new Pair(Arrays.asList(pairWithHighestWeight.getOtherDev(newSoloDeveloper))));
 		}
 	}
 
@@ -247,10 +247,8 @@ public class DayPairsHelper {
 		return possibleTracks;
 	}
 
-	private Developer rotateSoloNewDeveloper(Pair pairWithHighestWeight) {
-		Developer newPairForSoloDeveloper;
-		newPairForSoloDeveloper = pairWithHighestWeight == null ? null : getRandomDev(pairWithHighestWeight.getDevs());
-		return newPairForSoloDeveloper;
+	private Developer getNewSoloDeveloper(Pair pairWithHighestWeight) {
+		return pairWithHighestWeight == null ? null : getDevWithContextOrRandom(pairWithHighestWeight.getDevs());
 	}
 
 	private Predicate<? super Pair> isPairWithMixedExpirience() {
@@ -300,14 +298,14 @@ public class DayPairsHelper {
 		logger.info("time to rotate");
 		if (trackPairOneDayBack == null) {
 			logger.info("No history. Add one dev random from available devs");
-			trackPairToday.addDev(getRandomDev(availableDevs));
+			trackPairToday.addDev(getDevWithContextOrRandom(availableDevs));
 		} else if (trackPairOneDayBack.isSolo()) {
 			logger.info("Solo dev should stay on track. Don't do anything");
 		} else if (hasHistoryForLongestDev(trackPairThreeDaysBack)) {
 			tryToRotateLongestDev(availableDevs, trackPairToday, trackPairOneDayBack, trackPairThreeDaysBack);
 		} else {
 			logger.info("No older history. Add one dev random");
-			trackPairToday.addDev(getRandomDev(getAvailableDevs(availableDevs, trackPairOneDayBack.getDevs())));
+			trackPairToday.addDev(getDevWithContextOrRandom(getAvailableDevs(availableDevs, trackPairOneDayBack.getDevs())));
 		}
 	}
 
@@ -316,14 +314,16 @@ public class DayPairsHelper {
 		logger.info("There is history to find longest dev");
 		Developer longestDevOnStory = getLongestDevOnStory(trackPairOneDayBack, trackPairThreeDaysBack);
 		if (longestDevOnStory != null) {
-			Developer longestDev = getDeveloperById(availableDevs, longestDevOnStory);
-			logger.info("Longest dev is {}", longestDev);
-			Developer devToStay = trackPairOneDayBack.getOtherDev(longestDevOnStory);
-			if (devToStay != null && availableDevs.contains(getDeveloperById(availableDevs, devToStay))) {
-				logger.info("Dev to stay is {}", getDeveloperById(availableDevs, devToStay));
-				trackPairToday.addDev(getDeveloperById(availableDevs, devToStay));
-			} else {
-				trackPairToday.addDev(longestDev);
+			Developer devToRotate = getDeveloperById(availableDevs, longestDevOnStory);
+			logger.info("Longest dev is {}", devToRotate);
+			Developer devToStay = getDeveloperById(availableDevs, trackPairOneDayBack.getOtherDev(longestDevOnStory));
+			if (devToStay != null && availableDevs.contains(devToStay)) {
+				logger.info("Dev with context to stay is {}", devToStay);
+				devToStay.setHasContext(true);
+				trackPairToday.addDev(devToStay);
+			} else if (devToRotate != null) {
+				devToRotate.setHasContext(true);
+				trackPairToday.addDev(devToRotate);
 			}
 		}
 	}
@@ -374,7 +374,7 @@ public class DayPairsHelper {
 		ArrayList<Developer> devsOnTrack = new ArrayList<>();
 		devsOnTrack.addAll(firstDayPair.getDevs());
 		devsOnTrack.retainAll(thirdDayPair.getDevs());
-		return devsOnTrack.isEmpty() || devsOnTrack.size() == 2 ? getRandomDev(firstDayPair.getDevs())
+		return devsOnTrack.isEmpty() || devsOnTrack.size() == 2 ? getDevWithContextOrRandom(firstDayPair.getDevs())
 				: devsOnTrack.get(0);
 	}
 
@@ -384,9 +384,19 @@ public class DayPairsHelper {
 		return possibleDevs;
 	}
 
-	private Developer getRandomDev(List<Developer> devs) {
-		Collections.shuffle(devs);
-		return devs.isEmpty() ? null : devs.get(0);
+	private Developer getDevWithContextOrRandom(List<Developer> devs) {
+		if (devs.isEmpty()) {
+			return null;
+		} else {
+			if (devs.get(0).hasContext()) {
+				return devs.get(0);
+			} else if(devs.size() > 1 && devs.get(1).hasContext()) {
+				return devs.get(1);
+			} else {
+				Collections.shuffle(devs);
+				return devs.get(0);
+			}
+		}
 	}
 
 	private Developer getDeveloperById(List<Developer> devs, Developer developerToCompare) {

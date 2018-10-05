@@ -119,6 +119,11 @@ public class DayPairsHelperTest {
 				is(not(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2"))))));
 		assertThat(dayPairs.getPairByTrack("track2"),
 				is(not(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4"))))));
+		
+		boolean trackOneHasContext = dayPairs.getPairByTrack("track1").getFirstDev().hasContext() || dayPairs.getPairByTrack("track1").getSecondDev().hasContext();
+		boolean trackTwoHasContext = dayPairs.getPairByTrack("track2").getFirstDev().hasContext() || dayPairs.getPairByTrack("track2").getSecondDev().hasContext();
+		assertThat(trackOneHasContext, is(true));
+		assertThat(trackTwoHasContext, is(true));
 	}
 
 	@Test
@@ -186,9 +191,10 @@ public class DayPairsHelperTest {
 
 		assertThat(dayPairs.getTracks().size(), is(2));
 		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
-		System.out.println(dayPairs.getPairs());
 		assertThat(dayPairs.hasPair(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(true));
 		assertThat(dayPairs.hasPair(new Pair(Arrays.asList(new Developer("dev3")))), is(true));
+		boolean trackOneHasContext = dayPairs.getPairByTrack("track1").getFirstDev().hasContext() || dayPairs.getPairByTrack("track1").getSecondDev().hasContext();
+		assertThat(trackOneHasContext, is(true));
 	}
 
 	@Test
@@ -447,9 +453,12 @@ public class DayPairsHelperTest {
 		assertThat(todayPairs.getPairByTrack("track2"), is(soloPair));
 
 		DevPairCombinations newCombinations = new DevPairCombinations(pairs.subList(1, pairs.size()));
+		todayPairs.getPairByTrack("track1").getFirstDev().setHasContext(true);
 		subject.rotateSoloPairIfAny(todayPairs, newCombinations, pairsWeight);
 
 		assertThat(todayPairs.getPairByTrack("track2"), is(not(soloPair)));
+		boolean trackOneHasContext = todayPairs.getPairByTrack("track1").getFirstDev().hasContext() || todayPairs.getPairByTrack("track1").getSecondDev().hasContext();
+		assertThat(trackOneHasContext, is(true));
 	}
 
 	@Test
