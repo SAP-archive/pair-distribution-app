@@ -1,7 +1,7 @@
 ---
 applications:
 - name: <pair-app-name>
-  memory: 512M
+  memory: 1G
   instances: 1
   host: <pair-app-host>
   path: target/ROOT.war
