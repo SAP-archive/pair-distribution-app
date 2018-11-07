@@ -108,7 +108,7 @@ public class DevPairsCombinationsTest {
 		DevPairCombinations devPairCombinations = new DevPairCombinations(getPairsListFromDevs(standardDevs));
 		
 		
-		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1", "track2"), standardDevs), is(true));
+		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1", "track2"), standardDevs, false), is(true));
 	}
 	
 	@Test
@@ -121,7 +121,7 @@ public class DevPairsCombinationsTest {
 		DevPairCombinations devPairCombinations = new DevPairCombinations(pastPairs);
 		
 		
-		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1", "track2"), standardDevs), is(true));
+		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1", "track2"), standardDevs, false), is(true));
 	}
 	
 	@Test
@@ -133,7 +133,19 @@ public class DevPairsCombinationsTest {
 		DevPairCombinations devPairCombinations = new DevPairCombinations(pastPairs);
 		
 		
-		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1", "track2"), standardDevs), is(false));
+		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1", "track2"), standardDevs, false), is(false));
+	}
+	
+	@Test
+	public void testIsRotationForOneDayPairWithEveryDayRotation() {
+		List<Developer> standardDevs = getStandardDevs();
+		List<DayPairs> pastPairs = getPairsListFromDevs(standardDevs);
+		pastPairs.remove(2);
+		pastPairs.remove(1);
+		DevPairCombinations devPairCombinations = new DevPairCombinations(pastPairs);
+		
+		
+		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1", "track2"), standardDevs, true), is(true));
 	}
 	
 	private List<DayPairs> getPairsListFromDevs(List<Developer> devs) {

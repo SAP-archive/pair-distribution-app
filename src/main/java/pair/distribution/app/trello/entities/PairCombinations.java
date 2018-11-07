@@ -11,5 +11,5 @@ public interface PairCombinations {
 	
 	Pair getPastPairByTrack(int daysBack, String track);
 
-	boolean isRotationTime(List<String> possibleTracks, List<Developer> availableDevs);
+	boolean isRotationTime(List<String> possibleTracks, List<Developer> availableDevs, boolean rotateEveryday);
 }

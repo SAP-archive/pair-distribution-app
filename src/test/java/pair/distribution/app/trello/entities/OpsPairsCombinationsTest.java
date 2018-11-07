@@ -105,7 +105,15 @@ public class OpsPairsCombinationsTest {
 		OpsPairCombinations devPairCombinations = new OpsPairCombinations(new ArrayList<>());
 		
 		
-		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1"), getStandardDevs()), is(false));
+		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1"), getStandardDevs(), false), is(false));
+	}
+	
+	@Test
+	public void testIsRotationTimeForEmptyHistoryWithEveryDayRotation() {
+		OpsPairCombinations devPairCombinations = new OpsPairCombinations(new ArrayList<>());
+		
+		
+		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1"), getStandardDevs(), true), is(false));
 	}
 	
 	@Test
@@ -118,7 +126,20 @@ public class OpsPairsCombinationsTest {
 		OpsPairCombinations devPairCombinations = new OpsPairCombinations(Arrays.asList(pairs));
 		
 		
-		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1"), standardDevs), is(false));
+		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1"), standardDevs, false), is(false));
+	}
+	
+	@Test
+	public void testIsRotationTimeForSameWeekWithEveryDayRotation() {
+		List<Developer> standardDevs = getStandardDevs();
+		DayPairs pairs = new DayPairs();
+		pairs.setDate(new Date());
+		pairs.addPair("track1", new Pair(Arrays.asList(standardDevs.get(0), standardDevs.get(1)), true, "track1"));
+		
+		OpsPairCombinations devPairCombinations = new OpsPairCombinations(Arrays.asList(pairs));
+		
+		
+		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1"), standardDevs, true), is(false));
 	}
 	
 	@Test
@@ -131,7 +152,7 @@ public class OpsPairsCombinationsTest {
 		OpsPairCombinations devPairCombinations = new OpsPairCombinations(Arrays.asList(pairs));
 		
 		
-		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1"), standardDevs), is(true));
+		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1"), standardDevs, false), is(true));
 	}
 
 	private Date getDateWeeksBefore(int daysBack) {

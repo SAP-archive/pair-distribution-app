@@ -145,12 +145,11 @@ public class DayPairsHelper {
 		DayPairs result = new DayPairs();
 		List<String> possibleTracks = getPossibleTracks(tracks, devs, companies);
 		List<Developer> availableDevs = new ArrayList<>(devs);
-		boolean rotationTime = pairCombination.isRotationTime(possibleTracks, availableDevs);
+		boolean rotationTime = pairCombination.isRotationTime(possibleTracks, availableDevs, rotateEveryday);
 
 		for (String track : possibleTracks) {
 			List<Developer> developersForTrack = getDevelopersForTrack(companies, availableDevs, track);
-			Pair pair = tryToFindPairFirstDeveloper(track, pairCombination, developersForTrack, rotateEveryday,
-					rotationTime);
+			Pair pair = tryToFindPairFirstDeveloper(track, pairCombination, developersForTrack, rotationTime);
 			availableDevs.removeAll(pair.getDevs());
 			result.addPair(track, pair);
 
@@ -277,14 +276,14 @@ public class DayPairsHelper {
 	}
 
 	private Pair tryToFindPairFirstDeveloper(String track, PairCombinations pairCombination,
-			final List<Developer> availableDevs, boolean rotateEveryday, boolean rotationRequired) {
+			final List<Developer> availableDevs, boolean rotationRequired) {
 		Pair trackPairToday = new Pair();
 		Pair trackPairOneDayBack = pairCombination.getPastPairByTrack(0, track);
 		Pair trackPairTwoDaysBack = pairCombination.getPastPairByTrack(1, track);
 		Pair trackPairThreeDaysBack = pairCombination.getPastPairByTrack(2, track);
 		logger.info("Track is: {}\nPair one day back: {}\nPair two days back: {}\nPair three days back: {}", track,
 				trackPairOneDayBack, trackPairTwoDaysBack, trackPairThreeDaysBack);
-		if (rotateEveryday || rotationRequired) {
+		if (rotationRequired) {
 			findFirstDeveloper(availableDevs, trackPairToday, trackPairOneDayBack, trackPairThreeDaysBack);
 		} else if (trackPairOneDayBack != null) {
 			logger.info("No rotation required");

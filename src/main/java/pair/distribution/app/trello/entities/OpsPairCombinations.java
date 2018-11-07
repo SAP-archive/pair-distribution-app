@@ -34,7 +34,7 @@ public class OpsPairCombinations implements PairCombinations {
 	}
 
 	@Override
-	public boolean isRotationTime(List<String> possibleTracks, List<Developer> availableDevs) {
+	public boolean isRotationTime(List<String> possibleTracks, List<Developer> availableDevs, boolean rotateEveryday) {
 		LocalDateTime currentWeekDate = LocalDateTime.ofInstant(getStartDate().toInstant(), ZoneId.systemDefault());
 		DayPairs lastDayPairs = getLastDayPairs();
 		if (lastDayPairs != null) {

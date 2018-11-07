@@ -51,7 +51,11 @@ public class DevPairCombinations implements PairCombinations {
 	}	
 	
 	@Override
-	public boolean isRotationTime(List<String> possibleTracks, final List<Developer> availableDevs) {
+	public boolean isRotationTime(List<String> possibleTracks, final List<Developer> availableDevs, boolean rotateEveryday) {
+		if (rotateEveryday) {
+			return true;
+		}
+		
 		boolean rotation = false;
 		for (String track : possibleTracks) {
 			Pair trackPairOneDayBack = getPastPairByTrack(0, track);
