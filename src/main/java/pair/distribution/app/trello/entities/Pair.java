@@ -13,6 +13,7 @@ public class Pair {
 	private boolean communityPair;
 	private boolean opsPair;
 	private String track;
+	private boolean isLockedPair;
 
     public Pair() {
     		devs = new ArrayList<>(2);
@@ -100,7 +101,7 @@ public class Pair {
 	
 	@Override
 	public String toString() {
-		return "Pair [devs=" + devs + ", opsPair=" + opsPair + "]";
+		return "Pair [devs=" + devs + ", opsPair=" + opsPair + ", locked=" + isLockedPair + "]";
 	}
 
 	public boolean isSolo() {
@@ -137,5 +138,13 @@ public class Pair {
 	
 	public String getTrack() {
 		return this.track;
+	}
+
+	public void setLockedPair(boolean lockedPair) {
+		this.isLockedPair = lockedPair;
+	}
+	
+	public boolean isLockedPair() {
+		return this.isLockedPair;
 	}
 }

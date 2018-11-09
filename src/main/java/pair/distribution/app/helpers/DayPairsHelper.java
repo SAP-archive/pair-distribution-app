@@ -2,9 +2,11 @@ package pair.distribution.app.helpers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ public class DayPairsHelper {
 	}
 
 	public void updateDataBaseWithTrelloContent(List<DayPairs> pairs) {
+		removeTodayFromDatabase();
 		for (DayPairs pairsByDate : pairs) {
 			List<DayPairs> findByDate = repository.findByDate(pairsByDate.getDate());
 			if (findByDate.size() == 1) {
@@ -49,6 +52,22 @@ public class DayPairsHelper {
 				logger.info("More than one entry found. They are: {}", findByDate);
 				throw new RuntimeException();
 			}
+		}
+	}
+
+	private void removeTodayFromDatabase() {
+		Calendar today = Calendar.getInstance();
+		today.set(Calendar.HOUR_OF_DAY, 0);
+		today.clear(Calendar.MINUTE);
+		today.clear(Calendar.SECOND);
+		today.clear(Calendar.MILLISECOND);
+		Date todayDate = today.getTime();
+		List<DayPairs> findByDate = repository.findByDate(todayDate);
+		if (findByDate.size() > 0) {
+			logger.info("Found pairs for today, removing");
+			repository.deleteByDate(todayDate);
+		} else {
+			logger.info("No pairs found for today.");
 		}
 	}
 
@@ -279,6 +298,12 @@ public class DayPairsHelper {
 			final List<Developer> availableDevs, boolean rotationRequired) {
 		Pair trackPairToday = new Pair();
 		Pair trackPairOneDayBack = pairCombination.getPastPairByTrack(0, track);
+		if (trackPairOneDayBack != null && trackPairOneDayBack.isLockedPair()) {
+			logger.info("Pair locked!");
+			trackPairToday.addDev(trackPairOneDayBack.getFirstDev());
+			trackPairToday.addDev(trackPairOneDayBack.getSecondDev());
+			return trackPairToday;
+		}
 		Pair trackPairTwoDaysBack = pairCombination.getPastPairByTrack(1, track);
 		Pair trackPairThreeDaysBack = pairCombination.getPastPairByTrack(2, track);
 		logger.info("Track is: {}\nPair one day back: {}\nPair two days back: {}\nPair three days back: {}", track,
