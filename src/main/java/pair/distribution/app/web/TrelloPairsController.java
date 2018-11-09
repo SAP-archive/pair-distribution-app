@@ -46,17 +46,18 @@ public class TrelloPairsController {
     }
 
     @RequestMapping(value = "/pairs/trello", method = RequestMethod.GET)
-    public DayPairs pairs() {
-    		return generatePairs(0);
+    public DayPairs pairs(@RequestParam(value = "everyday", defaultValue="false") boolean everyday) {
+	    rotateEveryday = everyday;
+	    return generatePairs(0);
     }
-    
+
     @RequestMapping(value = "/pairs/test/trello", method = RequestMethod.GET)
     public DayPairs pairs(@RequestParam("days") int daysIntoFuture ) {
     		return generatePairs(daysIntoFuture);
     }
     
     @RequestMapping(value = "/pairs/rotate", method = RequestMethod.PUT)
-    public void pairs(@RequestParam("everyday") boolean everyday ) {
+    public void pairsConfiguration(@RequestParam("everyday") boolean everyday ) {
     		rotateEveryday = everyday;
     }
 
