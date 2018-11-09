@@ -1,8 +1,13 @@
 package pair.distribution.app.web;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,13 +45,22 @@ public class TrelloPairsController {
 	@Value("${trello.pairing.board.id}")
 	private String pairingBoardId;
 	
+	private String[] messages = { "Have a nice day!", "Happy pairing!", "Go go go!", "To the keyboards!" };
+
     @Autowired
     public TrelloPairsController(TrelloPairsRepository repository) {
         this.repository = repository;
     }
 
     @RequestMapping(value = "/pairs/trello", method = RequestMethod.GET)
-    public DayPairs pairs(@RequestParam(value = "everyday", defaultValue="false") boolean everyday) {
+    public String pairs() throws IOException {
+	    rotateEveryday = everyday;
+		generatePairs(0);
+		return generateOutput();
+    }
+
+    @RequestMapping(value = "/pairs/trello/json", method = RequestMethod.GET)
+    public DayPairs pairsJson(@RequestParam(value = "everyday", defaultValue="false") boolean everyday) {
 	    rotateEveryday = everyday;
 	    return generatePairs(0);
     }
@@ -55,7 +69,7 @@ public class TrelloPairsController {
     public DayPairs pairs(@RequestParam("days") int daysIntoFuture ) {
     		return generatePairs(daysIntoFuture);
     }
-    
+
     @RequestMapping(value = "/pairs/rotate", method = RequestMethod.PUT)
     public void pairsConfiguration(@RequestParam("everyday") boolean everyday ) {
     		rotateEveryday = everyday;
@@ -70,15 +84,38 @@ public class TrelloPairsController {
 		List<DayPairs> pastPairs = repository.findAll();
 		PairCombinations pairCombination = new DevPairCombinations(pastPairs);
 		OpsPairCombinations devOpsPairCombination = new OpsPairCombinations(pastPairs, daysIntoFuture);
-		
-		List<DayPairs> todayDevOpsPairs = generateTodayOpsPairs(pairingBoardTrello, pairsHelper, devOpsPairCombination, pairingBoardTrello.getDevs(), pairingBoardTrello.getDevOpsCompanies());
-		DayPairs todayPairs = generateTodayDevPairs(pairingBoardTrello, pairsHelper, pairCombination, getTodayDevelopers(pairingBoardTrello, todayDevOpsPairs), !todayDevOpsPairs.isEmpty());
+
+		List<DayPairs> todayDevOpsPairs = generateTodayOpsPairs(pairingBoardTrello, pairsHelper, devOpsPairCombination,
+				pairingBoardTrello.getDevs(), pairingBoardTrello.getDevOpsCompanies());
+		DayPairs todayPairs = generateTodayDevPairs(pairingBoardTrello, pairsHelper, pairCombination,
+				getTodayDevelopers(pairingBoardTrello, todayDevOpsPairs), !todayDevOpsPairs.isEmpty());
 		todayDevOpsPairs.stream().forEach(devOpsPairs -> todayPairs.addPiars(devOpsPairs.getPairs()));
-		
+
 		pairingBoardTrello.addTodayPairsToBoard(todayPairs, daysIntoFuture);
 		logger.info("Trello board has been updated");
-		
+
 		return todayPairs;
+	}
+
+	private String generateOutput() throws IOException {
+		ClassLoader classLoader = getClass().getClassLoader();
+		InputStream inputStream = classLoader.getResourceAsStream("output.html");
+		String data = readFromInputStream(inputStream);
+		Random rand = new Random();
+		int selectedMessage = rand.nextInt(messages.length);
+		return data.replaceAll("--message--", messages[selectedMessage]);
+	}
+
+	private String readFromInputStream(InputStream inputStream) throws IOException {
+		StringBuilder builder = new StringBuilder();
+		BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+		String line;
+		while ((line = br.readLine()) != null) {
+			builder.append(line);
+			builder.append("\n");
+		}
+
+		return builder.toString();
 	}
 
 	private List<Developer> getTodayDevelopers(PairingBoard pairingBoardTrello, List<DayPairs> todayDevOpsPairs) {
