@@ -24,6 +24,7 @@ public class PairingBoard {
 
 	private static final String BUILD_PAIR_LABEL_COLOR = "orange";
 	private static final String COMMUNITY_PAIR_LABEL_COLOR = "green";
+	private static final String LOCK_LABEL_COLOR = "red";
 	private static final String DEVOPS_PAIR_DESCRIPTION = "devops";
 	private static final String CREATE_LISTS = "/lists?";
     private static final String GET_LIST_CARDS = "/lists/{listId}/cards?";
@@ -106,6 +107,7 @@ public class PairingBoard {
 			Pair pair = new Pair();
 			pair.setBuildPair(isPairWithLabel(card, BUILD_PAIR_LABEL_COLOR));
 			pair.setCommunityPair(isPairWithLabel(card, COMMUNITY_PAIR_LABEL_COLOR));
+			pair.setLockedPair(isPairWithLabel(card, LOCK_LABEL_COLOR));
 			pair.setOpsPair(isPairDevOpsPair(card.getDesc()));
 			pair.setDevs( getDevelopersFromCard(card));
 			pair.setTrack(card.getName());
