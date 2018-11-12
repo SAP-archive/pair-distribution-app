@@ -299,9 +299,9 @@ public class DayPairsHelper {
 		Pair trackPairToday = new Pair();
 		Pair trackPairOneDayBack = pairCombination.getPastPairByTrack(0, track);
 		if (trackPairOneDayBack != null && trackPairOneDayBack.isLockedPair()) {
-			logger.info("Pair locked!");
-			trackPairToday.addDev(trackPairOneDayBack.getFirstDev());
-			trackPairToday.addDev(trackPairOneDayBack.getSecondDev());
+			logger.info("Pair is locked: {}", trackPairOneDayBack);
+			trackPairToday.addDev(getDeveloperById(availableDevs, trackPairOneDayBack.getFirstDev()));
+			trackPairToday.addDev(getDeveloperById(availableDevs, trackPairOneDayBack.getSecondDev()));
 			return trackPairToday;
 		}
 		Pair trackPairTwoDaysBack = pairCombination.getPastPairByTrack(1, track);

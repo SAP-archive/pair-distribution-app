@@ -53,10 +53,10 @@ public class TrelloPairsController {
     }
 
     @RequestMapping(value = "/pairs/trello", method = RequestMethod.GET)
-    public String pairs() throws IOException {
+    public String pairs(@RequestParam(value = "everyday", defaultValue="false") boolean everyday) throws IOException {
 	    rotateEveryday = everyday;
 		generatePairs(0);
-		return generateOutput();
+		return generateHtmlOutput();
     }
 
     @RequestMapping(value = "/pairs/trello/json", method = RequestMethod.GET)
@@ -97,7 +97,7 @@ public class TrelloPairsController {
 		return todayPairs;
 	}
 
-	private String generateOutput() throws IOException {
+	private String generateHtmlOutput() throws IOException {
 		ClassLoader classLoader = getClass().getClassLoader();
 		InputStream inputStream = classLoader.getResourceAsStream("output.html");
 		String data = readFromInputStream(inputStream);
