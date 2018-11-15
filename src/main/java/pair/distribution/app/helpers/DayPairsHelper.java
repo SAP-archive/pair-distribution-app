@@ -25,12 +25,20 @@ import pair.distribution.app.trello.entities.PairCombinations;
 
 public class DayPairsHelper {
 
+	private static final int THRE_DAYS_BACK = 2;
+
+	private static final int TWO_DAYS_BACK = 1;
+
+	private static final int ONE_DAYS_BACK = 0;
+
 	private static final Logger logger = LoggerFactory.getLogger(DayPairsHelper.class);
 
 	private TrelloPairsRepository repository;
+	private boolean everydayRotationMode;
 
-	public DayPairsHelper(TrelloPairsRepository repository) {
+	public DayPairsHelper(TrelloPairsRepository repository, boolean everydayRotationMode) {
 		this.repository = repository;
+		this.everydayRotationMode = everydayRotationMode;
 	}
 
 	public void updateDataBaseWithTrelloContent(List<DayPairs> pairs) {
@@ -160,11 +168,11 @@ public class DayPairsHelper {
 	}
 
 	public DayPairs generateNewDayPairs(List<String> tracks, List<Developer> devs, PairCombinations pairCombination,
-			Map<Pair, Integer> pairsWeight, boolean rotateEveryday, List<Company> companies) {
+			Map<Pair, Integer> pairsWeight, List<Company> companies) {
 		DayPairs result = new DayPairs();
 		List<String> possibleTracks = getPossibleTracks(tracks, devs, companies);
 		List<Developer> availableDevs = new ArrayList<>(devs);
-		boolean rotationTime = pairCombination.isRotationTime(possibleTracks, availableDevs, rotateEveryday);
+		boolean rotationTime = pairCombination.isRotationTime(possibleTracks, availableDevs, everydayRotationMode);
 
 		for (String track : possibleTracks) {
 			List<Developer> developersForTrack = getDevelopersForTrack(companies, availableDevs, track);
@@ -297,19 +305,17 @@ public class DayPairsHelper {
 	private Pair tryToFindPairFirstDeveloper(String track, PairCombinations pairCombination,
 			final List<Developer> availableDevs, boolean rotationRequired) {
 		Pair trackPairToday = new Pair();
-		Pair trackPairOneDayBack = pairCombination.getPastPairByTrack(0, track);
+		Pair trackPairOneDayBack = pairCombination.getPastPairByTrack(ONE_DAYS_BACK, track);
 		if (trackPairOneDayBack != null && trackPairOneDayBack.isLockedPair()) {
 			logger.info("Pair is locked: {}", trackPairOneDayBack);
 			trackPairToday.addDev(getDeveloperById(availableDevs, trackPairOneDayBack.getFirstDev()));
 			trackPairToday.addDev(getDeveloperById(availableDevs, trackPairOneDayBack.getSecondDev()));
 			return trackPairToday;
 		}
-		Pair trackPairTwoDaysBack = pairCombination.getPastPairByTrack(1, track);
-		Pair trackPairThreeDaysBack = pairCombination.getPastPairByTrack(2, track);
 		logger.info("Track is: {}\nPair one day back: {}\nPair two days back: {}\nPair three days back: {}", track,
-				trackPairOneDayBack, trackPairTwoDaysBack, trackPairThreeDaysBack);
+				trackPairOneDayBack, pairCombination.getPastPairByTrack(TWO_DAYS_BACK, track), pairCombination.getPastPairByTrack(THRE_DAYS_BACK, track));
 		if (rotationRequired) {
-			findFirstDeveloper(availableDevs, trackPairToday, trackPairOneDayBack, trackPairThreeDaysBack);
+			findFirstDeveloper(availableDevs, trackPairToday, pairCombination, track);
 		} else if (trackPairOneDayBack != null) {
 			logger.info("No rotation required");
 			trackPairToday.setDevs(getAvailableDevs(availableDevs, trackPairOneDayBack.getDevs()));
@@ -317,30 +323,29 @@ public class DayPairsHelper {
 		return trackPairToday;
 	}
 
-	private void findFirstDeveloper(final List<Developer> availableDevs, Pair trackPairToday, Pair trackPairOneDayBack,
-			Pair trackPairThreeDaysBack) {
+	private void findFirstDeveloper(final List<Developer> availableDevs, Pair trackPairToday, PairCombinations pairCombination, String track) {
 		logger.info("time to rotate");
+		Pair trackPairOneDayBack = pairCombination.getPastPairByTrack(ONE_DAYS_BACK, track);
 		if (trackPairOneDayBack == null) {
 			logger.info("No history. Add one dev random from available devs");
 			trackPairToday.addDev(getDevWithContextOrRandom(availableDevs));
 		} else if (trackPairOneDayBack.isSolo()) {
 			logger.info("Solo dev should stay on track. Don't do anything");
-		} else if (hasHistoryForLongestDev(trackPairThreeDaysBack)) {
-			tryToRotateLongestDev(availableDevs, trackPairToday, trackPairOneDayBack, trackPairThreeDaysBack);
+		} else if (hasHistoryForLongestDev(pairCombination, track)) {
+			tryToRotateLongestDev(availableDevs, trackPairToday, pairCombination, track);
 		} else {
 			logger.info("No older history. Add one dev random");
 			trackPairToday.addDev(getDevWithContextOrRandom(getAvailableDevs(availableDevs, trackPairOneDayBack.getDevs())));
 		}
 	}
 
-	private void tryToRotateLongestDev(final List<Developer> availableDevs, Pair trackPairToday,
-			Pair trackPairOneDayBack, Pair trackPairThreeDaysBack) {
+	private void tryToRotateLongestDev(final List<Developer> availableDevs, Pair trackPairToday, PairCombinations pairCombination, String track) {
 		logger.info("There is history to find longest dev");
-		Developer longestDevOnStory = getLongestDevOnStory(trackPairOneDayBack, trackPairThreeDaysBack);
+		Developer longestDevOnStory = getLongestDevOnStory(pairCombination, track);
 		if (longestDevOnStory != null) {
 			Developer devToRotate = getDeveloperById(availableDevs, longestDevOnStory);
 			logger.info("Longest dev is {}", devToRotate);
-			Developer devToStay = getDeveloperById(availableDevs, trackPairOneDayBack.getOtherDev(longestDevOnStory));
+			Developer devToStay = getDeveloperById(availableDevs, pairCombination.getPastPairByTrack(ONE_DAYS_BACK, track).getOtherDev(longestDevOnStory));
 			if (devToStay != null && availableDevs.contains(devToStay)) {
 				logger.info("Dev with context to stay is {}", devToStay);
 				devToStay.setHasContext(true);
@@ -352,8 +357,14 @@ public class DayPairsHelper {
 		}
 	}
 
-	private boolean hasHistoryForLongestDev(Pair trackPairThreeDaysBack) {
-		return trackPairThreeDaysBack != null;
+	private boolean hasHistoryForLongestDev(PairCombinations pairCombination, String track) {
+		Pair trackPairOneDaysBack = pairCombination.getPastPairByTrack(ONE_DAYS_BACK, track);
+		Pair trackPairTwoDaysBack = pairCombination.getPastPairByTrack(TWO_DAYS_BACK, track);
+		if (everydayRotationMode) {
+			return trackPairOneDaysBack != null && trackPairTwoDaysBack != null;
+		}
+			
+		return trackPairOneDaysBack != null && trackPairTwoDaysBack != null && pairCombination.getPastPairByTrack(THRE_DAYS_BACK, track) != null;
 	}
 
 	private Pair getPairByWeight(Pair pairCandidate, List<Developer> availableDevs, Map<Pair, Integer> pairsWeight, String track) {
@@ -394,11 +405,19 @@ public class DayPairsHelper {
 		}
 	}
 
-	private Developer getLongestDevOnStory(Pair firstDayPair, Pair thirdDayPair) {
+	private Developer getLongestDevOnStory(PairCombinations pairCombination, String track) {
 		ArrayList<Developer> devsOnTrack = new ArrayList<>();
-		devsOnTrack.addAll(firstDayPair.getDevs());
-		devsOnTrack.retainAll(thirdDayPair.getDevs());
-		return devsOnTrack.isEmpty() || devsOnTrack.size() == 2 ? getDevWithContextOrRandom(firstDayPair.getDevs())
+		Pair lastDayPair = pairCombination.getPastPairByTrack(ONE_DAYS_BACK, track);
+		devsOnTrack.addAll(lastDayPair.getDevs());
+		
+		for(int daysBack = 1; daysBack < 4; daysBack++) {
+			Pair pastPairByTrack = pairCombination.getPastPairByTrack(daysBack, track);
+			if(pastPairByTrack != null) {				
+				devsOnTrack.retainAll(pastPairByTrack.getDevs());
+			}
+		}
+
+		return devsOnTrack.isEmpty() || devsOnTrack.size() == 2 ? getDevWithContextOrRandom(lastDayPair.getDevs())
 				: devsOnTrack.get(0);
 	}
 
@@ -412,7 +431,9 @@ public class DayPairsHelper {
 		if (devs.isEmpty()) {
 			return null;
 		} else {
-			if (devs.get(0).hasContext()) {
+			if (devs.size() == 1) {
+				return devs.get(0);
+			}else if (devs.get(0).hasContext()) {
 				return devs.get(0);
 			} else if(devs.size() > 1 && devs.get(1).hasContext()) {
 				return devs.get(1);

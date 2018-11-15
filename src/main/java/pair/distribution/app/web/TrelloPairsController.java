@@ -66,7 +66,8 @@ public class TrelloPairsController {
     }
 
     @RequestMapping(value = "/pairs/test/trello", method = RequestMethod.GET)
-    public DayPairs pairs(@RequestParam("days") int daysIntoFuture ) {
+    public DayPairs pairs(@RequestParam("days") int daysIntoFuture, @RequestParam(value = "everyday", defaultValue="false") boolean everyday ) {
+    	    rotateEveryday = everyday;
     		return generatePairs(daysIntoFuture);
     }
 
@@ -79,7 +80,7 @@ public class TrelloPairsController {
 		PairingBoard pairingBoardTrello = new PairingBoard(apiToken, apiKey, pairingBoardId);
 		pairingBoardTrello.syncTrelloBoardState();
 		logger.info("Syncing state finished. Updating database state");
-		DayPairsHelper pairsHelper = new DayPairsHelper(repository);
+		DayPairsHelper pairsHelper = new DayPairsHelper(repository, rotateEveryday);
 		pairsHelper.updateDataBaseWithTrelloContent(pairingBoardTrello.getPastPairs());
 		List<DayPairs> pastPairs = repository.findAll();
 		PairCombinations pairCombination = new DevPairCombinations(pastPairs);
@@ -131,7 +132,7 @@ public class TrelloPairsController {
 		logger.info("Pairs weight after adaptation: {}", pairsWeight);
 		pairsHelper.buildDevelopersTracksWeightFromPastPairing(pairCombination, todayDevs);
 		logger.info("Tracks are: {} today devs are: {}", pairingBoardTrello.getTracks(), todayDevs);
-		DayPairs todayDevPairs = pairsHelper.generateNewDayPairs(pairingBoardTrello.getTracks(), todayDevs, pairCombination, pairsWeight, rotateEveryday, pairingBoardTrello.getCompanies());
+		DayPairs todayDevPairs = pairsHelper.generateNewDayPairs(pairingBoardTrello.getTracks(), todayDevs, pairCombination, pairsWeight, pairingBoardTrello.getCompanies());
 		logger.info("Today pairs are: {}",  todayDevPairs);
 		pairsHelper.rotateSoloPairIfAny(todayDevPairs, pairCombination, pairsWeight);
 		logger.info("After single pair rotation they are: {}", todayDevPairs);
@@ -156,7 +157,7 @@ public class TrelloPairsController {
 			logger.info("Company : {} devs are: {}", company.getName(), companyDevs);
 			Map<Pair, Integer> companyDevOpsPairsWeight = pairsHelper.buildPairsWeightFromPastPairing(devOpsPairCombination, companyDevs);
 			logger.info("DevOpsPairs weight for company: {} is {}", company.getName(), companyDevOpsPairsWeight);
-			DayPairs dayPairs = pairsHelper.generateNewDayPairs(Arrays.asList(company.getTrack()), companyDevs, devOpsPairCombination, companyDevOpsPairsWeight, rotateEveryday, pairingBoardTrello.getCompanies());
+			DayPairs dayPairs = pairsHelper.generateNewDayPairs(Arrays.asList(company.getTrack()), companyDevs, devOpsPairCombination, companyDevOpsPairsWeight, pairingBoardTrello.getCompanies());
 			dayPairs.getPairs().values().stream().forEach(pair -> { pair.setOpsPair(true); pair.setBuildPair(true); pair.setCommunityPair(true); });
 			todayPairs.add(dayPairs);
 			logger.info("Today DevOpsPairs for company: {} are {}", company.getName(), todayPairs);

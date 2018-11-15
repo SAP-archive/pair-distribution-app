@@ -38,7 +38,7 @@ public class DayPairsHelperTest {
 	@Before
 	public void setUp() {
 		trelloPairsRepository = mock(TrelloPairsRepository.class);
-		subject = new DayPairsHelper(trelloPairsRepository);
+		subject = new DayPairsHelper(trelloPairsRepository, false);
 	}
 
 	@Test(expected = RuntimeException.class)
@@ -110,8 +110,7 @@ public class DayPairsHelperTest {
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
 		subject.buildDevelopersPairingDays(pairs, devs);
 		
-		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, false,
-				getStandardCompanies());
+		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.getTracks().size(), is(2));
 		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
@@ -125,6 +124,30 @@ public class DayPairsHelperTest {
 		assertThat(trackOneHasContext, is(true));
 		assertThat(trackTwoHasContext, is(true));
 	}
+	
+	@Test
+	public void testGenerateNewDayPairsWithEverydayRotation() {
+		PairCombinations pairs = getPairsList();
+		List<Developer> devs = getStandardDevs();
+		List<String> tracks = Arrays.asList("track1", "track2", "track3");
+		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
+		subject.buildDevelopersPairingDays(pairs, devs);
+		
+		DayPairsHelper subjectWithEverydayRotation = new DayPairsHelper(trelloPairsRepository, true);
+		DayPairs dayPairs = subjectWithEverydayRotation.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
+
+		assertThat(dayPairs.getTracks().size(), is(2));
+		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
+		assertThat(dayPairs.getPairByTrack("track1"),
+				is(not(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2"))))));
+		assertThat(dayPairs.getPairByTrack("track2"),
+				is(not(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4"))))));
+		
+		boolean trackOneHasDev2 = dayPairs.getPairByTrack("track1").getFirstDev().equals(new Developer("dev2")) || dayPairs.getPairByTrack("track1").getSecondDev().equals(new Developer("dev2"));
+		boolean trackTwoHasDev4 = dayPairs.getPairByTrack("track2").getFirstDev().equals(new Developer("dev4")) || dayPairs.getPairByTrack("track2").getSecondDev().equals(new Developer("dev4"));
+		assertThat(trackOneHasDev2, is(true));
+		assertThat(trackTwoHasDev4, is(true));
+	}
 
 	@Test
 	public void testGenerateNewDayPairsWithSmallestWeight() {
@@ -135,8 +158,7 @@ public class DayPairsHelperTest {
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
 		subject.buildDevelopersPairingDays(pairs, devs);
 		
-		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, false,
-				getStandardCompanies());
+		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.getTracks().size(), is(3));
 		assertThat(dayPairs.getTracks(), contains("track1", "track2", "track3"));
@@ -153,8 +175,7 @@ public class DayPairsHelperTest {
 		List<String> tracks = Arrays.asList("track1", "track2", "track3");
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
 
-		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, false,
-				getStandardCompanies());
+		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.getTracks().size(), is(2));
 		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
@@ -170,8 +191,7 @@ public class DayPairsHelperTest {
 		List<String> tracks = Arrays.asList("track1", "track2", "track3");
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
 
-		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, false,
-				getStandardCompanies());
+		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.getTracks().size(), is(1));
 		assertThat(dayPairs.getTracks(), contains("track1"));
@@ -186,8 +206,7 @@ public class DayPairsHelperTest {
 		List<String> tracks = Arrays.asList("track1", "track2", "track3");
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
 
-		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, false,
-				getStandardCompanies());
+		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.getTracks().size(), is(2));
 		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
@@ -211,8 +230,7 @@ public class DayPairsHelperTest {
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
 		subject.adaptPairsWeight(pairsWeight, devs);
 
-		DayPairs todayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, false,
-				getStandardCompanies());
+		DayPairs todayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(todayPairs.getPairByTrack("track1"),
 				is(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2")))));
@@ -237,8 +255,7 @@ public class DayPairsHelperTest {
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
 		subject.adaptPairsWeight(pairsWeight, devs);
 
-		DayPairs todayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, false,
-				getStandardCompanies());
+		DayPairs todayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 		subject.rotateSoloPairIfAny(todayPairs, pairs, pairsWeight);
 
 		assertThat(todayPairs.getPairByTrack("track1"), is(not(new Pair(Arrays.asList(new Developer("dev1"))))));
@@ -252,8 +269,7 @@ public class DayPairsHelperTest {
 		List<String> tracks = Arrays.asList("track1", "track2", "track3");
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
 
-		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, false,
-				getStandardCompanies());
+		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.getTracks().size(), is(2));
 		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
@@ -265,8 +281,9 @@ public class DayPairsHelperTest {
 		List<Developer> devs = getStandardDevs();
 		List<String> tracks = Arrays.asList("track1", "track2", "track3");
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
-
-		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, true, getStandardCompanies());
+		
+		DayPairsHelper subjectWithEverydayRotation = new DayPairsHelper(trelloPairsRepository, true);
+		DayPairs dayPairs = subjectWithEverydayRotation.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.getTracks().size(), is(2));
 		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
@@ -284,8 +301,7 @@ public class DayPairsHelperTest {
 		List<String> tracks = Arrays.asList("bar-track1", "track2", "track3");
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairs, devs);
 
-		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, false,
-				getStandardCompanies());
+		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.getTracks().size(), is(3));
 		assertThat(dayPairs.getTracks(), hasItems("bar-track1", "track2", "track3"));
@@ -329,8 +345,7 @@ public class DayPairsHelperTest {
 		List<String> tracks = Arrays.asList("track1");
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairCombinations, todayDevs);
 
-		DayPairs dayPairs = subject.generateNewDayPairs(tracks, todayDevs, pairCombinations, pairsWeight, false,
-				getStandardCompanies());
+		DayPairs dayPairs = subject.generateNewDayPairs(tracks, todayDevs, pairCombinations, pairsWeight,	getStandardCompanies());
 
 		assertThat(dayPairs.hasPair(new Pair(Arrays.asList(firstDeveloper, thirdDeveloper))), is(true));
 	}
@@ -373,8 +388,7 @@ public class DayPairsHelperTest {
 		subject.buildDevelopersTracksWeightFromPastPairing(pairCombinations, todayDevs);
 		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(pairCombinations, todayDevs);
 
-		DayPairs dayPairs = subject.generateNewDayPairs(tracks, todayDevs, pairCombinations, pairsWeight, false,
-				getStandardCompanies());
+		DayPairs dayPairs = subject.generateNewDayPairs(tracks, todayDevs, pairCombinations, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.hasPair(new Pair(Arrays.asList(firstDeveloper, secondDeveloper))), is(true));
 	}
@@ -398,7 +412,7 @@ public class DayPairsHelperTest {
 				new Developer("dev4"), new Developer("dev5"), new Developer("dev6"));
 		return new DevPairCombinations(getPairsListWithLongestDevFromDevs(devs));
 	}
-
+	
 	private List<DayPairs> getPairsListFromDevs(List<Developer> devs) {
 		ArrayList<DayPairs> result = new ArrayList<DayPairs>();
 		for (int i = 1; i < 3; i++) {
