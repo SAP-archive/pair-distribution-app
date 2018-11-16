@@ -35,7 +35,6 @@ import pair.distribution.app.trello.entities.PairCombinations;
 public class TrelloPairsController {
    
     private static final Logger logger = LoggerFactory.getLogger(TrelloPairsController.class);
-    private boolean rotateEveryday = false;
     
     private TrelloPairsRepository repository;
 	@Value("${trello.api.token}")
@@ -54,33 +53,25 @@ public class TrelloPairsController {
 
     @RequestMapping(value = "/pairs/trello", method = RequestMethod.GET)
     public String pairs(@RequestParam(value = "everyday", defaultValue="false") boolean everyday) throws IOException {
-	    rotateEveryday = everyday;
-		generatePairs(0);
+		generatePairs(0, everyday);
 		return generateHtmlOutput();
     }
 
     @RequestMapping(value = "/pairs/trello/json", method = RequestMethod.GET)
     public DayPairs pairsJson(@RequestParam(value = "everyday", defaultValue="false") boolean everyday) {
-	    rotateEveryday = everyday;
-	    return generatePairs(0);
+	    return generatePairs(0, everyday);
     }
 
     @RequestMapping(value = "/pairs/test/trello", method = RequestMethod.GET)
     public DayPairs pairs(@RequestParam("days") int daysIntoFuture, @RequestParam(value = "everyday", defaultValue="false") boolean everyday ) {
-    	    rotateEveryday = everyday;
-    		return generatePairs(daysIntoFuture);
+    		return generatePairs(daysIntoFuture, everyday);
     }
 
-    @RequestMapping(value = "/pairs/rotate", method = RequestMethod.PUT)
-    public void pairsConfiguration(@RequestParam("everyday") boolean everyday ) {
-    		rotateEveryday = everyday;
-    }
-
-	private DayPairs generatePairs(int daysIntoFuture) {
+	private DayPairs generatePairs(int daysIntoFuture, boolean everydayRotation) {
 		PairingBoard pairingBoardTrello = new PairingBoard(apiToken, apiKey, pairingBoardId);
 		pairingBoardTrello.syncTrelloBoardState();
 		logger.info("Syncing state finished. Updating database state");
-		DayPairsHelper pairsHelper = new DayPairsHelper(repository, rotateEveryday);
+		DayPairsHelper pairsHelper = new DayPairsHelper(repository, everydayRotation);
 		pairsHelper.updateDataBaseWithTrelloContent(pairingBoardTrello.getPastPairs());
 		List<DayPairs> pastPairs = repository.findAll();
 		PairCombinations pairCombination = new DevPairCombinations(pastPairs);
