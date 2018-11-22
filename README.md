@@ -9,11 +9,11 @@ The `pair-distribution-app` supports teams which do pair programming and operati
 
 There are different strategies for pair generation. Currently, supported strategies are:
 * For development
-  * rotate every two days
+  * rotate every day or every two days 
   * the developer with more days in the track rotates out
   * new pair combinations are generated based on the pair weights. Based on its history the `pair-distribution-app` computes for each pair combination, a weight which represents how often a pair worked together and how often a developer from the pair was in a track. Pair generation takes the pair with the smallest weight for a track. In case that more than one combination have the same weight then a random one is choosen.
 * For operations
-  * rotate every week
+  * rotate in the same way as development or weekly
   * for each company which do operations one operations pair is generated. The operations pairs are developers from the same company and have a card title `<company-name>-ops/interrupt` 
   * the rest of the rules are the same like for development
 * In case of multiple companies with company specific projects
@@ -21,7 +21,8 @@ There are different strategies for pair generation. Currently, supported strateg
   * the rest of the rules are the same as for development
 
 ### REST APIs
-* For production use: `/pairs/trello`
+* For two day rotation use: `/pairs/trello`
+* For every day rotation use: `/pairs/trello?everyday=true` 
 * For testing `pairs/test/trello?days=<days-in-the-future`
 
 # Requirements
@@ -73,7 +74,7 @@ Edit both files and replace all place holders `<...>` inside.
 The `pair-distribution-app` accesses information about developers, tracks and companies via Trello-APIs, uses its history and generates the new pairs for the day which is a Trello list.
 * Create a list called `Devs`. 
   * create a card called `Devs` and add all developers of your team as members to this card. The application will use this information for pair generation.
-  * if operations pair is required create a card called `DevOps: <company-name>`. This will automatically generate an operations pair for the `<company-name>`. 
+  * if operations pair is required create a card called `DevOps: <company-name>`. This will automatically generate an operations pair for the `<company-name>`. Default behavoir here is to rotate like the dev pairs. For weekly roation change the configuration to `DevOps: <company-name>-weekly`.  
   * create a card called `New`. This card is for all new developer. The members of this card will not be considered for the operations pair.
   * create a card `<company-name>` for each company and add all developers of a `<company-name>` as members of their company card.
 * create a list called `Tracks`. 
