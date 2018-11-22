@@ -148,8 +148,13 @@ public class PairingBoard {
 	}
 
 	private void initDevOpsCompanies(String[] companyNames) {
-		for (String companyName : companyNames) {
-			devOpsCompanies.add(getCompanyByName(companyName));
+		for (String company : companyNames) {
+			String[] companyAndDevOpsRotation = company.split("-");
+			Company companyByName = getCompanyByName(companyAndDevOpsRotation[0]);
+			devOpsCompanies.add(companyByName);
+			if (companyAndDevOpsRotation.length > 1) {
+				companyByName.setDevOpsRotationStrategy(companyAndDevOpsRotation[1]);
+			}
 		}
 	}
 

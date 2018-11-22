@@ -103,19 +103,31 @@ public class OpsPairsCombinationsTest {
 	@Test
 	public void testIsRotationTimeForEmptyHistory() {
 		OpsPairCombinations devPairCombinations = new OpsPairCombinations(new ArrayList<>());
-		
-		
+		Company company = new Company("myCompany");
+		company.setDevOpsRotationStrategy("weekly");
+		devPairCombinations.setCompany(company);
+
 		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1"), getStandardDevs(), false), is(false));
 	}
+
 	
 	@Test
 	public void testIsRotationTimeForEmptyHistoryWithEveryDayRotation() {
 		OpsPairCombinations devPairCombinations = new OpsPairCombinations(new ArrayList<>());
-		
-		
+		Company company = new Company("myCompany");
+		company.setDevOpsRotationStrategy("weekly");
+		devPairCombinations.setCompany(company);
+
 		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1"), getStandardDevs(), true), is(false));
 	}
-	
+
+	@Test
+	public void testIsRotationTimeForEmptyHistoryWithEveryDayRotationAnNoWeeklyRotation() {
+		OpsPairCombinations devPairCombinations = new OpsPairCombinations(new ArrayList<>());
+
+		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1"), getStandardDevs(), true), is(true));
+	}
+
 	@Test
 	public void testIsRotationTimeForSameWeek() {
 		List<Developer> standardDevs = getStandardDevs();
@@ -124,11 +136,13 @@ public class OpsPairsCombinationsTest {
 		pairs.addPair("track1", new Pair(Arrays.asList(standardDevs.get(0), standardDevs.get(1)), true, "track1"));
 		
 		OpsPairCombinations devPairCombinations = new OpsPairCombinations(Arrays.asList(pairs));
-		
+		Company company = new Company("myCompany");
+		company.setDevOpsRotationStrategy("weekly");
+		devPairCombinations.setCompany(company);
 		
 		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1"), standardDevs, false), is(false));
 	}
-	
+
 	@Test
 	public void testIsRotationTimeForSameWeekWithEveryDayRotation() {
 		List<Developer> standardDevs = getStandardDevs();
@@ -137,8 +151,10 @@ public class OpsPairsCombinationsTest {
 		pairs.addPair("track1", new Pair(Arrays.asList(standardDevs.get(0), standardDevs.get(1)), true, "track1"));
 		
 		OpsPairCombinations devPairCombinations = new OpsPairCombinations(Arrays.asList(pairs));
-		
-		
+		Company company = new Company("myCompany");
+		company.setDevOpsRotationStrategy("weekly");
+		devPairCombinations.setCompany(company);
+
 		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1"), standardDevs, true), is(false));
 	}
 	
@@ -150,8 +166,10 @@ public class OpsPairsCombinationsTest {
 		pairs.addPair("track1", new Pair(Arrays.asList(standardDevs.get(0), standardDevs.get(1)), true, "track1"));
 		
 		OpsPairCombinations devPairCombinations = new OpsPairCombinations(Arrays.asList(pairs));
-		
-		
+		Company company = new Company("myCompany");
+		company.setDevOpsRotationStrategy("weekly");
+		devPairCombinations.setCompany(company);
+
 		assertThat(devPairCombinations.isRotationTime(Arrays.asList("track1"), standardDevs, false), is(true));
 	}
 

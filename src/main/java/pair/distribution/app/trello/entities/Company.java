@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 public class Company {
 
 	private String name;
+	private boolean isDevOpsRotationWeekly;
 
 	public Company(String name) {
 		this.name = name.trim();
@@ -40,7 +41,18 @@ public class Company {
 		return todayDevs.stream().filter(isSameCompanry()).collect(Collectors.toList());
 	}
 
+	public boolean isDevOpsRotationWeekly() {
+		return isDevOpsRotationWeekly;
+	}
+
+	public void setDevOpsRotationStrategy(String rotationMode) {
+		if("weekly".equals(rotationMode)) {
+			isDevOpsRotationWeekly = true;
+		}
+	}
+
 	private Predicate<? super Developer> isSameCompanry() {
 		return developer -> developer.getCompany().getName().equals(this.getName());
 	}
+
 }

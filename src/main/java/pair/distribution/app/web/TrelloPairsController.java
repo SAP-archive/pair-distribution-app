@@ -148,6 +148,7 @@ public class TrelloPairsController {
 			logger.info("Company : {} devs are: {}", company.getName(), companyDevs);
 			Map<Pair, Integer> companyDevOpsPairsWeight = pairsHelper.buildPairsWeightFromPastPairing(devOpsPairCombination, companyDevs);
 			logger.info("DevOpsPairs weight for company: {} is {}", company.getName(), companyDevOpsPairsWeight);
+			devOpsPairCombination.setCompany(company);
 			DayPairs dayPairs = pairsHelper.generateNewDayPairs(Arrays.asList(company.getTrack()), companyDevs, devOpsPairCombination, companyDevOpsPairsWeight, pairingBoardTrello.getCompanies());
 			dayPairs.getPairs().values().stream().forEach(pair -> { pair.setOpsPair(true); pair.setBuildPair(true); pair.setCommunityPair(true); });
 			todayPairs.add(dayPairs);

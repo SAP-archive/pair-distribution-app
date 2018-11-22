@@ -11,10 +11,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-public class OpsPairCombinations implements PairCombinations {
+public class OpsPairCombinations extends PairCombinations {
 	
 	private List<DayPairs> pastPairs;
 	private int daysIntoFuture;
+	private Company company;
 
 	public OpsPairCombinations(List<DayPairs> dayPairs, int daysIntoFuture) {
 		this.pastPairs = dayPairs;
@@ -35,14 +36,17 @@ public class OpsPairCombinations implements PairCombinations {
 
 	@Override
 	public boolean isRotationTime(List<String> possibleTracks, List<Developer> availableDevs, boolean rotateEveryday) {
-		LocalDateTime currentWeekDate = LocalDateTime.ofInstant(getStartDate().toInstant(), ZoneId.systemDefault());
-		DayPairs lastDayPairs = getLastDayPairs();
-		if (lastDayPairs != null) {
-			LocalDateTime lastPairWeekDate = LocalDateTime.ofInstant(lastDayPairs.getDate().toInstant(), ZoneId.systemDefault());
-			WeekFields weekFields = WeekFields.of(Locale.getDefault());
-			return currentWeekDate.get(weekFields.weekOfWeekBasedYear()) != lastPairWeekDate.get(weekFields.weekOfWeekBasedYear());
+		if(company != null && company.isDevOpsRotationWeekly()) {
+			LocalDateTime currentWeekDate = LocalDateTime.ofInstant(getStartDate().toInstant(), ZoneId.systemDefault());
+			DayPairs lastDayPairs = getLastDayPairs();
+			if (lastDayPairs != null) {
+				LocalDateTime lastPairWeekDate = LocalDateTime.ofInstant(lastDayPairs.getDate().toInstant(), ZoneId.systemDefault());
+				WeekFields weekFields = WeekFields.of(Locale.getDefault());
+				return currentWeekDate.get(weekFields.weekOfWeekBasedYear()) != lastPairWeekDate.get(weekFields.weekOfWeekBasedYear());
+			}
+			return false;
 		}
-		return false;
+		return super.isRotationTime(possibleTracks, availableDevs, rotateEveryday);
 	}
 
 	@Override
@@ -64,7 +68,11 @@ public class OpsPairCombinations implements PairCombinations {
 		}
 		return null;
 	}
-	
+
+	public void setCompany(Company company) {
+		this.company = company;
+}
+
 	private void sortByDescendDate() {
 		Collections.sort(pastPairs);
 		Collections.reverse(pastPairs);

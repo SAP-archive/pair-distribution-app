@@ -84,10 +84,30 @@ public class CompanyTest {
 	@Test
 	public void testIsCompanyTrackFalse() {
 		boolean isCompanyTrack = new Company("Company").isCompanyTrack("companyB-track");
-		
+
 		assertThat(isCompanyTrack, is(false));
 	}
 	
+	@Test
+	public void testIsDevOpsRotationWeekly() {
+		Company company = new Company("Company");
+
+		company.setDevOpsRotationStrategy("weekly");
+
+		assertThat(company.isDevOpsRotationWeekly(), is(true));
+	}
+
+	@Test
+	public void testIsDevOpsRotationWeeklyFalse() {
+		Company company = new Company("Company");
+
+		company.setDevOpsRotationStrategy("");
+		assertThat(company.isDevOpsRotationWeekly(), is(false));
+
+		company.setDevOpsRotationStrategy("foo");
+		assertThat(company.isDevOpsRotationWeekly(), is(false));
+	}
+
 	@Test
 	public void testGetCompanyDevs() {
 		Developer developerCompanyA = new Developer("a");
@@ -97,9 +117,9 @@ public class CompanyTest {
 		newDeveloperCompanyA.setNew(true);
 		Developer developerCompanyB = new Developer("b");
 		developerCompanyB.setCompany(new Company("b"));
-		
+
 		List<Developer> companyDevs = new Company("a").getDevs(Arrays.asList(developerCompanyA, developerCompanyB, newDeveloperCompanyA));
-		
+
 		assertThat(companyDevs, is(Arrays.asList(developerCompanyA, newDeveloperCompanyA)));
 	}
 }
