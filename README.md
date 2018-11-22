@@ -9,7 +9,8 @@ The `pair-distribution-app` supports teams which do pair programming and operati
 
 There are different strategies for pair generation. Currently, supported strategies are:
 * For development
-  * rotate every day or every two days 
+  * rotate every day or every two days
+  * block rotation for one day
   * the developer with more days in the track rotates out
   * new pair combinations are generated based on the pair weights. Based on its history the `pair-distribution-app` computes for each pair combination, a weight which represents how often a pair worked together and how often a developer from the pair was in a track. Pair generation takes the pair with the smallest weight for a track. In case that more than one combination have the same weight then a random one is choosen.
 * For operations
@@ -80,6 +81,7 @@ The `pair-distribution-app` accesses information about developers, tracks and co
 * create a list called `Tracks`. 
   * create a card for each track prioritized from the top to the bottom. 
   * for company specific projects create a card with title `<company-name>-<project-name>`
+* by adding the red label to the latest card of a pair you can block the rotation for this pair for the next rotation
   
 
 ### Prepare Persistence
