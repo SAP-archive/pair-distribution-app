@@ -1,5 +1,4 @@
-server.contextPath=/
-endpoints.health.sensitive=false
+server.servlet.context-path=/
 
 #trello auth
 trello.api.key=<trello-api-key>
@@ -7,5 +6,5 @@ trello.api.token=<trello-api-token>
 trello.pairing.board.id=<trello-pairing-board-id>
 
 #basic auth
-security.user.name=<basic-auth-user-name>
-security.user.password=<basic-auth-password>
+spring.security.user.name=<basic-auth-user-name>
+spring.security.user.password=<basic-auth-password>
