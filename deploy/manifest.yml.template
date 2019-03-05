@@ -3,6 +3,7 @@ applications:
 - name: <pair-app-name>
   memory: 1G
   instances: 1
+  stack: cflinuxfs3
   host: <pair-app-host>
   path: target/ROOT.war
   services:
