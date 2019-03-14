@@ -409,8 +409,8 @@ public class DayPairsHelper {
 		ArrayList<Developer> devsOnTrack = new ArrayList<>();
 		Pair lastDayPair = pairCombination.getPastPairByTrack(ONE_DAYS_BACK, track);
 		devsOnTrack.addAll(lastDayPair.getDevs());
-		
-		for(int daysBack = 1; daysBack < 4; daysBack++) {
+		int daysBackToConsider = this.everydayRotationMode ? 3 : 4;
+		for(int daysBack = 1; daysBack < daysBackToConsider; daysBack++) {
 			Pair pastPairByTrack = pairCombination.getPastPairByTrack(daysBack, track);
 			if(pastPairByTrack != null) {				
 				devsOnTrack.retainAll(pastPairByTrack.getDevs());
