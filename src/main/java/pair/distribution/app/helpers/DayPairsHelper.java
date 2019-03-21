@@ -326,35 +326,48 @@ public class DayPairsHelper {
 	private void findFirstDeveloper(final List<Developer> availableDevs, Pair trackPairToday, PairCombinations pairCombination, String track) {
 		logger.info("time to rotate");
 		Pair trackPairOneDayBack = pairCombination.getPastPairByTrack(ONE_DAYS_BACK, track);
-		if (trackPairOneDayBack == null) {
-			logger.info("No history. Add one dev random from available devs");
+		if (trackPairOneDayBack == null || getAvailablePastDevsForTrack(availableDevs, trackPairOneDayBack).isEmpty()) {
+			logger.info("No history or both past Devs are unavailable. Add one dev random from available devs");
 			trackPairToday.addDev(getDevWithContextOrRandom(availableDevs));
 		} else if (trackPairOneDayBack.isSolo()) {
 			logger.info("Solo dev should stay on track. Don't do anything");
-		} else if (hasHistoryForLongestDev(pairCombination, track)) {
-			tryToRotateLongestDev(availableDevs, trackPairToday, pairCombination, track);
-		} else {
-			logger.info("No older history. Add one dev random");
-			trackPairToday.addDev(getDevWithContextOrRandom(getAvailableDevs(availableDevs, trackPairOneDayBack.getDevs())));
+		} else if (getAvailablePastDevsForTrack(availableDevs, trackPairOneDayBack).size() == 2) {
+			if (hasHistoryForLongestDev(pairCombination, track) && getLongestDevOnStory(pairCombination, track) != null) {
+				logger.info("There is history to find longest dev");
+				rotateLongestDev(availableDevs, trackPairToday, pairCombination, track);
+			} else {
+				logger.info("No enough history for longest dev. Add one dev random");
+				Developer devWithContextOrRandom = getDevWithContextOrRandom(getAvailableDevs(availableDevs, trackPairOneDayBack.getDevs()));
+				devWithContextOrRandom.setHasContext(true);
+				trackPairToday.addDev(devWithContextOrRandom);
+			}
+		}else {
+			Developer availablePastDev = getAvailablePastDevsForTrack(availableDevs, trackPairOneDayBack).get(0);
+			logger.info("Only one past Dev available {}", availablePastDev);
+			availablePastDev.setHasContext(true);
+			trackPairToday.addDev(availablePastDev);
 		}
 	}
 
-	private void tryToRotateLongestDev(final List<Developer> availableDevs, Pair trackPairToday, PairCombinations pairCombination, String track) {
-		logger.info("There is history to find longest dev");
-		Developer longestDevOnStory = getLongestDevOnStory(pairCombination, track);
-		if (longestDevOnStory != null) {
-			Developer devToRotate = getDeveloperById(availableDevs, longestDevOnStory);
-			logger.info("Longest dev is {}", devToRotate);
-			Developer devToStay = getDeveloperById(availableDevs, pairCombination.getPastPairByTrack(ONE_DAYS_BACK, track).getOtherDev(longestDevOnStory));
-			if (devToStay != null && availableDevs.contains(devToStay)) {
-				logger.info("Dev with context to stay is {}", devToStay);
-				devToStay.setHasContext(true);
-				trackPairToday.addDev(devToStay);
-			} else if (devToRotate != null) {
-				devToRotate.setHasContext(true);
-				trackPairToday.addDev(devToRotate);
-			}
+	private List<Developer> getAvailablePastDevsForTrack(List<Developer> availableDevs, Pair trackPairOneDayBack) {
+		List<Developer> availablePastDevsForTrack = new ArrayList<Developer>();
+		if (getDeveloperById(availableDevs, trackPairOneDayBack.getFirstDev()) != null) {
+			availablePastDevsForTrack.add(getDeveloperById(availableDevs, trackPairOneDayBack.getFirstDev()));
 		}
+		if (getDeveloperById(availableDevs, trackPairOneDayBack.getSecondDev()) != null) {
+			availablePastDevsForTrack.add(getDeveloperById(availableDevs, trackPairOneDayBack.getSecondDev()));
+		}
+		return availablePastDevsForTrack;
+	}
+
+	private void rotateLongestDev(final List<Developer> availableDevs, Pair trackPairToday, PairCombinations pairCombination, String track) {
+		Developer longestDevOnStory = getLongestDevOnStory(pairCombination, track);
+		Developer devToRotate = getDeveloperById(availableDevs, longestDevOnStory);
+		logger.info("Longest dev is {}", devToRotate);
+		Developer devToStay = getDeveloperById(availableDevs, pairCombination.getPastPairByTrack(ONE_DAYS_BACK, track).getOtherDev(longestDevOnStory));
+		logger.info("Dev with context to stay is {}", devToStay);
+		devToStay.setHasContext(true);
+		trackPairToday.addDev(devToStay);
 	}
 
 	private boolean hasHistoryForLongestDev(PairCombinations pairCombination, String track) {
@@ -409,8 +422,8 @@ public class DayPairsHelper {
 		ArrayList<Developer> devsOnTrack = new ArrayList<>();
 		Pair lastDayPair = pairCombination.getPastPairByTrack(ONE_DAYS_BACK, track);
 		devsOnTrack.addAll(lastDayPair.getDevs());
-		int daysBackToConsider = this.everydayRotationMode ? 3 : 4;
-		for(int daysBack = 1; daysBack < daysBackToConsider; daysBack++) {
+		int daysBackToConsider = this.everydayRotationMode ? 2 : 3;
+		for(int daysBack = 1; daysBack <= daysBackToConsider; daysBack++) {
 			Pair pastPairByTrack = pairCombination.getPastPairByTrack(daysBack, track);
 			if(pastPairByTrack != null) {				
 				devsOnTrack.retainAll(pastPairByTrack.getDevs());
