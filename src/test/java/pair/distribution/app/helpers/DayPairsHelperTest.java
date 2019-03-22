@@ -256,7 +256,6 @@ public class DayPairsHelperTest {
 		subject.adaptPairsWeight(pairsWeight, devs);
 
 		DayPairs todayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
-		subject.rotateSoloPairIfAny(todayPairs, pairs, pairsWeight, devs);
 
 		assertThat(todayPairs.getPairByTrack("track1"), is(not(new Pair(Arrays.asList(new Developer("dev1"))))));
 		assertThat(todayPairs.getPairByTrack("track1"), is(not(new Pair(Arrays.asList(developer2, developer3)))));
@@ -468,20 +467,12 @@ public class DayPairsHelperTest {
 
 		DevPairCombinations newCombinations = new DevPairCombinations(pairs.subList(1, pairs.size()));
 		todayPairs.getPairByTrack("track1").getFirstDev().setHasContext(true);
-		subject.rotateSoloPairIfAny(todayPairs, newCombinations, pairsWeight, devs);
+		List<String> todayTracks = Arrays.asList(todayPairs.getTracks().toArray(new String[0]));
+		todayPairs = subject.generateNewDayPairs(todayTracks, devs, newCombinations, pairsWeight, getStandardCompanies());
 
 		assertThat(todayPairs.getPairByTrack("track2"), is(not(soloPair)));
 		boolean trackOneHasContext = todayPairs.getPairByTrack("track1").getFirstDev().hasContext() || todayPairs.getPairByTrack("track1").getSecondDev().hasContext();
 		assertThat(trackOneHasContext, is(true));
-	}
-
-	@Test
-	public void testRotateSoloPairWithoutState() {
-		List<Developer> devs = Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"));
-		List<DayPairs> pairs = new ArrayList<>();
-		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(new DevPairCombinations(pairs), devs);
-
-		subject.rotateSoloPairIfAny(new DayPairs(), new DevPairCombinations(pairs), pairsWeight, devs);
 	}
 
 	@Test

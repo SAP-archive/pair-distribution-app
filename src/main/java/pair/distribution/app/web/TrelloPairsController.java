@@ -125,8 +125,6 @@ public class TrelloPairsController {
 		logger.info("Tracks are: {} today devs are: {}", pairingBoardTrello.getTracks(), todayDevs);
 		DayPairs todayDevPairs = pairsHelper.generateNewDayPairs(pairingBoardTrello.getTracks(), todayDevs, pairCombination, pairsWeight, pairingBoardTrello.getCompanies());
 		logger.info("Today pairs are: {}",  todayDevPairs);
-		pairsHelper.rotateSoloPairIfAny(todayDevPairs, pairCombination, pairsWeight, todayDevs);
-		logger.info("After single pair rotation they are: {}", todayDevPairs);
 
 		if(!opsPair) {
 			Map<Pair, Integer> buildPairsWeight = pairsHelper.buildBuildPairsWeightFromPastPairing(pairCombination, todayDevs);
