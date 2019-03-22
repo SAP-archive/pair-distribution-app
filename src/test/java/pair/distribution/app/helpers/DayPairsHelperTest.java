@@ -256,7 +256,7 @@ public class DayPairsHelperTest {
 		subject.adaptPairsWeight(pairsWeight, devs);
 
 		DayPairs todayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
-		subject.rotateSoloPairIfAny(todayPairs, pairs, pairsWeight);
+		subject.rotateSoloPairIfAny(todayPairs, pairs, pairsWeight, devs);
 
 		assertThat(todayPairs.getPairByTrack("track1"), is(not(new Pair(Arrays.asList(new Developer("dev1"))))));
 		assertThat(todayPairs.getPairByTrack("track1"), is(not(new Pair(Arrays.asList(developer2, developer3)))));
@@ -460,15 +460,15 @@ public class DayPairsHelperTest {
 		for (DayPairs dayPairs : pairs) {
 			dayPairs.addPair("track2", soloPair);
 		}
-		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(new DevPairCombinations(pairs),
-				Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3")));
+		List<Developer> devs = Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"));
+		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(new DevPairCombinations(pairs), devs);
 		DayPairs todayPairs = pairs.get(0);
 
 		assertThat(todayPairs.getPairByTrack("track2"), is(soloPair));
 
 		DevPairCombinations newCombinations = new DevPairCombinations(pairs.subList(1, pairs.size()));
 		todayPairs.getPairByTrack("track1").getFirstDev().setHasContext(true);
-		subject.rotateSoloPairIfAny(todayPairs, newCombinations, pairsWeight);
+		subject.rotateSoloPairIfAny(todayPairs, newCombinations, pairsWeight, devs);
 
 		assertThat(todayPairs.getPairByTrack("track2"), is(not(soloPair)));
 		boolean trackOneHasContext = todayPairs.getPairByTrack("track1").getFirstDev().hasContext() || todayPairs.getPairByTrack("track1").getSecondDev().hasContext();
@@ -477,11 +477,11 @@ public class DayPairsHelperTest {
 
 	@Test
 	public void testRotateSoloPairWithoutState() {
+		List<Developer> devs = Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3"));
 		List<DayPairs> pairs = new ArrayList<>();
-		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(new DevPairCombinations(pairs),
-				Arrays.asList(new Developer("dev1"), new Developer("dev2"), new Developer("dev3")));
+		Map<Pair, Integer> pairsWeight = subject.buildPairsWeightFromPastPairing(new DevPairCombinations(pairs), devs);
 
-		subject.rotateSoloPairIfAny(new DayPairs(), new DevPairCombinations(pairs), pairsWeight);
+		subject.rotateSoloPairIfAny(new DayPairs(), new DevPairCombinations(pairs), pairsWeight, devs);
 	}
 
 	@Test

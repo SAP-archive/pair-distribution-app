@@ -23,7 +23,7 @@ import pair.distribution.app.trello.entities.Developer;
 import pair.distribution.app.trello.entities.Pair;
 import pair.distribution.app.trello.entities.PairCombinations;
 
-public class DayPairsHelper {
+public class DayPairsHelper<E> {
 
 	private static final int THRE_DAYS_BACK = 2;
 
@@ -189,7 +189,7 @@ public class DayPairsHelper {
 		}
 
 		for (String track : possibleTracks) {
-			// Fill uncompleted pairs 
+			// Fill uncompleted pairs
 			Pair fullPair = tryToFindPairSecondDeveloper(pairsWeight, todayPairs.getPairs().get(track), availableDevs, track);
 			availableDevs.removeAll(fullPair.getDevs());
 			todayPairs.addPair(track, fullPair);
@@ -222,30 +222,21 @@ public class DayPairsHelper {
 	}
 
 	public void rotateSoloPairIfAny(DayPairs todayPairs, PairCombinations pairCombination,
-			Map<Pair, Integer> pairsWeight) {
+			Map<Pair, Integer> pairsWeight, List<Developer> todayDevs) {
 		Pair soloPair = todayPairs.getSoloPair();
-		if (soloPair != null && (isSoloPairForTwoDays(pairCombination, soloPair) || soloPair.getFirstDev().getNew())) {
-			Developer soloDeveloper = soloPair.getFirstDev();
-			Pair pairWithHighestWeight = null;
-			Developer newSoloDeveloper = null;
+		List<String> todayTracks = Arrays.asList(todayPairs.getTracks().toArray(new String[0]));
+		if (soloPair != null && pairCombination.isRotationTime(todayTracks, todayDevs, everydayRotationMode)) {
 			Collection<Pair> allPairsOfTheDay = todayPairs.getPairs().values();
-			if (soloDeveloper.getNew()) {
-				pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight,
-						isPairWithNoNewDevelopers());
-				newSoloDeveloper = getNewSoloDeveloper(pairWithHighestWeight);
-			} else {
-				pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight,
-						alwaysTrue());
-				newSoloDeveloper = getDevWithContextOrRandom(pairWithHighestWeight.getDevs());
-			}
+			Pair pairWithHighestWeight = getPairWithHighestWeightForPredicat(allPairsOfTheDay, pairsWeight, isPairConform(soloPair.getFirstDev().getNew()));
+			Developer newSoloDeveloper = getNewSoloDeveloper(pairWithHighestWeight);
+
 			if (newSoloDeveloper == null) {
 				// No rotation for Solo developer possible
 				return;
 			}
 			Pair newPair = new Pair(Arrays.asList(soloPair.getDevs().get(0), newSoloDeveloper));
 			todayPairs.replacePairWith(pairWithHighestWeight, newPair);
-			todayPairs.replacePairWith(soloPair,
-					new Pair(Arrays.asList(pairWithHighestWeight.getOtherDev(newSoloDeveloper))));
+			todayPairs.replacePairWith(soloPair, new Pair(Arrays.asList(pairWithHighestWeight.getOtherDev(newSoloDeveloper))));
 		}
 	}
 
@@ -274,19 +265,8 @@ public class DayPairsHelper {
 		return p -> !(p.getFirstDev().getNew() && p.getOtherDev(p.getFirstDev()).getNew());
 	}
 
-	private Predicate<? super Pair> isPairWithNoNewDevelopers() {
-		return p -> !(p.getFirstDev().getNew() || p.getOtherDev(p.getFirstDev()).getNew());
-	}
-
-	private boolean isSoloPairForTwoDays(PairCombinations pairCombination, Pair soloPair) {
-		List<Pair> firstDayPair = pairCombination.getPastPairs(0);
-		List<Pair> secondDayPair = pairCombination.getPastPairs(1);
-		return firstDayPair != null && secondDayPair != null && firstDayPair.contains(soloPair)
-				&& secondDayPair.contains(soloPair);
-	}
-
-	private Predicate<? super Pair> alwaysTrue() {
-		return p -> true;
+	private Predicate<? super Pair> isPairConform(boolean isNewDev) {
+		return p -> isNewDev ? !(p.getFirstDev().getNew() || p.getOtherDev(p.getFirstDev()).getNew()) : true;
 	}
 
 	private Pair getPairWithHighestWeightForPredicat(Collection<Pair> values, Map<Pair, Integer> pairsWeight,
@@ -316,8 +296,11 @@ public class DayPairsHelper {
 		if (trackPairOneDayBack == null || getAvailablePastDevsForTrack(availableDevs, trackPairOneDayBack).isEmpty()) {
 			logger.info("No history or both past Devs are unavailable. Add one dev random from available devs");
 			trackPairToday.addDev(getDevWithContextOrRandom(availableDevs));
-		} else if (trackPairOneDayBack.isSolo()) {
-			logger.info("Solo dev should stay on track. Don't do anything");
+		} else if (trackPairOneDayBack.isSolo() && !getAvailablePastDevsForTrack(availableDevs, trackPairOneDayBack).isEmpty()) {
+			logger.info("Solo dev should stay on track.");
+			Developer devForSolo = getAvailableDevs(availableDevs, trackPairOneDayBack.getDevs()).get(0);
+			devForSolo.setHasContext(true);
+			trackPairToday.addDev(devForSolo);
 		} else if (getAvailablePastDevsForTrack(availableDevs, trackPairOneDayBack).size() == 2) {
 			if (trackPairOneDayBack.isLockedPair()) {
 				logger.info("Pair is locked: {}", trackPairOneDayBack);
