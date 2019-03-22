@@ -306,12 +306,6 @@ public class DayPairsHelper {
 			final List<Developer> availableDevs, boolean rotationRequired) {
 		Pair trackPairToday = new Pair();
 		Pair trackPairOneDayBack = pairCombination.getPastPairByTrack(ONE_DAYS_BACK, track);
-		if (trackPairOneDayBack != null && trackPairOneDayBack.isLockedPair()) {
-			logger.info("Pair is locked: {}", trackPairOneDayBack);
-			trackPairToday.addDev(getDeveloperById(availableDevs, trackPairOneDayBack.getFirstDev()));
-			trackPairToday.addDev(getDeveloperById(availableDevs, trackPairOneDayBack.getSecondDev()));
-			return trackPairToday;
-		}
 		logger.info("Track is: {}\nPair one day back: {}\nPair two days back: {}\nPair three days back: {}", track,
 				trackPairOneDayBack, pairCombination.getPastPairByTrack(TWO_DAYS_BACK, track), pairCombination.getPastPairByTrack(THRE_DAYS_BACK, track));
 		if (rotationRequired) {
@@ -332,7 +326,10 @@ public class DayPairsHelper {
 		} else if (trackPairOneDayBack.isSolo()) {
 			logger.info("Solo dev should stay on track. Don't do anything");
 		} else if (getAvailablePastDevsForTrack(availableDevs, trackPairOneDayBack).size() == 2) {
-			if (hasHistoryForLongestDev(pairCombination, track) && getLongestDevOnStory(pairCombination, track) != null) {
+			if (trackPairOneDayBack.isLockedPair()) {
+				logger.info("Pair is locked: {}", trackPairOneDayBack);
+				trackPairToday.setDevs(getAvailableDevs(availableDevs, trackPairOneDayBack.getDevs()));
+			} else if (hasHistoryForLongestDev(pairCombination, track) && getLongestDevOnStory(pairCombination, track) != null) {
 				logger.info("There is history to find longest dev");
 				rotateLongestDev(availableDevs, trackPairToday, pairCombination, track);
 			} else {
