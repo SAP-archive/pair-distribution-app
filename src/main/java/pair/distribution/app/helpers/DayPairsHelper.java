@@ -169,7 +169,7 @@ public class DayPairsHelper {
 
 	public DayPairs generateNewDayPairs(List<String> tracks, List<Developer> devs, PairCombinations pairCombination,
 			Map<Pair, Integer> pairsWeight, List<Company> companies) {
-		DayPairs result = new DayPairs();
+		DayPairs todayPairs = new DayPairs();
 		List<String> possibleTracks = getPossibleTracks(tracks, devs, companies);
 		List<Developer> availableDevs = new ArrayList<>(devs);
 		boolean rotationTime = pairCombination.isRotationTime(possibleTracks, availableDevs, everydayRotationMode);
@@ -178,30 +178,24 @@ public class DayPairsHelper {
 			List<Developer> developersForTrack = getDevelopersForTrack(companies, availableDevs, track);
 			Pair pair = tryToFindPairFirstDeveloper(track, pairCombination, developersForTrack, rotationTime);
 			availableDevs.removeAll(pair.getDevs());
-			result.addPair(track, pair);
+			todayPairs.addPair(track, pair);
 
 			// Try to fill company specific tracks here, because they have higher priority
 			if (getCompanyForTrack(companies, track) != null) {
-				Pair fullPair = tryToFindPairSecondDeveloper(pairsWeight, result, developersForTrack, track);
-				if (fullPair != null) {
-					availableDevs.removeAll(fullPair.getDevs());
-					result.addPair(track, fullPair);
-				}
+				Pair fullPair = tryToFindPairSecondDeveloper(pairsWeight, pair, developersForTrack, track);
+				availableDevs.removeAll(fullPair.getDevs());
+				todayPairs.addPair(track, fullPair);
 			}
 		}
 
 		for (String track : possibleTracks) {
-			// Fill non company tracks
-			if (getCompanyForTrack(companies, track) == null) {
-				Pair fullPair = tryToFindPairSecondDeveloper(pairsWeight, result, availableDevs, track);
-				if (fullPair != null) {
-					availableDevs.removeAll(fullPair.getDevs());
-					result.addPair(track, fullPair);
-				}
-			}
+			// Fill uncompleted pairs 
+			Pair fullPair = tryToFindPairSecondDeveloper(pairsWeight, todayPairs.getPairs().get(track), availableDevs, track);
+			availableDevs.removeAll(fullPair.getDevs());
+			todayPairs.addPair(track, fullPair);
 		}
 
-		return result;
+		return todayPairs;
 	}
 
 	private List<Developer> getDevelopersForTrack(List<Company> companies, List<Developer> availableDevs,
@@ -214,18 +208,17 @@ public class DayPairsHelper {
 		return companies.stream().filter(company -> company.isCompanyTrack(track)).findFirst().orElse(null);
 	}
 
-	private Pair tryToFindPairSecondDeveloper(Map<Pair, Integer> pairsWeight, DayPairs result,
+	private Pair tryToFindPairSecondDeveloper(Map<Pair, Integer> pairsWeight, Pair pairWitFirstDev,
 			List<Developer> availableDevs, String track) {
-		Pair pair = result.getPairs().get(track);
-		if (!pair.isComplete() && !availableDevs.isEmpty()) {
-			pair = getPairByWeight(pair, availableDevs, pairsWeight, track);
+		if (!pairWitFirstDev.isComplete() && !availableDevs.isEmpty()) {
+			Pair pair = getPairByWeight(pairWitFirstDev, availableDevs, pairsWeight, track);
 			if (pair == null && availableDevs.size() == 1) {
 				pair = new Pair(availableDevs);
 			}
 
 			return pair;
 		}
-		return null;
+		return pairWitFirstDev;
 	}
 
 	public void rotateSoloPairIfAny(DayPairs todayPairs, PairCombinations pairCombination,
