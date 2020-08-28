@@ -1,0 +1,9 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: github.com/SAP/pair-distribution-app
+Upstream-Contact: beyhan.veli_at_sap.com
+Source: https://github.com/SAP/pair-distribution-app
+Disclaimer: The use of the Trello APIs and Trello service are subject to applicable Trello agreements.
+
+Files: **
+Copyright:  Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved.
+License: Apache-2.0

@@ -1,3 +1,5 @@
+[![REUSE status](https://api.reuse.software/badge/github.com/SAP/pair-distribution-app)](https://api.reuse.software/info/github.com/SAP/pair-distribution-app)
+
 # Pair Distribution Application
 
 The `pair-distribution-app` supports teams which do pair programming and operations in pairing mode (DevOps). It is a CloudFoundry application which can generate pair combinations based on different strategies.  Currently, supported use cases for pair programming are: 
@@ -100,14 +102,3 @@ The use of the Trello APIs and Trello service are subject to applicable Trello a
 # How to obtain support
 
 Please create a [new issue](https://github.com/SAP/pair-distribution-app/issues/new) if you find any problems.
-
-# License
-
-Copyright (c) 2017 SAP SE
-
-Except as provided below, this software is licensed under the Apache License, Version 2.0 (the "License"); you may not use this software except in compliance with the License.You may obtain a copy of the License at:
-
-[LICENSE](https://github.com/SAP/pair-distribution-app/blob/master/LICENSE)
-
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
-
