@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
@@ -113,7 +114,7 @@ public class DayPairsHelperTest {
 		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.getTracks().size(), is(2));
-		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
+		assertThat(dayPairs.getTracks(), containsInAnyOrder("track1", "track2"));
 		assertThat(dayPairs.getPairByTrack("track1"),
 				is(not(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2"))))));
 		assertThat(dayPairs.getPairByTrack("track2"),
@@ -137,7 +138,7 @@ public class DayPairsHelperTest {
 		DayPairs dayPairs = subjectWithEverydayRotation.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.getTracks().size(), is(2));
-		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
+		assertThat(dayPairs.getTracks(), containsInAnyOrder("track1", "track2"));
 		assertThat(dayPairs.getPairByTrack("track1"),
 				is(not(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2"))))));
 		assertThat(dayPairs.getPairByTrack("track2"),
@@ -161,7 +162,7 @@ public class DayPairsHelperTest {
 		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.getTracks().size(), is(3));
-		assertThat(dayPairs.getTracks(), contains("track1", "track2", "track3"));
+		assertThat(dayPairs.getTracks(), containsInAnyOrder("track1", "track2", "track3"));
 		System.out.println(dayPairs.getPairs());
 		assertThat(dayPairs.hasPair(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev6")))), is(true));
 		assertThat(dayPairs.hasPair(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev2")))), is(true));
@@ -178,7 +179,7 @@ public class DayPairsHelperTest {
 		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.getTracks().size(), is(2));
-		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
+		assertThat(dayPairs.getTracks(), containsInAnyOrder("track1", "track2"));
 		assertThat(dayPairs.getPairByTrack("track1"),
 				is((new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2"))))));
 	}
@@ -209,7 +210,7 @@ public class DayPairsHelperTest {
 		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.getTracks().size(), is(2));
-		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
+	  	assertThat(dayPairs.getTracks(), containsInAnyOrder("track1", "track2"));
 		assertThat(dayPairs.hasPair(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev4")))), is(true));
 		assertThat(dayPairs.hasPair(new Pair(Arrays.asList(new Developer("dev3")))), is(true));
 		boolean trackOneHasContext = dayPairs.getPairByTrack("track1").getFirstDev().hasContext() || dayPairs.getPairByTrack("track1").getSecondDev().hasContext();
@@ -271,7 +272,7 @@ public class DayPairsHelperTest {
 		DayPairs dayPairs = subject.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.getTracks().size(), is(2));
-		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
+		assertThat(dayPairs.getTracks(), containsInAnyOrder("track1", "track2"));
 	}
 
 	@Test
@@ -285,7 +286,7 @@ public class DayPairsHelperTest {
 		DayPairs dayPairs = subjectWithEverydayRotation.generateNewDayPairs(tracks, devs, pairs, pairsWeight, getStandardCompanies());
 
 		assertThat(dayPairs.getTracks().size(), is(2));
-		assertThat(dayPairs.getTracks(), contains("track1", "track2"));
+		assertThat(dayPairs.getTracks(), containsInAnyOrder("track1", "track2"));
 	}
 
 	@Test
